@@ -1,0 +1,16 @@
+/*
+  Warnings:
+
+  - The `role` column on the `User` table would be dropped and recreated. This will lead to data loss if there is data in the column.
+
+*/
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'EMPLOYEE');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "mustResetPassword" BOOLEAN NOT NULL DEFAULT true,
+DROP COLUMN "role",
+ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'EMPLOYEE';
+
+-- DropEnum
+DROP TYPE "ROLE";
