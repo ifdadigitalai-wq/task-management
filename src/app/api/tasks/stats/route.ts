@@ -59,7 +59,7 @@ const deptMap = new Map<string, {
     const pri = task.priority as "HIGH" | "MEDIUM" | "LOW";
     const pts = POINTS[pri] ?? 1;
     const isDone = task.status === "COMPLETED";
-    const isDue  = !!task.dueDate && new Date(task.dueDate) < now && !isDone;
+    const isDue = !isDone;
     const bucket: keyof HML = pri === "HIGH" ? "H" : pri === "MEDIUM" ? "M" : "L";
 
     priorityMap[pri].total++;

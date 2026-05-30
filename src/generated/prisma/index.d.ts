@@ -43,6 +43,16 @@ export type Activity = $Result.DefaultSelection<Prisma.$ActivityPayload>
  * 
  */
 export type Notification = $Result.DefaultSelection<Prisma.$NotificationPayload>
+/**
+ * Model TaskUpdate
+ * 
+ */
+export type TaskUpdate = $Result.DefaultSelection<Prisma.$TaskUpdatePayload>
+/**
+ * Model UpdateComment
+ * 
+ */
+export type UpdateComment = $Result.DefaultSelection<Prisma.$UpdateCommentPayload>
 
 /**
  * Enums
@@ -268,6 +278,26 @@ export class PrismaClient<
     * ```
     */
   get notification(): Prisma.NotificationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.taskUpdate`: Exposes CRUD operations for the **TaskUpdate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TaskUpdates
+    * const taskUpdates = await prisma.taskUpdate.findMany()
+    * ```
+    */
+  get taskUpdate(): Prisma.TaskUpdateDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.updateComment`: Exposes CRUD operations for the **UpdateComment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UpdateComments
+    * const updateComments = await prisma.updateComment.findMany()
+    * ```
+    */
+  get updateComment(): Prisma.UpdateCommentDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -707,7 +737,9 @@ export namespace Prisma {
     TaskTemplate: 'TaskTemplate',
     Holiday: 'Holiday',
     Activity: 'Activity',
-    Notification: 'Notification'
+    Notification: 'Notification',
+    TaskUpdate: 'TaskUpdate',
+    UpdateComment: 'UpdateComment'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -723,7 +755,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "task" | "taskTemplate" | "holiday" | "activity" | "notification"
+      modelProps: "user" | "task" | "taskTemplate" | "holiday" | "activity" | "notification" | "taskUpdate" | "updateComment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1171,6 +1203,154 @@ export namespace Prisma {
           }
         }
       }
+      TaskUpdate: {
+        payload: Prisma.$TaskUpdatePayload<ExtArgs>
+        fields: Prisma.TaskUpdateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TaskUpdateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TaskUpdateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>
+          }
+          findFirst: {
+            args: Prisma.TaskUpdateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TaskUpdateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>
+          }
+          findMany: {
+            args: Prisma.TaskUpdateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>[]
+          }
+          create: {
+            args: Prisma.TaskUpdateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>
+          }
+          createMany: {
+            args: Prisma.TaskUpdateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TaskUpdateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>[]
+          }
+          delete: {
+            args: Prisma.TaskUpdateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>
+          }
+          update: {
+            args: Prisma.TaskUpdateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>
+          }
+          deleteMany: {
+            args: Prisma.TaskUpdateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TaskUpdateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TaskUpdateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>[]
+          }
+          upsert: {
+            args: Prisma.TaskUpdateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskUpdatePayload>
+          }
+          aggregate: {
+            args: Prisma.TaskUpdateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTaskUpdate>
+          }
+          groupBy: {
+            args: Prisma.TaskUpdateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TaskUpdateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TaskUpdateCountArgs<ExtArgs>
+            result: $Utils.Optional<TaskUpdateCountAggregateOutputType> | number
+          }
+        }
+      }
+      UpdateComment: {
+        payload: Prisma.$UpdateCommentPayload<ExtArgs>
+        fields: Prisma.UpdateCommentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UpdateCommentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UpdateCommentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>
+          }
+          findFirst: {
+            args: Prisma.UpdateCommentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UpdateCommentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>
+          }
+          findMany: {
+            args: Prisma.UpdateCommentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>[]
+          }
+          create: {
+            args: Prisma.UpdateCommentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>
+          }
+          createMany: {
+            args: Prisma.UpdateCommentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UpdateCommentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>[]
+          }
+          delete: {
+            args: Prisma.UpdateCommentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>
+          }
+          update: {
+            args: Prisma.UpdateCommentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>
+          }
+          deleteMany: {
+            args: Prisma.UpdateCommentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UpdateCommentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UpdateCommentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>[]
+          }
+          upsert: {
+            args: Prisma.UpdateCommentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UpdateCommentPayload>
+          }
+          aggregate: {
+            args: Prisma.UpdateCommentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUpdateComment>
+          }
+          groupBy: {
+            args: Prisma.UpdateCommentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UpdateCommentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UpdateCommentCountArgs<ExtArgs>
+            result: $Utils.Optional<UpdateCommentCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1285,6 +1465,8 @@ export namespace Prisma {
     holiday?: HolidayOmit
     activity?: ActivityOmit
     notification?: NotificationOmit
+    taskUpdate?: TaskUpdateOmit
+    updateComment?: UpdateCommentOmit
   }
 
   /* Types for Logging */
@@ -1368,12 +1550,14 @@ export namespace Prisma {
     assignedTasks: number
     delegatedTasks: number
     notifications: number
+    updateComments: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTasks?: boolean | UserCountOutputTypeCountAssignedTasksArgs
     delegatedTasks?: boolean | UserCountOutputTypeCountDelegatedTasksArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+    updateComments?: boolean | UserCountOutputTypeCountUpdateCommentsArgs
   }
 
   // Custom InputTypes
@@ -1408,6 +1592,44 @@ export namespace Prisma {
     where?: NotificationWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountUpdateCommentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UpdateCommentWhereInput
+  }
+
+
+  /**
+   * Count Type TaskCountOutputType
+   */
+
+  export type TaskCountOutputType = {
+    updates: number
+  }
+
+  export type TaskCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    updates?: boolean | TaskCountOutputTypeCountUpdatesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TaskCountOutputType without action
+   */
+  export type TaskCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskCountOutputType
+     */
+    select?: TaskCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TaskCountOutputType without action
+   */
+  export type TaskCountOutputTypeCountUpdatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TaskUpdateWhereInput
+  }
+
 
   /**
    * Count Type TaskTemplateCountOutputType
@@ -1437,6 +1659,37 @@ export namespace Prisma {
    */
   export type TaskTemplateCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskWhereInput
+  }
+
+
+  /**
+   * Count Type TaskUpdateCountOutputType
+   */
+
+  export type TaskUpdateCountOutputType = {
+    comments: number
+  }
+
+  export type TaskUpdateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    comments?: boolean | TaskUpdateCountOutputTypeCountCommentsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TaskUpdateCountOutputType without action
+   */
+  export type TaskUpdateCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdateCountOutputType
+     */
+    select?: TaskUpdateCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TaskUpdateCountOutputType without action
+   */
+  export type TaskUpdateCountOutputTypeCountCommentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UpdateCommentWhereInput
   }
 
 
@@ -1659,6 +1912,7 @@ export namespace Prisma {
     assignedTasks?: boolean | User$assignedTasksArgs<ExtArgs>
     delegatedTasks?: boolean | User$delegatedTasksArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
+    updateComments?: boolean | User$updateCommentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1709,6 +1963,7 @@ export namespace Prisma {
     assignedTasks?: boolean | User$assignedTasksArgs<ExtArgs>
     delegatedTasks?: boolean | User$delegatedTasksArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
+    updateComments?: boolean | User$updateCommentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1720,6 +1975,7 @@ export namespace Prisma {
       assignedTasks: Prisma.$TaskPayload<ExtArgs>[]
       delegatedTasks: Prisma.$TaskPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
+      updateComments: Prisma.$UpdateCommentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2130,6 +2386,7 @@ export namespace Prisma {
     assignedTasks<T extends User$assignedTasksArgs<ExtArgs> = {}>(args?: Subset<T, User$assignedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     delegatedTasks<T extends User$delegatedTasksArgs<ExtArgs> = {}>(args?: Subset<T, User$delegatedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    updateComments<T extends User$updateCommentsArgs<ExtArgs> = {}>(args?: Subset<T, User$updateCommentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2635,6 +2892,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.updateComments
+   */
+  export type User$updateCommentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    where?: UpdateCommentWhereInput
+    orderBy?: UpdateCommentOrderByWithRelationInput | UpdateCommentOrderByWithRelationInput[]
+    cursor?: UpdateCommentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UpdateCommentScalarFieldEnum | UpdateCommentScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2934,6 +3215,8 @@ export namespace Prisma {
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
     delegatedBy?: boolean | Task$delegatedByArgs<ExtArgs>
     template?: boolean | Task$templateArgs<ExtArgs>
+    updates?: boolean | Task$updatesArgs<ExtArgs>
+    _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["task"]>
 
   export type TaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3001,6 +3284,8 @@ export namespace Prisma {
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
     delegatedBy?: boolean | Task$delegatedByArgs<ExtArgs>
     template?: boolean | Task$templateArgs<ExtArgs>
+    updates?: boolean | Task$updatesArgs<ExtArgs>
+    _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
@@ -3019,6 +3304,7 @@ export namespace Prisma {
       assignedTo: Prisma.$UserPayload<ExtArgs> | null
       delegatedBy: Prisma.$UserPayload<ExtArgs> | null
       template: Prisma.$TaskTemplatePayload<ExtArgs> | null
+      updates: Prisma.$TaskUpdatePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3433,6 +3719,7 @@ export namespace Prisma {
     assignedTo<T extends Task$assignedToArgs<ExtArgs> = {}>(args?: Subset<T, Task$assignedToArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     delegatedBy<T extends Task$delegatedByArgs<ExtArgs> = {}>(args?: Subset<T, Task$delegatedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     template<T extends Task$templateArgs<ExtArgs> = {}>(args?: Subset<T, Task$templateArgs<ExtArgs>>): Prisma__TaskTemplateClient<$Result.GetResult<Prisma.$TaskTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    updates<T extends Task$updatesArgs<ExtArgs> = {}>(args?: Subset<T, Task$updatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3932,6 +4219,30 @@ export namespace Prisma {
      */
     include?: TaskTemplateInclude<ExtArgs> | null
     where?: TaskTemplateWhereInput
+  }
+
+  /**
+   * Task.updates
+   */
+  export type Task$updatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    where?: TaskUpdateWhereInput
+    orderBy?: TaskUpdateOrderByWithRelationInput | TaskUpdateOrderByWithRelationInput[]
+    cursor?: TaskUpdateWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TaskUpdateScalarFieldEnum | TaskUpdateScalarFieldEnum[]
   }
 
   /**
@@ -8105,6 +8416,2188 @@ export namespace Prisma {
 
 
   /**
+   * Model TaskUpdate
+   */
+
+  export type AggregateTaskUpdate = {
+    _count: TaskUpdateCountAggregateOutputType | null
+    _min: TaskUpdateMinAggregateOutputType | null
+    _max: TaskUpdateMaxAggregateOutputType | null
+  }
+
+  export type TaskUpdateMinAggregateOutputType = {
+    id: string | null
+    taskId: string | null
+    remark: string | null
+    hasVoice: boolean | null
+    createdAt: Date | null
+  }
+
+  export type TaskUpdateMaxAggregateOutputType = {
+    id: string | null
+    taskId: string | null
+    remark: string | null
+    hasVoice: boolean | null
+    createdAt: Date | null
+  }
+
+  export type TaskUpdateCountAggregateOutputType = {
+    id: number
+    taskId: number
+    remark: number
+    files: number
+    images: number
+    hasVoice: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type TaskUpdateMinAggregateInputType = {
+    id?: true
+    taskId?: true
+    remark?: true
+    hasVoice?: true
+    createdAt?: true
+  }
+
+  export type TaskUpdateMaxAggregateInputType = {
+    id?: true
+    taskId?: true
+    remark?: true
+    hasVoice?: true
+    createdAt?: true
+  }
+
+  export type TaskUpdateCountAggregateInputType = {
+    id?: true
+    taskId?: true
+    remark?: true
+    files?: true
+    images?: true
+    hasVoice?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type TaskUpdateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TaskUpdate to aggregate.
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskUpdates to fetch.
+     */
+    orderBy?: TaskUpdateOrderByWithRelationInput | TaskUpdateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TaskUpdateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskUpdates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskUpdates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TaskUpdates
+    **/
+    _count?: true | TaskUpdateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TaskUpdateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TaskUpdateMaxAggregateInputType
+  }
+
+  export type GetTaskUpdateAggregateType<T extends TaskUpdateAggregateArgs> = {
+        [P in keyof T & keyof AggregateTaskUpdate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTaskUpdate[P]>
+      : GetScalarType<T[P], AggregateTaskUpdate[P]>
+  }
+
+
+
+
+  export type TaskUpdateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TaskUpdateWhereInput
+    orderBy?: TaskUpdateOrderByWithAggregationInput | TaskUpdateOrderByWithAggregationInput[]
+    by: TaskUpdateScalarFieldEnum[] | TaskUpdateScalarFieldEnum
+    having?: TaskUpdateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TaskUpdateCountAggregateInputType | true
+    _min?: TaskUpdateMinAggregateInputType
+    _max?: TaskUpdateMaxAggregateInputType
+  }
+
+  export type TaskUpdateGroupByOutputType = {
+    id: string
+    taskId: string
+    remark: string
+    files: string[]
+    images: string[]
+    hasVoice: boolean
+    createdAt: Date
+    _count: TaskUpdateCountAggregateOutputType | null
+    _min: TaskUpdateMinAggregateOutputType | null
+    _max: TaskUpdateMaxAggregateOutputType | null
+  }
+
+  type GetTaskUpdateGroupByPayload<T extends TaskUpdateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TaskUpdateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TaskUpdateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TaskUpdateGroupByOutputType[P]>
+            : GetScalarType<T[P], TaskUpdateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TaskUpdateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    remark?: boolean
+    files?: boolean
+    images?: boolean
+    hasVoice?: boolean
+    createdAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    comments?: boolean | TaskUpdate$commentsArgs<ExtArgs>
+    _count?: boolean | TaskUpdateCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["taskUpdate"]>
+
+  export type TaskUpdateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    remark?: boolean
+    files?: boolean
+    images?: boolean
+    hasVoice?: boolean
+    createdAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["taskUpdate"]>
+
+  export type TaskUpdateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    remark?: boolean
+    files?: boolean
+    images?: boolean
+    hasVoice?: boolean
+    createdAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["taskUpdate"]>
+
+  export type TaskUpdateSelectScalar = {
+    id?: boolean
+    taskId?: boolean
+    remark?: boolean
+    files?: boolean
+    images?: boolean
+    hasVoice?: boolean
+    createdAt?: boolean
+  }
+
+  export type TaskUpdateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "taskId" | "remark" | "files" | "images" | "hasVoice" | "createdAt", ExtArgs["result"]["taskUpdate"]>
+  export type TaskUpdateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    comments?: boolean | TaskUpdate$commentsArgs<ExtArgs>
+    _count?: boolean | TaskUpdateCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type TaskUpdateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }
+  export type TaskUpdateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }
+
+  export type $TaskUpdatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TaskUpdate"
+    objects: {
+      task: Prisma.$TaskPayload<ExtArgs>
+      comments: Prisma.$UpdateCommentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      taskId: string
+      remark: string
+      files: string[]
+      images: string[]
+      hasVoice: boolean
+      createdAt: Date
+    }, ExtArgs["result"]["taskUpdate"]>
+    composites: {}
+  }
+
+  type TaskUpdateGetPayload<S extends boolean | null | undefined | TaskUpdateDefaultArgs> = $Result.GetResult<Prisma.$TaskUpdatePayload, S>
+
+  type TaskUpdateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TaskUpdateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TaskUpdateCountAggregateInputType | true
+    }
+
+  export interface TaskUpdateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TaskUpdate'], meta: { name: 'TaskUpdate' } }
+    /**
+     * Find zero or one TaskUpdate that matches the filter.
+     * @param {TaskUpdateFindUniqueArgs} args - Arguments to find a TaskUpdate
+     * @example
+     * // Get one TaskUpdate
+     * const taskUpdate = await prisma.taskUpdate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TaskUpdateFindUniqueArgs>(args: SelectSubset<T, TaskUpdateFindUniqueArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TaskUpdate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TaskUpdateFindUniqueOrThrowArgs} args - Arguments to find a TaskUpdate
+     * @example
+     * // Get one TaskUpdate
+     * const taskUpdate = await prisma.taskUpdate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TaskUpdateFindUniqueOrThrowArgs>(args: SelectSubset<T, TaskUpdateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TaskUpdate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateFindFirstArgs} args - Arguments to find a TaskUpdate
+     * @example
+     * // Get one TaskUpdate
+     * const taskUpdate = await prisma.taskUpdate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TaskUpdateFindFirstArgs>(args?: SelectSubset<T, TaskUpdateFindFirstArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TaskUpdate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateFindFirstOrThrowArgs} args - Arguments to find a TaskUpdate
+     * @example
+     * // Get one TaskUpdate
+     * const taskUpdate = await prisma.taskUpdate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TaskUpdateFindFirstOrThrowArgs>(args?: SelectSubset<T, TaskUpdateFindFirstOrThrowArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TaskUpdates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TaskUpdates
+     * const taskUpdates = await prisma.taskUpdate.findMany()
+     * 
+     * // Get first 10 TaskUpdates
+     * const taskUpdates = await prisma.taskUpdate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const taskUpdateWithIdOnly = await prisma.taskUpdate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TaskUpdateFindManyArgs>(args?: SelectSubset<T, TaskUpdateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TaskUpdate.
+     * @param {TaskUpdateCreateArgs} args - Arguments to create a TaskUpdate.
+     * @example
+     * // Create one TaskUpdate
+     * const TaskUpdate = await prisma.taskUpdate.create({
+     *   data: {
+     *     // ... data to create a TaskUpdate
+     *   }
+     * })
+     * 
+     */
+    create<T extends TaskUpdateCreateArgs>(args: SelectSubset<T, TaskUpdateCreateArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TaskUpdates.
+     * @param {TaskUpdateCreateManyArgs} args - Arguments to create many TaskUpdates.
+     * @example
+     * // Create many TaskUpdates
+     * const taskUpdate = await prisma.taskUpdate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TaskUpdateCreateManyArgs>(args?: SelectSubset<T, TaskUpdateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TaskUpdates and returns the data saved in the database.
+     * @param {TaskUpdateCreateManyAndReturnArgs} args - Arguments to create many TaskUpdates.
+     * @example
+     * // Create many TaskUpdates
+     * const taskUpdate = await prisma.taskUpdate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TaskUpdates and only return the `id`
+     * const taskUpdateWithIdOnly = await prisma.taskUpdate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TaskUpdateCreateManyAndReturnArgs>(args?: SelectSubset<T, TaskUpdateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TaskUpdate.
+     * @param {TaskUpdateDeleteArgs} args - Arguments to delete one TaskUpdate.
+     * @example
+     * // Delete one TaskUpdate
+     * const TaskUpdate = await prisma.taskUpdate.delete({
+     *   where: {
+     *     // ... filter to delete one TaskUpdate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TaskUpdateDeleteArgs>(args: SelectSubset<T, TaskUpdateDeleteArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TaskUpdate.
+     * @param {TaskUpdateUpdateArgs} args - Arguments to update one TaskUpdate.
+     * @example
+     * // Update one TaskUpdate
+     * const taskUpdate = await prisma.taskUpdate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TaskUpdateUpdateArgs>(args: SelectSubset<T, TaskUpdateUpdateArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TaskUpdates.
+     * @param {TaskUpdateDeleteManyArgs} args - Arguments to filter TaskUpdates to delete.
+     * @example
+     * // Delete a few TaskUpdates
+     * const { count } = await prisma.taskUpdate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TaskUpdateDeleteManyArgs>(args?: SelectSubset<T, TaskUpdateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TaskUpdates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TaskUpdates
+     * const taskUpdate = await prisma.taskUpdate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TaskUpdateUpdateManyArgs>(args: SelectSubset<T, TaskUpdateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TaskUpdates and returns the data updated in the database.
+     * @param {TaskUpdateUpdateManyAndReturnArgs} args - Arguments to update many TaskUpdates.
+     * @example
+     * // Update many TaskUpdates
+     * const taskUpdate = await prisma.taskUpdate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TaskUpdates and only return the `id`
+     * const taskUpdateWithIdOnly = await prisma.taskUpdate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TaskUpdateUpdateManyAndReturnArgs>(args: SelectSubset<T, TaskUpdateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TaskUpdate.
+     * @param {TaskUpdateUpsertArgs} args - Arguments to update or create a TaskUpdate.
+     * @example
+     * // Update or create a TaskUpdate
+     * const taskUpdate = await prisma.taskUpdate.upsert({
+     *   create: {
+     *     // ... data to create a TaskUpdate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TaskUpdate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TaskUpdateUpsertArgs>(args: SelectSubset<T, TaskUpdateUpsertArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TaskUpdates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateCountArgs} args - Arguments to filter TaskUpdates to count.
+     * @example
+     * // Count the number of TaskUpdates
+     * const count = await prisma.taskUpdate.count({
+     *   where: {
+     *     // ... the filter for the TaskUpdates we want to count
+     *   }
+     * })
+    **/
+    count<T extends TaskUpdateCountArgs>(
+      args?: Subset<T, TaskUpdateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TaskUpdateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TaskUpdate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TaskUpdateAggregateArgs>(args: Subset<T, TaskUpdateAggregateArgs>): Prisma.PrismaPromise<GetTaskUpdateAggregateType<T>>
+
+    /**
+     * Group by TaskUpdate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskUpdateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TaskUpdateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TaskUpdateGroupByArgs['orderBy'] }
+        : { orderBy?: TaskUpdateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TaskUpdateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTaskUpdateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TaskUpdate model
+   */
+  readonly fields: TaskUpdateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TaskUpdate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TaskUpdateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    comments<T extends TaskUpdate$commentsArgs<ExtArgs> = {}>(args?: Subset<T, TaskUpdate$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TaskUpdate model
+   */
+  interface TaskUpdateFieldRefs {
+    readonly id: FieldRef<"TaskUpdate", 'String'>
+    readonly taskId: FieldRef<"TaskUpdate", 'String'>
+    readonly remark: FieldRef<"TaskUpdate", 'String'>
+    readonly files: FieldRef<"TaskUpdate", 'String[]'>
+    readonly images: FieldRef<"TaskUpdate", 'String[]'>
+    readonly hasVoice: FieldRef<"TaskUpdate", 'Boolean'>
+    readonly createdAt: FieldRef<"TaskUpdate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TaskUpdate findUnique
+   */
+  export type TaskUpdateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskUpdate to fetch.
+     */
+    where: TaskUpdateWhereUniqueInput
+  }
+
+  /**
+   * TaskUpdate findUniqueOrThrow
+   */
+  export type TaskUpdateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskUpdate to fetch.
+     */
+    where: TaskUpdateWhereUniqueInput
+  }
+
+  /**
+   * TaskUpdate findFirst
+   */
+  export type TaskUpdateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskUpdate to fetch.
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskUpdates to fetch.
+     */
+    orderBy?: TaskUpdateOrderByWithRelationInput | TaskUpdateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TaskUpdates.
+     */
+    cursor?: TaskUpdateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskUpdates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskUpdates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TaskUpdates.
+     */
+    distinct?: TaskUpdateScalarFieldEnum | TaskUpdateScalarFieldEnum[]
+  }
+
+  /**
+   * TaskUpdate findFirstOrThrow
+   */
+  export type TaskUpdateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskUpdate to fetch.
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskUpdates to fetch.
+     */
+    orderBy?: TaskUpdateOrderByWithRelationInput | TaskUpdateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TaskUpdates.
+     */
+    cursor?: TaskUpdateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskUpdates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskUpdates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TaskUpdates.
+     */
+    distinct?: TaskUpdateScalarFieldEnum | TaskUpdateScalarFieldEnum[]
+  }
+
+  /**
+   * TaskUpdate findMany
+   */
+  export type TaskUpdateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskUpdates to fetch.
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskUpdates to fetch.
+     */
+    orderBy?: TaskUpdateOrderByWithRelationInput | TaskUpdateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TaskUpdates.
+     */
+    cursor?: TaskUpdateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskUpdates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskUpdates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TaskUpdates.
+     */
+    distinct?: TaskUpdateScalarFieldEnum | TaskUpdateScalarFieldEnum[]
+  }
+
+  /**
+   * TaskUpdate create
+   */
+  export type TaskUpdateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TaskUpdate.
+     */
+    data: XOR<TaskUpdateCreateInput, TaskUpdateUncheckedCreateInput>
+  }
+
+  /**
+   * TaskUpdate createMany
+   */
+  export type TaskUpdateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TaskUpdates.
+     */
+    data: TaskUpdateCreateManyInput | TaskUpdateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TaskUpdate createManyAndReturn
+   */
+  export type TaskUpdateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * The data used to create many TaskUpdates.
+     */
+    data: TaskUpdateCreateManyInput | TaskUpdateCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TaskUpdate update
+   */
+  export type TaskUpdateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TaskUpdate.
+     */
+    data: XOR<TaskUpdateUpdateInput, TaskUpdateUncheckedUpdateInput>
+    /**
+     * Choose, which TaskUpdate to update.
+     */
+    where: TaskUpdateWhereUniqueInput
+  }
+
+  /**
+   * TaskUpdate updateMany
+   */
+  export type TaskUpdateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TaskUpdates.
+     */
+    data: XOR<TaskUpdateUpdateManyMutationInput, TaskUpdateUncheckedUpdateManyInput>
+    /**
+     * Filter which TaskUpdates to update
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * Limit how many TaskUpdates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TaskUpdate updateManyAndReturn
+   */
+  export type TaskUpdateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * The data used to update TaskUpdates.
+     */
+    data: XOR<TaskUpdateUpdateManyMutationInput, TaskUpdateUncheckedUpdateManyInput>
+    /**
+     * Filter which TaskUpdates to update
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * Limit how many TaskUpdates to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TaskUpdate upsert
+   */
+  export type TaskUpdateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TaskUpdate to update in case it exists.
+     */
+    where: TaskUpdateWhereUniqueInput
+    /**
+     * In case the TaskUpdate found by the `where` argument doesn't exist, create a new TaskUpdate with this data.
+     */
+    create: XOR<TaskUpdateCreateInput, TaskUpdateUncheckedCreateInput>
+    /**
+     * In case the TaskUpdate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TaskUpdateUpdateInput, TaskUpdateUncheckedUpdateInput>
+  }
+
+  /**
+   * TaskUpdate delete
+   */
+  export type TaskUpdateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+    /**
+     * Filter which TaskUpdate to delete.
+     */
+    where: TaskUpdateWhereUniqueInput
+  }
+
+  /**
+   * TaskUpdate deleteMany
+   */
+  export type TaskUpdateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TaskUpdates to delete
+     */
+    where?: TaskUpdateWhereInput
+    /**
+     * Limit how many TaskUpdates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TaskUpdate.comments
+   */
+  export type TaskUpdate$commentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    where?: UpdateCommentWhereInput
+    orderBy?: UpdateCommentOrderByWithRelationInput | UpdateCommentOrderByWithRelationInput[]
+    cursor?: UpdateCommentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UpdateCommentScalarFieldEnum | UpdateCommentScalarFieldEnum[]
+  }
+
+  /**
+   * TaskUpdate without action
+   */
+  export type TaskUpdateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskUpdate
+     */
+    select?: TaskUpdateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskUpdate
+     */
+    omit?: TaskUpdateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskUpdateInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UpdateComment
+   */
+
+  export type AggregateUpdateComment = {
+    _count: UpdateCommentCountAggregateOutputType | null
+    _min: UpdateCommentMinAggregateOutputType | null
+    _max: UpdateCommentMaxAggregateOutputType | null
+  }
+
+  export type UpdateCommentMinAggregateOutputType = {
+    id: string | null
+    updateId: string | null
+    text: string | null
+    authorId: string | null
+    createdAt: Date | null
+  }
+
+  export type UpdateCommentMaxAggregateOutputType = {
+    id: string | null
+    updateId: string | null
+    text: string | null
+    authorId: string | null
+    createdAt: Date | null
+  }
+
+  export type UpdateCommentCountAggregateOutputType = {
+    id: number
+    updateId: number
+    text: number
+    authorId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type UpdateCommentMinAggregateInputType = {
+    id?: true
+    updateId?: true
+    text?: true
+    authorId?: true
+    createdAt?: true
+  }
+
+  export type UpdateCommentMaxAggregateInputType = {
+    id?: true
+    updateId?: true
+    text?: true
+    authorId?: true
+    createdAt?: true
+  }
+
+  export type UpdateCommentCountAggregateInputType = {
+    id?: true
+    updateId?: true
+    text?: true
+    authorId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type UpdateCommentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UpdateComment to aggregate.
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UpdateComments to fetch.
+     */
+    orderBy?: UpdateCommentOrderByWithRelationInput | UpdateCommentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UpdateCommentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UpdateComments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UpdateComments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UpdateComments
+    **/
+    _count?: true | UpdateCommentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UpdateCommentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UpdateCommentMaxAggregateInputType
+  }
+
+  export type GetUpdateCommentAggregateType<T extends UpdateCommentAggregateArgs> = {
+        [P in keyof T & keyof AggregateUpdateComment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUpdateComment[P]>
+      : GetScalarType<T[P], AggregateUpdateComment[P]>
+  }
+
+
+
+
+  export type UpdateCommentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UpdateCommentWhereInput
+    orderBy?: UpdateCommentOrderByWithAggregationInput | UpdateCommentOrderByWithAggregationInput[]
+    by: UpdateCommentScalarFieldEnum[] | UpdateCommentScalarFieldEnum
+    having?: UpdateCommentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UpdateCommentCountAggregateInputType | true
+    _min?: UpdateCommentMinAggregateInputType
+    _max?: UpdateCommentMaxAggregateInputType
+  }
+
+  export type UpdateCommentGroupByOutputType = {
+    id: string
+    updateId: string
+    text: string
+    authorId: string
+    createdAt: Date
+    _count: UpdateCommentCountAggregateOutputType | null
+    _min: UpdateCommentMinAggregateOutputType | null
+    _max: UpdateCommentMaxAggregateOutputType | null
+  }
+
+  type GetUpdateCommentGroupByPayload<T extends UpdateCommentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UpdateCommentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UpdateCommentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UpdateCommentGroupByOutputType[P]>
+            : GetScalarType<T[P], UpdateCommentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UpdateCommentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    updateId?: boolean
+    text?: boolean
+    authorId?: boolean
+    createdAt?: boolean
+    update?: boolean | TaskUpdateDefaultArgs<ExtArgs>
+    author?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["updateComment"]>
+
+  export type UpdateCommentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    updateId?: boolean
+    text?: boolean
+    authorId?: boolean
+    createdAt?: boolean
+    update?: boolean | TaskUpdateDefaultArgs<ExtArgs>
+    author?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["updateComment"]>
+
+  export type UpdateCommentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    updateId?: boolean
+    text?: boolean
+    authorId?: boolean
+    createdAt?: boolean
+    update?: boolean | TaskUpdateDefaultArgs<ExtArgs>
+    author?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["updateComment"]>
+
+  export type UpdateCommentSelectScalar = {
+    id?: boolean
+    updateId?: boolean
+    text?: boolean
+    authorId?: boolean
+    createdAt?: boolean
+  }
+
+  export type UpdateCommentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updateId" | "text" | "authorId" | "createdAt", ExtArgs["result"]["updateComment"]>
+  export type UpdateCommentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    update?: boolean | TaskUpdateDefaultArgs<ExtArgs>
+    author?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UpdateCommentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    update?: boolean | TaskUpdateDefaultArgs<ExtArgs>
+    author?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UpdateCommentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    update?: boolean | TaskUpdateDefaultArgs<ExtArgs>
+    author?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $UpdateCommentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UpdateComment"
+    objects: {
+      update: Prisma.$TaskUpdatePayload<ExtArgs>
+      author: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      updateId: string
+      text: string
+      authorId: string
+      createdAt: Date
+    }, ExtArgs["result"]["updateComment"]>
+    composites: {}
+  }
+
+  type UpdateCommentGetPayload<S extends boolean | null | undefined | UpdateCommentDefaultArgs> = $Result.GetResult<Prisma.$UpdateCommentPayload, S>
+
+  type UpdateCommentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UpdateCommentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UpdateCommentCountAggregateInputType | true
+    }
+
+  export interface UpdateCommentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UpdateComment'], meta: { name: 'UpdateComment' } }
+    /**
+     * Find zero or one UpdateComment that matches the filter.
+     * @param {UpdateCommentFindUniqueArgs} args - Arguments to find a UpdateComment
+     * @example
+     * // Get one UpdateComment
+     * const updateComment = await prisma.updateComment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UpdateCommentFindUniqueArgs>(args: SelectSubset<T, UpdateCommentFindUniqueArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UpdateComment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UpdateCommentFindUniqueOrThrowArgs} args - Arguments to find a UpdateComment
+     * @example
+     * // Get one UpdateComment
+     * const updateComment = await prisma.updateComment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UpdateCommentFindUniqueOrThrowArgs>(args: SelectSubset<T, UpdateCommentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UpdateComment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentFindFirstArgs} args - Arguments to find a UpdateComment
+     * @example
+     * // Get one UpdateComment
+     * const updateComment = await prisma.updateComment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UpdateCommentFindFirstArgs>(args?: SelectSubset<T, UpdateCommentFindFirstArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UpdateComment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentFindFirstOrThrowArgs} args - Arguments to find a UpdateComment
+     * @example
+     * // Get one UpdateComment
+     * const updateComment = await prisma.updateComment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UpdateCommentFindFirstOrThrowArgs>(args?: SelectSubset<T, UpdateCommentFindFirstOrThrowArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UpdateComments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UpdateComments
+     * const updateComments = await prisma.updateComment.findMany()
+     * 
+     * // Get first 10 UpdateComments
+     * const updateComments = await prisma.updateComment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const updateCommentWithIdOnly = await prisma.updateComment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UpdateCommentFindManyArgs>(args?: SelectSubset<T, UpdateCommentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UpdateComment.
+     * @param {UpdateCommentCreateArgs} args - Arguments to create a UpdateComment.
+     * @example
+     * // Create one UpdateComment
+     * const UpdateComment = await prisma.updateComment.create({
+     *   data: {
+     *     // ... data to create a UpdateComment
+     *   }
+     * })
+     * 
+     */
+    create<T extends UpdateCommentCreateArgs>(args: SelectSubset<T, UpdateCommentCreateArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UpdateComments.
+     * @param {UpdateCommentCreateManyArgs} args - Arguments to create many UpdateComments.
+     * @example
+     * // Create many UpdateComments
+     * const updateComment = await prisma.updateComment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UpdateCommentCreateManyArgs>(args?: SelectSubset<T, UpdateCommentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UpdateComments and returns the data saved in the database.
+     * @param {UpdateCommentCreateManyAndReturnArgs} args - Arguments to create many UpdateComments.
+     * @example
+     * // Create many UpdateComments
+     * const updateComment = await prisma.updateComment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UpdateComments and only return the `id`
+     * const updateCommentWithIdOnly = await prisma.updateComment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UpdateCommentCreateManyAndReturnArgs>(args?: SelectSubset<T, UpdateCommentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UpdateComment.
+     * @param {UpdateCommentDeleteArgs} args - Arguments to delete one UpdateComment.
+     * @example
+     * // Delete one UpdateComment
+     * const UpdateComment = await prisma.updateComment.delete({
+     *   where: {
+     *     // ... filter to delete one UpdateComment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UpdateCommentDeleteArgs>(args: SelectSubset<T, UpdateCommentDeleteArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UpdateComment.
+     * @param {UpdateCommentUpdateArgs} args - Arguments to update one UpdateComment.
+     * @example
+     * // Update one UpdateComment
+     * const updateComment = await prisma.updateComment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UpdateCommentUpdateArgs>(args: SelectSubset<T, UpdateCommentUpdateArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UpdateComments.
+     * @param {UpdateCommentDeleteManyArgs} args - Arguments to filter UpdateComments to delete.
+     * @example
+     * // Delete a few UpdateComments
+     * const { count } = await prisma.updateComment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UpdateCommentDeleteManyArgs>(args?: SelectSubset<T, UpdateCommentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UpdateComments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UpdateComments
+     * const updateComment = await prisma.updateComment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UpdateCommentUpdateManyArgs>(args: SelectSubset<T, UpdateCommentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UpdateComments and returns the data updated in the database.
+     * @param {UpdateCommentUpdateManyAndReturnArgs} args - Arguments to update many UpdateComments.
+     * @example
+     * // Update many UpdateComments
+     * const updateComment = await prisma.updateComment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UpdateComments and only return the `id`
+     * const updateCommentWithIdOnly = await prisma.updateComment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UpdateCommentUpdateManyAndReturnArgs>(args: SelectSubset<T, UpdateCommentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UpdateComment.
+     * @param {UpdateCommentUpsertArgs} args - Arguments to update or create a UpdateComment.
+     * @example
+     * // Update or create a UpdateComment
+     * const updateComment = await prisma.updateComment.upsert({
+     *   create: {
+     *     // ... data to create a UpdateComment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UpdateComment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UpdateCommentUpsertArgs>(args: SelectSubset<T, UpdateCommentUpsertArgs<ExtArgs>>): Prisma__UpdateCommentClient<$Result.GetResult<Prisma.$UpdateCommentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UpdateComments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentCountArgs} args - Arguments to filter UpdateComments to count.
+     * @example
+     * // Count the number of UpdateComments
+     * const count = await prisma.updateComment.count({
+     *   where: {
+     *     // ... the filter for the UpdateComments we want to count
+     *   }
+     * })
+    **/
+    count<T extends UpdateCommentCountArgs>(
+      args?: Subset<T, UpdateCommentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UpdateCommentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UpdateComment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UpdateCommentAggregateArgs>(args: Subset<T, UpdateCommentAggregateArgs>): Prisma.PrismaPromise<GetUpdateCommentAggregateType<T>>
+
+    /**
+     * Group by UpdateComment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UpdateCommentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UpdateCommentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UpdateCommentGroupByArgs['orderBy'] }
+        : { orderBy?: UpdateCommentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UpdateCommentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUpdateCommentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UpdateComment model
+   */
+  readonly fields: UpdateCommentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UpdateComment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UpdateCommentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    update<T extends TaskUpdateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskUpdateDefaultArgs<ExtArgs>>): Prisma__TaskUpdateClient<$Result.GetResult<Prisma.$TaskUpdatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    author<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UpdateComment model
+   */
+  interface UpdateCommentFieldRefs {
+    readonly id: FieldRef<"UpdateComment", 'String'>
+    readonly updateId: FieldRef<"UpdateComment", 'String'>
+    readonly text: FieldRef<"UpdateComment", 'String'>
+    readonly authorId: FieldRef<"UpdateComment", 'String'>
+    readonly createdAt: FieldRef<"UpdateComment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UpdateComment findUnique
+   */
+  export type UpdateCommentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * Filter, which UpdateComment to fetch.
+     */
+    where: UpdateCommentWhereUniqueInput
+  }
+
+  /**
+   * UpdateComment findUniqueOrThrow
+   */
+  export type UpdateCommentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * Filter, which UpdateComment to fetch.
+     */
+    where: UpdateCommentWhereUniqueInput
+  }
+
+  /**
+   * UpdateComment findFirst
+   */
+  export type UpdateCommentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * Filter, which UpdateComment to fetch.
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UpdateComments to fetch.
+     */
+    orderBy?: UpdateCommentOrderByWithRelationInput | UpdateCommentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UpdateComments.
+     */
+    cursor?: UpdateCommentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UpdateComments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UpdateComments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UpdateComments.
+     */
+    distinct?: UpdateCommentScalarFieldEnum | UpdateCommentScalarFieldEnum[]
+  }
+
+  /**
+   * UpdateComment findFirstOrThrow
+   */
+  export type UpdateCommentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * Filter, which UpdateComment to fetch.
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UpdateComments to fetch.
+     */
+    orderBy?: UpdateCommentOrderByWithRelationInput | UpdateCommentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UpdateComments.
+     */
+    cursor?: UpdateCommentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UpdateComments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UpdateComments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UpdateComments.
+     */
+    distinct?: UpdateCommentScalarFieldEnum | UpdateCommentScalarFieldEnum[]
+  }
+
+  /**
+   * UpdateComment findMany
+   */
+  export type UpdateCommentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * Filter, which UpdateComments to fetch.
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UpdateComments to fetch.
+     */
+    orderBy?: UpdateCommentOrderByWithRelationInput | UpdateCommentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UpdateComments.
+     */
+    cursor?: UpdateCommentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UpdateComments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UpdateComments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UpdateComments.
+     */
+    distinct?: UpdateCommentScalarFieldEnum | UpdateCommentScalarFieldEnum[]
+  }
+
+  /**
+   * UpdateComment create
+   */
+  export type UpdateCommentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UpdateComment.
+     */
+    data: XOR<UpdateCommentCreateInput, UpdateCommentUncheckedCreateInput>
+  }
+
+  /**
+   * UpdateComment createMany
+   */
+  export type UpdateCommentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UpdateComments.
+     */
+    data: UpdateCommentCreateManyInput | UpdateCommentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UpdateComment createManyAndReturn
+   */
+  export type UpdateCommentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * The data used to create many UpdateComments.
+     */
+    data: UpdateCommentCreateManyInput | UpdateCommentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UpdateComment update
+   */
+  export type UpdateCommentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UpdateComment.
+     */
+    data: XOR<UpdateCommentUpdateInput, UpdateCommentUncheckedUpdateInput>
+    /**
+     * Choose, which UpdateComment to update.
+     */
+    where: UpdateCommentWhereUniqueInput
+  }
+
+  /**
+   * UpdateComment updateMany
+   */
+  export type UpdateCommentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UpdateComments.
+     */
+    data: XOR<UpdateCommentUpdateManyMutationInput, UpdateCommentUncheckedUpdateManyInput>
+    /**
+     * Filter which UpdateComments to update
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * Limit how many UpdateComments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UpdateComment updateManyAndReturn
+   */
+  export type UpdateCommentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * The data used to update UpdateComments.
+     */
+    data: XOR<UpdateCommentUpdateManyMutationInput, UpdateCommentUncheckedUpdateManyInput>
+    /**
+     * Filter which UpdateComments to update
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * Limit how many UpdateComments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UpdateComment upsert
+   */
+  export type UpdateCommentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UpdateComment to update in case it exists.
+     */
+    where: UpdateCommentWhereUniqueInput
+    /**
+     * In case the UpdateComment found by the `where` argument doesn't exist, create a new UpdateComment with this data.
+     */
+    create: XOR<UpdateCommentCreateInput, UpdateCommentUncheckedCreateInput>
+    /**
+     * In case the UpdateComment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UpdateCommentUpdateInput, UpdateCommentUncheckedUpdateInput>
+  }
+
+  /**
+   * UpdateComment delete
+   */
+  export type UpdateCommentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+    /**
+     * Filter which UpdateComment to delete.
+     */
+    where: UpdateCommentWhereUniqueInput
+  }
+
+  /**
+   * UpdateComment deleteMany
+   */
+  export type UpdateCommentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UpdateComments to delete
+     */
+    where?: UpdateCommentWhereInput
+    /**
+     * Limit how many UpdateComments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UpdateComment without action
+   */
+  export type UpdateCommentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UpdateComment
+     */
+    select?: UpdateCommentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UpdateComment
+     */
+    omit?: UpdateCommentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UpdateCommentInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -8199,6 +10692,30 @@ export namespace Prisma {
   };
 
   export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+  export const TaskUpdateScalarFieldEnum: {
+    id: 'id',
+    taskId: 'taskId',
+    remark: 'remark',
+    files: 'files',
+    images: 'images',
+    hasVoice: 'hasVoice',
+    createdAt: 'createdAt'
+  };
+
+  export type TaskUpdateScalarFieldEnum = (typeof TaskUpdateScalarFieldEnum)[keyof typeof TaskUpdateScalarFieldEnum]
+
+
+  export const UpdateCommentScalarFieldEnum: {
+    id: 'id',
+    updateId: 'updateId',
+    text: 'text',
+    authorId: 'authorId',
+    createdAt: 'createdAt'
+  };
+
+  export type UpdateCommentScalarFieldEnum = (typeof UpdateCommentScalarFieldEnum)[keyof typeof UpdateCommentScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -8356,6 +10873,7 @@ export namespace Prisma {
     assignedTasks?: TaskListRelationFilter
     delegatedTasks?: TaskListRelationFilter
     notifications?: NotificationListRelationFilter
+    updateComments?: UpdateCommentListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -8373,6 +10891,7 @@ export namespace Prisma {
     assignedTasks?: TaskOrderByRelationAggregateInput
     delegatedTasks?: TaskOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
+    updateComments?: UpdateCommentOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -8393,6 +10912,7 @@ export namespace Prisma {
     assignedTasks?: TaskListRelationFilter
     delegatedTasks?: TaskListRelationFilter
     notifications?: NotificationListRelationFilter
+    updateComments?: UpdateCommentListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -8451,6 +10971,7 @@ export namespace Prisma {
     assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     delegatedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     template?: XOR<TaskTemplateNullableScalarRelationFilter, TaskTemplateWhereInput> | null
+    updates?: TaskUpdateListRelationFilter
   }
 
   export type TaskOrderByWithRelationInput = {
@@ -8472,6 +10993,7 @@ export namespace Prisma {
     assignedTo?: UserOrderByWithRelationInput
     delegatedBy?: UserOrderByWithRelationInput
     template?: TaskTemplateOrderByWithRelationInput
+    updates?: TaskUpdateOrderByRelationAggregateInput
   }
 
   export type TaskWhereUniqueInput = Prisma.AtLeast<{
@@ -8496,6 +11018,7 @@ export namespace Prisma {
     assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     delegatedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     template?: XOR<TaskTemplateNullableScalarRelationFilter, TaskTemplateWhereInput> | null
+    updates?: TaskUpdateListRelationFilter
   }, "id">
 
   export type TaskOrderByWithAggregationInput = {
@@ -8761,6 +11284,132 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Notification"> | Date | string
   }
 
+  export type TaskUpdateWhereInput = {
+    AND?: TaskUpdateWhereInput | TaskUpdateWhereInput[]
+    OR?: TaskUpdateWhereInput[]
+    NOT?: TaskUpdateWhereInput | TaskUpdateWhereInput[]
+    id?: StringFilter<"TaskUpdate"> | string
+    taskId?: StringFilter<"TaskUpdate"> | string
+    remark?: StringFilter<"TaskUpdate"> | string
+    files?: StringNullableListFilter<"TaskUpdate">
+    images?: StringNullableListFilter<"TaskUpdate">
+    hasVoice?: BoolFilter<"TaskUpdate"> | boolean
+    createdAt?: DateTimeFilter<"TaskUpdate"> | Date | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+    comments?: UpdateCommentListRelationFilter
+  }
+
+  export type TaskUpdateOrderByWithRelationInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    remark?: SortOrder
+    files?: SortOrder
+    images?: SortOrder
+    hasVoice?: SortOrder
+    createdAt?: SortOrder
+    task?: TaskOrderByWithRelationInput
+    comments?: UpdateCommentOrderByRelationAggregateInput
+  }
+
+  export type TaskUpdateWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TaskUpdateWhereInput | TaskUpdateWhereInput[]
+    OR?: TaskUpdateWhereInput[]
+    NOT?: TaskUpdateWhereInput | TaskUpdateWhereInput[]
+    taskId?: StringFilter<"TaskUpdate"> | string
+    remark?: StringFilter<"TaskUpdate"> | string
+    files?: StringNullableListFilter<"TaskUpdate">
+    images?: StringNullableListFilter<"TaskUpdate">
+    hasVoice?: BoolFilter<"TaskUpdate"> | boolean
+    createdAt?: DateTimeFilter<"TaskUpdate"> | Date | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+    comments?: UpdateCommentListRelationFilter
+  }, "id">
+
+  export type TaskUpdateOrderByWithAggregationInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    remark?: SortOrder
+    files?: SortOrder
+    images?: SortOrder
+    hasVoice?: SortOrder
+    createdAt?: SortOrder
+    _count?: TaskUpdateCountOrderByAggregateInput
+    _max?: TaskUpdateMaxOrderByAggregateInput
+    _min?: TaskUpdateMinOrderByAggregateInput
+  }
+
+  export type TaskUpdateScalarWhereWithAggregatesInput = {
+    AND?: TaskUpdateScalarWhereWithAggregatesInput | TaskUpdateScalarWhereWithAggregatesInput[]
+    OR?: TaskUpdateScalarWhereWithAggregatesInput[]
+    NOT?: TaskUpdateScalarWhereWithAggregatesInput | TaskUpdateScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TaskUpdate"> | string
+    taskId?: StringWithAggregatesFilter<"TaskUpdate"> | string
+    remark?: StringWithAggregatesFilter<"TaskUpdate"> | string
+    files?: StringNullableListFilter<"TaskUpdate">
+    images?: StringNullableListFilter<"TaskUpdate">
+    hasVoice?: BoolWithAggregatesFilter<"TaskUpdate"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"TaskUpdate"> | Date | string
+  }
+
+  export type UpdateCommentWhereInput = {
+    AND?: UpdateCommentWhereInput | UpdateCommentWhereInput[]
+    OR?: UpdateCommentWhereInput[]
+    NOT?: UpdateCommentWhereInput | UpdateCommentWhereInput[]
+    id?: StringFilter<"UpdateComment"> | string
+    updateId?: StringFilter<"UpdateComment"> | string
+    text?: StringFilter<"UpdateComment"> | string
+    authorId?: StringFilter<"UpdateComment"> | string
+    createdAt?: DateTimeFilter<"UpdateComment"> | Date | string
+    update?: XOR<TaskUpdateScalarRelationFilter, TaskUpdateWhereInput>
+    author?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type UpdateCommentOrderByWithRelationInput = {
+    id?: SortOrder
+    updateId?: SortOrder
+    text?: SortOrder
+    authorId?: SortOrder
+    createdAt?: SortOrder
+    update?: TaskUpdateOrderByWithRelationInput
+    author?: UserOrderByWithRelationInput
+  }
+
+  export type UpdateCommentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: UpdateCommentWhereInput | UpdateCommentWhereInput[]
+    OR?: UpdateCommentWhereInput[]
+    NOT?: UpdateCommentWhereInput | UpdateCommentWhereInput[]
+    updateId?: StringFilter<"UpdateComment"> | string
+    text?: StringFilter<"UpdateComment"> | string
+    authorId?: StringFilter<"UpdateComment"> | string
+    createdAt?: DateTimeFilter<"UpdateComment"> | Date | string
+    update?: XOR<TaskUpdateScalarRelationFilter, TaskUpdateWhereInput>
+    author?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type UpdateCommentOrderByWithAggregationInput = {
+    id?: SortOrder
+    updateId?: SortOrder
+    text?: SortOrder
+    authorId?: SortOrder
+    createdAt?: SortOrder
+    _count?: UpdateCommentCountOrderByAggregateInput
+    _max?: UpdateCommentMaxOrderByAggregateInput
+    _min?: UpdateCommentMinOrderByAggregateInput
+  }
+
+  export type UpdateCommentScalarWhereWithAggregatesInput = {
+    AND?: UpdateCommentScalarWhereWithAggregatesInput | UpdateCommentScalarWhereWithAggregatesInput[]
+    OR?: UpdateCommentScalarWhereWithAggregatesInput[]
+    NOT?: UpdateCommentScalarWhereWithAggregatesInput | UpdateCommentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"UpdateComment"> | string
+    updateId?: StringWithAggregatesFilter<"UpdateComment"> | string
+    text?: StringWithAggregatesFilter<"UpdateComment"> | string
+    authorId?: StringWithAggregatesFilter<"UpdateComment"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"UpdateComment"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -8776,6 +11425,7 @@ export namespace Prisma {
     assignedTasks?: TaskCreateNestedManyWithoutAssignedToInput
     delegatedTasks?: TaskCreateNestedManyWithoutDelegatedByInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
+    updateComments?: UpdateCommentCreateNestedManyWithoutAuthorInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -8793,6 +11443,7 @@ export namespace Prisma {
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     delegatedTasks?: TaskUncheckedCreateNestedManyWithoutDelegatedByInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    updateComments?: UpdateCommentUncheckedCreateNestedManyWithoutAuthorInput
   }
 
   export type UserUpdateInput = {
@@ -8810,6 +11461,7 @@ export namespace Prisma {
     assignedTasks?: TaskUpdateManyWithoutAssignedToNestedInput
     delegatedTasks?: TaskUpdateManyWithoutDelegatedByNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
+    updateComments?: UpdateCommentUpdateManyWithoutAuthorNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -8827,6 +11479,7 @@ export namespace Prisma {
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     delegatedTasks?: TaskUncheckedUpdateManyWithoutDelegatedByNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    updateComments?: UpdateCommentUncheckedUpdateManyWithoutAuthorNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -8887,6 +11540,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutAssignedTasksInput
     delegatedBy?: UserCreateNestedOneWithoutDelegatedTasksInput
     template?: TaskTemplateCreateNestedOneWithoutTasksInput
+    updates?: TaskUpdateCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateInput = {
@@ -8905,6 +11559,7 @@ export namespace Prisma {
     assignedToId?: string | null
     delegatedById?: string | null
     templateId?: string | null
+    updates?: TaskUpdateUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUpdateInput = {
@@ -8923,6 +11578,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutAssignedTasksNestedInput
     delegatedBy?: UserUpdateOneWithoutDelegatedTasksNestedInput
     template?: TaskTemplateUpdateOneWithoutTasksNestedInput
+    updates?: TaskUpdateUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateInput = {
@@ -8941,6 +11597,7 @@ export namespace Prisma {
     assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     delegatedById?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: NullableStringFieldUpdateOperationsInput | string | null
+    updates?: TaskUpdateUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateManyInput = {
@@ -9228,6 +11885,133 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TaskUpdateCreateInput = {
+    id?: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+    task: TaskCreateNestedOneWithoutUpdatesInput
+    comments?: UpdateCommentCreateNestedManyWithoutUpdateInput
+  }
+
+  export type TaskUpdateUncheckedCreateInput = {
+    id?: string
+    taskId: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+    comments?: UpdateCommentUncheckedCreateNestedManyWithoutUpdateInput
+  }
+
+  export type TaskUpdateUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    task?: TaskUpdateOneRequiredWithoutUpdatesNestedInput
+    comments?: UpdateCommentUpdateManyWithoutUpdateNestedInput
+  }
+
+  export type TaskUpdateUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    comments?: UpdateCommentUncheckedUpdateManyWithoutUpdateNestedInput
+  }
+
+  export type TaskUpdateCreateManyInput = {
+    id?: string
+    taskId: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+  }
+
+  export type TaskUpdateUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskUpdateUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UpdateCommentCreateInput = {
+    id?: string
+    text: string
+    createdAt?: Date | string
+    update: TaskUpdateCreateNestedOneWithoutCommentsInput
+    author: UserCreateNestedOneWithoutUpdateCommentsInput
+  }
+
+  export type UpdateCommentUncheckedCreateInput = {
+    id?: string
+    updateId: string
+    text: string
+    authorId: string
+    createdAt?: Date | string
+  }
+
+  export type UpdateCommentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    update?: TaskUpdateUpdateOneRequiredWithoutCommentsNestedInput
+    author?: UserUpdateOneRequiredWithoutUpdateCommentsNestedInput
+  }
+
+  export type UpdateCommentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    updateId?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    authorId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UpdateCommentCreateManyInput = {
+    id?: string
+    updateId: string
+    text: string
+    authorId: string
+    createdAt?: Date | string
+  }
+
+  export type UpdateCommentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UpdateCommentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    updateId?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    authorId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -9304,6 +12088,12 @@ export namespace Prisma {
     none?: NotificationWhereInput
   }
 
+  export type UpdateCommentListRelationFilter = {
+    every?: UpdateCommentWhereInput
+    some?: UpdateCommentWhereInput
+    none?: UpdateCommentWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -9314,6 +12104,10 @@ export namespace Prisma {
   }
 
   export type NotificationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UpdateCommentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -9474,6 +12268,16 @@ export namespace Prisma {
   export type TaskTemplateNullableScalarRelationFilter = {
     is?: TaskTemplateWhereInput | null
     isNot?: TaskTemplateWhereInput | null
+  }
+
+  export type TaskUpdateListRelationFilter = {
+    every?: TaskUpdateWhereInput
+    some?: TaskUpdateWhereInput
+    none?: TaskUpdateWhereInput
+  }
+
+  export type TaskUpdateOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type TaskCountOrderByAggregateInput = {
@@ -9678,6 +12482,74 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type TaskScalarRelationFilter = {
+    is?: TaskWhereInput
+    isNot?: TaskWhereInput
+  }
+
+  export type TaskUpdateCountOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    remark?: SortOrder
+    files?: SortOrder
+    images?: SortOrder
+    hasVoice?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TaskUpdateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    remark?: SortOrder
+    hasVoice?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TaskUpdateMinOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    remark?: SortOrder
+    hasVoice?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TaskUpdateScalarRelationFilter = {
+    is?: TaskUpdateWhereInput
+    isNot?: TaskUpdateWhereInput
+  }
+
+  export type UpdateCommentCountOrderByAggregateInput = {
+    id?: SortOrder
+    updateId?: SortOrder
+    text?: SortOrder
+    authorId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UpdateCommentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    updateId?: SortOrder
+    text?: SortOrder
+    authorId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UpdateCommentMinOrderByAggregateInput = {
+    id?: SortOrder
+    updateId?: SortOrder
+    text?: SortOrder
+    authorId?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type TaskCreateNestedManyWithoutAssignedToInput = {
     create?: XOR<TaskCreateWithoutAssignedToInput, TaskUncheckedCreateWithoutAssignedToInput> | TaskCreateWithoutAssignedToInput[] | TaskUncheckedCreateWithoutAssignedToInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutAssignedToInput | TaskCreateOrConnectWithoutAssignedToInput[]
@@ -9699,6 +12571,13 @@ export namespace Prisma {
     connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
   }
 
+  export type UpdateCommentCreateNestedManyWithoutAuthorInput = {
+    create?: XOR<UpdateCommentCreateWithoutAuthorInput, UpdateCommentUncheckedCreateWithoutAuthorInput> | UpdateCommentCreateWithoutAuthorInput[] | UpdateCommentUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutAuthorInput | UpdateCommentCreateOrConnectWithoutAuthorInput[]
+    createMany?: UpdateCommentCreateManyAuthorInputEnvelope
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+  }
+
   export type TaskUncheckedCreateNestedManyWithoutAssignedToInput = {
     create?: XOR<TaskCreateWithoutAssignedToInput, TaskUncheckedCreateWithoutAssignedToInput> | TaskCreateWithoutAssignedToInput[] | TaskUncheckedCreateWithoutAssignedToInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutAssignedToInput | TaskCreateOrConnectWithoutAssignedToInput[]
@@ -9718,6 +12597,13 @@ export namespace Prisma {
     connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
     createMany?: NotificationCreateManyUserInputEnvelope
     connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+  }
+
+  export type UpdateCommentUncheckedCreateNestedManyWithoutAuthorInput = {
+    create?: XOR<UpdateCommentCreateWithoutAuthorInput, UpdateCommentUncheckedCreateWithoutAuthorInput> | UpdateCommentCreateWithoutAuthorInput[] | UpdateCommentUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutAuthorInput | UpdateCommentCreateOrConnectWithoutAuthorInput[]
+    createMany?: UpdateCommentCreateManyAuthorInputEnvelope
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -9786,6 +12672,20 @@ export namespace Prisma {
     deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
   }
 
+  export type UpdateCommentUpdateManyWithoutAuthorNestedInput = {
+    create?: XOR<UpdateCommentCreateWithoutAuthorInput, UpdateCommentUncheckedCreateWithoutAuthorInput> | UpdateCommentCreateWithoutAuthorInput[] | UpdateCommentUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutAuthorInput | UpdateCommentCreateOrConnectWithoutAuthorInput[]
+    upsert?: UpdateCommentUpsertWithWhereUniqueWithoutAuthorInput | UpdateCommentUpsertWithWhereUniqueWithoutAuthorInput[]
+    createMany?: UpdateCommentCreateManyAuthorInputEnvelope
+    set?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    disconnect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    delete?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    update?: UpdateCommentUpdateWithWhereUniqueWithoutAuthorInput | UpdateCommentUpdateWithWhereUniqueWithoutAuthorInput[]
+    updateMany?: UpdateCommentUpdateManyWithWhereWithoutAuthorInput | UpdateCommentUpdateManyWithWhereWithoutAuthorInput[]
+    deleteMany?: UpdateCommentScalarWhereInput | UpdateCommentScalarWhereInput[]
+  }
+
   export type TaskUncheckedUpdateManyWithoutAssignedToNestedInput = {
     create?: XOR<TaskCreateWithoutAssignedToInput, TaskUncheckedCreateWithoutAssignedToInput> | TaskCreateWithoutAssignedToInput[] | TaskUncheckedCreateWithoutAssignedToInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutAssignedToInput | TaskCreateOrConnectWithoutAssignedToInput[]
@@ -9828,6 +12728,20 @@ export namespace Prisma {
     deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
   }
 
+  export type UpdateCommentUncheckedUpdateManyWithoutAuthorNestedInput = {
+    create?: XOR<UpdateCommentCreateWithoutAuthorInput, UpdateCommentUncheckedCreateWithoutAuthorInput> | UpdateCommentCreateWithoutAuthorInput[] | UpdateCommentUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutAuthorInput | UpdateCommentCreateOrConnectWithoutAuthorInput[]
+    upsert?: UpdateCommentUpsertWithWhereUniqueWithoutAuthorInput | UpdateCommentUpsertWithWhereUniqueWithoutAuthorInput[]
+    createMany?: UpdateCommentCreateManyAuthorInputEnvelope
+    set?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    disconnect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    delete?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    update?: UpdateCommentUpdateWithWhereUniqueWithoutAuthorInput | UpdateCommentUpdateWithWhereUniqueWithoutAuthorInput[]
+    updateMany?: UpdateCommentUpdateManyWithWhereWithoutAuthorInput | UpdateCommentUpdateManyWithWhereWithoutAuthorInput[]
+    deleteMany?: UpdateCommentScalarWhereInput | UpdateCommentScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutAssignedTasksInput = {
     create?: XOR<UserCreateWithoutAssignedTasksInput, UserUncheckedCreateWithoutAssignedTasksInput>
     connectOrCreate?: UserCreateOrConnectWithoutAssignedTasksInput
@@ -9844,6 +12758,20 @@ export namespace Prisma {
     create?: XOR<TaskTemplateCreateWithoutTasksInput, TaskTemplateUncheckedCreateWithoutTasksInput>
     connectOrCreate?: TaskTemplateCreateOrConnectWithoutTasksInput
     connect?: TaskTemplateWhereUniqueInput
+  }
+
+  export type TaskUpdateCreateNestedManyWithoutTaskInput = {
+    create?: XOR<TaskUpdateCreateWithoutTaskInput, TaskUpdateUncheckedCreateWithoutTaskInput> | TaskUpdateCreateWithoutTaskInput[] | TaskUpdateUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskUpdateCreateOrConnectWithoutTaskInput | TaskUpdateCreateOrConnectWithoutTaskInput[]
+    createMany?: TaskUpdateCreateManyTaskInputEnvelope
+    connect?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+  }
+
+  export type TaskUpdateUncheckedCreateNestedManyWithoutTaskInput = {
+    create?: XOR<TaskUpdateCreateWithoutTaskInput, TaskUpdateUncheckedCreateWithoutTaskInput> | TaskUpdateCreateWithoutTaskInput[] | TaskUpdateUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskUpdateCreateOrConnectWithoutTaskInput | TaskUpdateCreateOrConnectWithoutTaskInput[]
+    createMany?: TaskUpdateCreateManyTaskInputEnvelope
+    connect?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
   }
 
   export type EnumTaskStatusFieldUpdateOperationsInput = {
@@ -9890,6 +12818,34 @@ export namespace Prisma {
     delete?: TaskTemplateWhereInput | boolean
     connect?: TaskTemplateWhereUniqueInput
     update?: XOR<XOR<TaskTemplateUpdateToOneWithWhereWithoutTasksInput, TaskTemplateUpdateWithoutTasksInput>, TaskTemplateUncheckedUpdateWithoutTasksInput>
+  }
+
+  export type TaskUpdateUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<TaskUpdateCreateWithoutTaskInput, TaskUpdateUncheckedCreateWithoutTaskInput> | TaskUpdateCreateWithoutTaskInput[] | TaskUpdateUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskUpdateCreateOrConnectWithoutTaskInput | TaskUpdateCreateOrConnectWithoutTaskInput[]
+    upsert?: TaskUpdateUpsertWithWhereUniqueWithoutTaskInput | TaskUpdateUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: TaskUpdateCreateManyTaskInputEnvelope
+    set?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    disconnect?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    delete?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    connect?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    update?: TaskUpdateUpdateWithWhereUniqueWithoutTaskInput | TaskUpdateUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: TaskUpdateUpdateManyWithWhereWithoutTaskInput | TaskUpdateUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: TaskUpdateScalarWhereInput | TaskUpdateScalarWhereInput[]
+  }
+
+  export type TaskUpdateUncheckedUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<TaskUpdateCreateWithoutTaskInput, TaskUpdateUncheckedCreateWithoutTaskInput> | TaskUpdateCreateWithoutTaskInput[] | TaskUpdateUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskUpdateCreateOrConnectWithoutTaskInput | TaskUpdateCreateOrConnectWithoutTaskInput[]
+    upsert?: TaskUpdateUpsertWithWhereUniqueWithoutTaskInput | TaskUpdateUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: TaskUpdateCreateManyTaskInputEnvelope
+    set?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    disconnect?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    delete?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    connect?: TaskUpdateWhereUniqueInput | TaskUpdateWhereUniqueInput[]
+    update?: TaskUpdateUpdateWithWhereUniqueWithoutTaskInput | TaskUpdateUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: TaskUpdateUpdateManyWithWhereWithoutTaskInput | TaskUpdateUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: TaskUpdateScalarWhereInput | TaskUpdateScalarWhereInput[]
   }
 
   export type TaskCreateNestedManyWithoutTemplateInput = {
@@ -9946,6 +12902,108 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutNotificationsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationsInput, UserUpdateWithoutNotificationsInput>, UserUncheckedUpdateWithoutNotificationsInput>
+  }
+
+  export type TaskUpdateCreatefilesInput = {
+    set: string[]
+  }
+
+  export type TaskUpdateCreateimagesInput = {
+    set: string[]
+  }
+
+  export type TaskCreateNestedOneWithoutUpdatesInput = {
+    create?: XOR<TaskCreateWithoutUpdatesInput, TaskUncheckedCreateWithoutUpdatesInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutUpdatesInput
+    connect?: TaskWhereUniqueInput
+  }
+
+  export type UpdateCommentCreateNestedManyWithoutUpdateInput = {
+    create?: XOR<UpdateCommentCreateWithoutUpdateInput, UpdateCommentUncheckedCreateWithoutUpdateInput> | UpdateCommentCreateWithoutUpdateInput[] | UpdateCommentUncheckedCreateWithoutUpdateInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutUpdateInput | UpdateCommentCreateOrConnectWithoutUpdateInput[]
+    createMany?: UpdateCommentCreateManyUpdateInputEnvelope
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+  }
+
+  export type UpdateCommentUncheckedCreateNestedManyWithoutUpdateInput = {
+    create?: XOR<UpdateCommentCreateWithoutUpdateInput, UpdateCommentUncheckedCreateWithoutUpdateInput> | UpdateCommentCreateWithoutUpdateInput[] | UpdateCommentUncheckedCreateWithoutUpdateInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutUpdateInput | UpdateCommentCreateOrConnectWithoutUpdateInput[]
+    createMany?: UpdateCommentCreateManyUpdateInputEnvelope
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+  }
+
+  export type TaskUpdateUpdatefilesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type TaskUpdateUpdateimagesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type TaskUpdateOneRequiredWithoutUpdatesNestedInput = {
+    create?: XOR<TaskCreateWithoutUpdatesInput, TaskUncheckedCreateWithoutUpdatesInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutUpdatesInput
+    upsert?: TaskUpsertWithoutUpdatesInput
+    connect?: TaskWhereUniqueInput
+    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutUpdatesInput, TaskUpdateWithoutUpdatesInput>, TaskUncheckedUpdateWithoutUpdatesInput>
+  }
+
+  export type UpdateCommentUpdateManyWithoutUpdateNestedInput = {
+    create?: XOR<UpdateCommentCreateWithoutUpdateInput, UpdateCommentUncheckedCreateWithoutUpdateInput> | UpdateCommentCreateWithoutUpdateInput[] | UpdateCommentUncheckedCreateWithoutUpdateInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutUpdateInput | UpdateCommentCreateOrConnectWithoutUpdateInput[]
+    upsert?: UpdateCommentUpsertWithWhereUniqueWithoutUpdateInput | UpdateCommentUpsertWithWhereUniqueWithoutUpdateInput[]
+    createMany?: UpdateCommentCreateManyUpdateInputEnvelope
+    set?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    disconnect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    delete?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    update?: UpdateCommentUpdateWithWhereUniqueWithoutUpdateInput | UpdateCommentUpdateWithWhereUniqueWithoutUpdateInput[]
+    updateMany?: UpdateCommentUpdateManyWithWhereWithoutUpdateInput | UpdateCommentUpdateManyWithWhereWithoutUpdateInput[]
+    deleteMany?: UpdateCommentScalarWhereInput | UpdateCommentScalarWhereInput[]
+  }
+
+  export type UpdateCommentUncheckedUpdateManyWithoutUpdateNestedInput = {
+    create?: XOR<UpdateCommentCreateWithoutUpdateInput, UpdateCommentUncheckedCreateWithoutUpdateInput> | UpdateCommentCreateWithoutUpdateInput[] | UpdateCommentUncheckedCreateWithoutUpdateInput[]
+    connectOrCreate?: UpdateCommentCreateOrConnectWithoutUpdateInput | UpdateCommentCreateOrConnectWithoutUpdateInput[]
+    upsert?: UpdateCommentUpsertWithWhereUniqueWithoutUpdateInput | UpdateCommentUpsertWithWhereUniqueWithoutUpdateInput[]
+    createMany?: UpdateCommentCreateManyUpdateInputEnvelope
+    set?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    disconnect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    delete?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    connect?: UpdateCommentWhereUniqueInput | UpdateCommentWhereUniqueInput[]
+    update?: UpdateCommentUpdateWithWhereUniqueWithoutUpdateInput | UpdateCommentUpdateWithWhereUniqueWithoutUpdateInput[]
+    updateMany?: UpdateCommentUpdateManyWithWhereWithoutUpdateInput | UpdateCommentUpdateManyWithWhereWithoutUpdateInput[]
+    deleteMany?: UpdateCommentScalarWhereInput | UpdateCommentScalarWhereInput[]
+  }
+
+  export type TaskUpdateCreateNestedOneWithoutCommentsInput = {
+    create?: XOR<TaskUpdateCreateWithoutCommentsInput, TaskUpdateUncheckedCreateWithoutCommentsInput>
+    connectOrCreate?: TaskUpdateCreateOrConnectWithoutCommentsInput
+    connect?: TaskUpdateWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutUpdateCommentsInput = {
+    create?: XOR<UserCreateWithoutUpdateCommentsInput, UserUncheckedCreateWithoutUpdateCommentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutUpdateCommentsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type TaskUpdateUpdateOneRequiredWithoutCommentsNestedInput = {
+    create?: XOR<TaskUpdateCreateWithoutCommentsInput, TaskUpdateUncheckedCreateWithoutCommentsInput>
+    connectOrCreate?: TaskUpdateCreateOrConnectWithoutCommentsInput
+    upsert?: TaskUpdateUpsertWithoutCommentsInput
+    connect?: TaskUpdateWhereUniqueInput
+    update?: XOR<XOR<TaskUpdateUpdateToOneWithWhereWithoutCommentsInput, TaskUpdateUpdateWithoutCommentsInput>, TaskUpdateUncheckedUpdateWithoutCommentsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutUpdateCommentsNestedInput = {
+    create?: XOR<UserCreateWithoutUpdateCommentsInput, UserUncheckedCreateWithoutUpdateCommentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutUpdateCommentsInput
+    upsert?: UserUpsertWithoutUpdateCommentsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutUpdateCommentsInput, UserUpdateWithoutUpdateCommentsInput>, UserUncheckedUpdateWithoutUpdateCommentsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -10188,6 +13246,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     delegatedBy?: UserCreateNestedOneWithoutDelegatedTasksInput
     template?: TaskTemplateCreateNestedOneWithoutTasksInput
+    updates?: TaskUpdateCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutAssignedToInput = {
@@ -10205,6 +13264,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     delegatedById?: string | null
     templateId?: string | null
+    updates?: TaskUpdateUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutAssignedToInput = {
@@ -10232,6 +13292,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     assignedTo?: UserCreateNestedOneWithoutAssignedTasksInput
     template?: TaskTemplateCreateNestedOneWithoutTasksInput
+    updates?: TaskUpdateCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutDelegatedByInput = {
@@ -10249,6 +13310,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     assignedToId?: string | null
     templateId?: string | null
+    updates?: TaskUpdateUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutDelegatedByInput = {
@@ -10284,6 +13346,30 @@ export namespace Prisma {
 
   export type NotificationCreateManyUserInputEnvelope = {
     data: NotificationCreateManyUserInput | NotificationCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UpdateCommentCreateWithoutAuthorInput = {
+    id?: string
+    text: string
+    createdAt?: Date | string
+    update: TaskUpdateCreateNestedOneWithoutCommentsInput
+  }
+
+  export type UpdateCommentUncheckedCreateWithoutAuthorInput = {
+    id?: string
+    updateId: string
+    text: string
+    createdAt?: Date | string
+  }
+
+  export type UpdateCommentCreateOrConnectWithoutAuthorInput = {
+    where: UpdateCommentWhereUniqueInput
+    create: XOR<UpdateCommentCreateWithoutAuthorInput, UpdateCommentUncheckedCreateWithoutAuthorInput>
+  }
+
+  export type UpdateCommentCreateManyAuthorInputEnvelope = {
+    data: UpdateCommentCreateManyAuthorInput | UpdateCommentCreateManyAuthorInput[]
     skipDuplicates?: boolean
   }
 
@@ -10368,6 +13454,33 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Notification"> | Date | string
   }
 
+  export type UpdateCommentUpsertWithWhereUniqueWithoutAuthorInput = {
+    where: UpdateCommentWhereUniqueInput
+    update: XOR<UpdateCommentUpdateWithoutAuthorInput, UpdateCommentUncheckedUpdateWithoutAuthorInput>
+    create: XOR<UpdateCommentCreateWithoutAuthorInput, UpdateCommentUncheckedCreateWithoutAuthorInput>
+  }
+
+  export type UpdateCommentUpdateWithWhereUniqueWithoutAuthorInput = {
+    where: UpdateCommentWhereUniqueInput
+    data: XOR<UpdateCommentUpdateWithoutAuthorInput, UpdateCommentUncheckedUpdateWithoutAuthorInput>
+  }
+
+  export type UpdateCommentUpdateManyWithWhereWithoutAuthorInput = {
+    where: UpdateCommentScalarWhereInput
+    data: XOR<UpdateCommentUpdateManyMutationInput, UpdateCommentUncheckedUpdateManyWithoutAuthorInput>
+  }
+
+  export type UpdateCommentScalarWhereInput = {
+    AND?: UpdateCommentScalarWhereInput | UpdateCommentScalarWhereInput[]
+    OR?: UpdateCommentScalarWhereInput[]
+    NOT?: UpdateCommentScalarWhereInput | UpdateCommentScalarWhereInput[]
+    id?: StringFilter<"UpdateComment"> | string
+    updateId?: StringFilter<"UpdateComment"> | string
+    text?: StringFilter<"UpdateComment"> | string
+    authorId?: StringFilter<"UpdateComment"> | string
+    createdAt?: DateTimeFilter<"UpdateComment"> | Date | string
+  }
+
   export type UserCreateWithoutAssignedTasksInput = {
     id?: string
     name: string
@@ -10382,6 +13495,7 @@ export namespace Prisma {
     createdAt?: Date | string
     delegatedTasks?: TaskCreateNestedManyWithoutDelegatedByInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
+    updateComments?: UpdateCommentCreateNestedManyWithoutAuthorInput
   }
 
   export type UserUncheckedCreateWithoutAssignedTasksInput = {
@@ -10398,6 +13512,7 @@ export namespace Prisma {
     createdAt?: Date | string
     delegatedTasks?: TaskUncheckedCreateNestedManyWithoutDelegatedByInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    updateComments?: UpdateCommentUncheckedCreateNestedManyWithoutAuthorInput
   }
 
   export type UserCreateOrConnectWithoutAssignedTasksInput = {
@@ -10419,6 +13534,7 @@ export namespace Prisma {
     createdAt?: Date | string
     assignedTasks?: TaskCreateNestedManyWithoutAssignedToInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
+    updateComments?: UpdateCommentCreateNestedManyWithoutAuthorInput
   }
 
   export type UserUncheckedCreateWithoutDelegatedTasksInput = {
@@ -10435,6 +13551,7 @@ export namespace Prisma {
     createdAt?: Date | string
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    updateComments?: UpdateCommentUncheckedCreateNestedManyWithoutAuthorInput
   }
 
   export type UserCreateOrConnectWithoutDelegatedTasksInput = {
@@ -10465,6 +13582,36 @@ export namespace Prisma {
     create: XOR<TaskTemplateCreateWithoutTasksInput, TaskTemplateUncheckedCreateWithoutTasksInput>
   }
 
+  export type TaskUpdateCreateWithoutTaskInput = {
+    id?: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+    comments?: UpdateCommentCreateNestedManyWithoutUpdateInput
+  }
+
+  export type TaskUpdateUncheckedCreateWithoutTaskInput = {
+    id?: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+    comments?: UpdateCommentUncheckedCreateNestedManyWithoutUpdateInput
+  }
+
+  export type TaskUpdateCreateOrConnectWithoutTaskInput = {
+    where: TaskUpdateWhereUniqueInput
+    create: XOR<TaskUpdateCreateWithoutTaskInput, TaskUpdateUncheckedCreateWithoutTaskInput>
+  }
+
+  export type TaskUpdateCreateManyTaskInputEnvelope = {
+    data: TaskUpdateCreateManyTaskInput | TaskUpdateCreateManyTaskInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutAssignedTasksInput = {
     update: XOR<UserUpdateWithoutAssignedTasksInput, UserUncheckedUpdateWithoutAssignedTasksInput>
     create: XOR<UserCreateWithoutAssignedTasksInput, UserUncheckedCreateWithoutAssignedTasksInput>
@@ -10490,6 +13637,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     delegatedTasks?: TaskUpdateManyWithoutDelegatedByNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
+    updateComments?: UpdateCommentUpdateManyWithoutAuthorNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssignedTasksInput = {
@@ -10506,6 +13654,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     delegatedTasks?: TaskUncheckedUpdateManyWithoutDelegatedByNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    updateComments?: UpdateCommentUncheckedUpdateManyWithoutAuthorNestedInput
   }
 
   export type UserUpsertWithoutDelegatedTasksInput = {
@@ -10533,6 +13682,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTasks?: TaskUpdateManyWithoutAssignedToNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
+    updateComments?: UpdateCommentUpdateManyWithoutAuthorNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDelegatedTasksInput = {
@@ -10549,6 +13699,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    updateComments?: UpdateCommentUncheckedUpdateManyWithoutAuthorNestedInput
   }
 
   export type TaskTemplateUpsertWithoutTasksInput = {
@@ -10580,6 +13731,35 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TaskUpdateUpsertWithWhereUniqueWithoutTaskInput = {
+    where: TaskUpdateWhereUniqueInput
+    update: XOR<TaskUpdateUpdateWithoutTaskInput, TaskUpdateUncheckedUpdateWithoutTaskInput>
+    create: XOR<TaskUpdateCreateWithoutTaskInput, TaskUpdateUncheckedCreateWithoutTaskInput>
+  }
+
+  export type TaskUpdateUpdateWithWhereUniqueWithoutTaskInput = {
+    where: TaskUpdateWhereUniqueInput
+    data: XOR<TaskUpdateUpdateWithoutTaskInput, TaskUpdateUncheckedUpdateWithoutTaskInput>
+  }
+
+  export type TaskUpdateUpdateManyWithWhereWithoutTaskInput = {
+    where: TaskUpdateScalarWhereInput
+    data: XOR<TaskUpdateUpdateManyMutationInput, TaskUpdateUncheckedUpdateManyWithoutTaskInput>
+  }
+
+  export type TaskUpdateScalarWhereInput = {
+    AND?: TaskUpdateScalarWhereInput | TaskUpdateScalarWhereInput[]
+    OR?: TaskUpdateScalarWhereInput[]
+    NOT?: TaskUpdateScalarWhereInput | TaskUpdateScalarWhereInput[]
+    id?: StringFilter<"TaskUpdate"> | string
+    taskId?: StringFilter<"TaskUpdate"> | string
+    remark?: StringFilter<"TaskUpdate"> | string
+    files?: StringNullableListFilter<"TaskUpdate">
+    images?: StringNullableListFilter<"TaskUpdate">
+    hasVoice?: BoolFilter<"TaskUpdate"> | boolean
+    createdAt?: DateTimeFilter<"TaskUpdate"> | Date | string
+  }
+
   export type TaskCreateWithoutTemplateInput = {
     id?: string
     title: string
@@ -10595,6 +13775,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     assignedTo?: UserCreateNestedOneWithoutAssignedTasksInput
     delegatedBy?: UserCreateNestedOneWithoutDelegatedTasksInput
+    updates?: TaskUpdateCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutTemplateInput = {
@@ -10612,6 +13793,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     assignedToId?: string | null
     delegatedById?: string | null
+    updates?: TaskUpdateUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutTemplateInput = {
@@ -10654,6 +13836,7 @@ export namespace Prisma {
     createdAt?: Date | string
     assignedTasks?: TaskCreateNestedManyWithoutAssignedToInput
     delegatedTasks?: TaskCreateNestedManyWithoutDelegatedByInput
+    updateComments?: UpdateCommentCreateNestedManyWithoutAuthorInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -10670,6 +13853,7 @@ export namespace Prisma {
     createdAt?: Date | string
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     delegatedTasks?: TaskUncheckedCreateNestedManyWithoutDelegatedByInput
+    updateComments?: UpdateCommentUncheckedCreateNestedManyWithoutAuthorInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -10702,6 +13886,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTasks?: TaskUpdateManyWithoutAssignedToNestedInput
     delegatedTasks?: TaskUpdateManyWithoutDelegatedByNestedInput
+    updateComments?: UpdateCommentUpdateManyWithoutAuthorNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -10718,6 +13903,275 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     delegatedTasks?: TaskUncheckedUpdateManyWithoutDelegatedByNestedInput
+    updateComments?: UpdateCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  }
+
+  export type TaskCreateWithoutUpdatesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    status?: $Enums.TaskStatus
+    priority?: $Enums.Priority
+    progress?: number
+    tag?: string | null
+    dueDate?: Date | string | null
+    targetDate?: Date | string | null
+    isDeleted?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignedTo?: UserCreateNestedOneWithoutAssignedTasksInput
+    delegatedBy?: UserCreateNestedOneWithoutDelegatedTasksInput
+    template?: TaskTemplateCreateNestedOneWithoutTasksInput
+  }
+
+  export type TaskUncheckedCreateWithoutUpdatesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    status?: $Enums.TaskStatus
+    priority?: $Enums.Priority
+    progress?: number
+    tag?: string | null
+    dueDate?: Date | string | null
+    targetDate?: Date | string | null
+    isDeleted?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignedToId?: string | null
+    delegatedById?: string | null
+    templateId?: string | null
+  }
+
+  export type TaskCreateOrConnectWithoutUpdatesInput = {
+    where: TaskWhereUniqueInput
+    create: XOR<TaskCreateWithoutUpdatesInput, TaskUncheckedCreateWithoutUpdatesInput>
+  }
+
+  export type UpdateCommentCreateWithoutUpdateInput = {
+    id?: string
+    text: string
+    createdAt?: Date | string
+    author: UserCreateNestedOneWithoutUpdateCommentsInput
+  }
+
+  export type UpdateCommentUncheckedCreateWithoutUpdateInput = {
+    id?: string
+    text: string
+    authorId: string
+    createdAt?: Date | string
+  }
+
+  export type UpdateCommentCreateOrConnectWithoutUpdateInput = {
+    where: UpdateCommentWhereUniqueInput
+    create: XOR<UpdateCommentCreateWithoutUpdateInput, UpdateCommentUncheckedCreateWithoutUpdateInput>
+  }
+
+  export type UpdateCommentCreateManyUpdateInputEnvelope = {
+    data: UpdateCommentCreateManyUpdateInput | UpdateCommentCreateManyUpdateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TaskUpsertWithoutUpdatesInput = {
+    update: XOR<TaskUpdateWithoutUpdatesInput, TaskUncheckedUpdateWithoutUpdatesInput>
+    create: XOR<TaskCreateWithoutUpdatesInput, TaskUncheckedCreateWithoutUpdatesInput>
+    where?: TaskWhereInput
+  }
+
+  export type TaskUpdateToOneWithWhereWithoutUpdatesInput = {
+    where?: TaskWhereInput
+    data: XOR<TaskUpdateWithoutUpdatesInput, TaskUncheckedUpdateWithoutUpdatesInput>
+  }
+
+  export type TaskUpdateWithoutUpdatesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTaskStatusFieldUpdateOperationsInput | $Enums.TaskStatus
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    progress?: IntFieldUpdateOperationsInput | number
+    tag?: NullableStringFieldUpdateOperationsInput | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedTo?: UserUpdateOneWithoutAssignedTasksNestedInput
+    delegatedBy?: UserUpdateOneWithoutDelegatedTasksNestedInput
+    template?: TaskTemplateUpdateOneWithoutTasksNestedInput
+  }
+
+  export type TaskUncheckedUpdateWithoutUpdatesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTaskStatusFieldUpdateOperationsInput | $Enums.TaskStatus
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    progress?: IntFieldUpdateOperationsInput | number
+    tag?: NullableStringFieldUpdateOperationsInput | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    delegatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UpdateCommentUpsertWithWhereUniqueWithoutUpdateInput = {
+    where: UpdateCommentWhereUniqueInput
+    update: XOR<UpdateCommentUpdateWithoutUpdateInput, UpdateCommentUncheckedUpdateWithoutUpdateInput>
+    create: XOR<UpdateCommentCreateWithoutUpdateInput, UpdateCommentUncheckedCreateWithoutUpdateInput>
+  }
+
+  export type UpdateCommentUpdateWithWhereUniqueWithoutUpdateInput = {
+    where: UpdateCommentWhereUniqueInput
+    data: XOR<UpdateCommentUpdateWithoutUpdateInput, UpdateCommentUncheckedUpdateWithoutUpdateInput>
+  }
+
+  export type UpdateCommentUpdateManyWithWhereWithoutUpdateInput = {
+    where: UpdateCommentScalarWhereInput
+    data: XOR<UpdateCommentUpdateManyMutationInput, UpdateCommentUncheckedUpdateManyWithoutUpdateInput>
+  }
+
+  export type TaskUpdateCreateWithoutCommentsInput = {
+    id?: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+    task: TaskCreateNestedOneWithoutUpdatesInput
+  }
+
+  export type TaskUpdateUncheckedCreateWithoutCommentsInput = {
+    id?: string
+    taskId: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+  }
+
+  export type TaskUpdateCreateOrConnectWithoutCommentsInput = {
+    where: TaskUpdateWhereUniqueInput
+    create: XOR<TaskUpdateCreateWithoutCommentsInput, TaskUpdateUncheckedCreateWithoutCommentsInput>
+  }
+
+  export type UserCreateWithoutUpdateCommentsInput = {
+    id?: string
+    name: string
+    email: string
+    image?: string | null
+    phone?: string | null
+    department?: string | null
+    password: string
+    role?: $Enums.Role
+    mustResetPassword?: boolean
+    joinedAt?: Date | string | null
+    createdAt?: Date | string
+    assignedTasks?: TaskCreateNestedManyWithoutAssignedToInput
+    delegatedTasks?: TaskCreateNestedManyWithoutDelegatedByInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutUpdateCommentsInput = {
+    id?: string
+    name: string
+    email: string
+    image?: string | null
+    phone?: string | null
+    department?: string | null
+    password: string
+    role?: $Enums.Role
+    mustResetPassword?: boolean
+    joinedAt?: Date | string | null
+    createdAt?: Date | string
+    assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
+    delegatedTasks?: TaskUncheckedCreateNestedManyWithoutDelegatedByInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutUpdateCommentsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutUpdateCommentsInput, UserUncheckedCreateWithoutUpdateCommentsInput>
+  }
+
+  export type TaskUpdateUpsertWithoutCommentsInput = {
+    update: XOR<TaskUpdateUpdateWithoutCommentsInput, TaskUpdateUncheckedUpdateWithoutCommentsInput>
+    create: XOR<TaskUpdateCreateWithoutCommentsInput, TaskUpdateUncheckedCreateWithoutCommentsInput>
+    where?: TaskUpdateWhereInput
+  }
+
+  export type TaskUpdateUpdateToOneWithWhereWithoutCommentsInput = {
+    where?: TaskUpdateWhereInput
+    data: XOR<TaskUpdateUpdateWithoutCommentsInput, TaskUpdateUncheckedUpdateWithoutCommentsInput>
+  }
+
+  export type TaskUpdateUpdateWithoutCommentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    task?: TaskUpdateOneRequiredWithoutUpdatesNestedInput
+  }
+
+  export type TaskUpdateUncheckedUpdateWithoutCommentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpsertWithoutUpdateCommentsInput = {
+    update: XOR<UserUpdateWithoutUpdateCommentsInput, UserUncheckedUpdateWithoutUpdateCommentsInput>
+    create: XOR<UserCreateWithoutUpdateCommentsInput, UserUncheckedCreateWithoutUpdateCommentsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutUpdateCommentsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutUpdateCommentsInput, UserUncheckedUpdateWithoutUpdateCommentsInput>
+  }
+
+  export type UserUpdateWithoutUpdateCommentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    mustResetPassword?: BoolFieldUpdateOperationsInput | boolean
+    joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedTasks?: TaskUpdateManyWithoutAssignedToNestedInput
+    delegatedTasks?: TaskUpdateManyWithoutDelegatedByNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutUpdateCommentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    mustResetPassword?: BoolFieldUpdateOperationsInput | boolean
+    joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedTasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
+    delegatedTasks?: TaskUncheckedUpdateManyWithoutDelegatedByNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TaskCreateManyAssignedToInput = {
@@ -10762,6 +14216,13 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type UpdateCommentCreateManyAuthorInput = {
+    id?: string
+    updateId: string
+    text: string
+    createdAt?: Date | string
+  }
+
   export type TaskUpdateWithoutAssignedToInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -10777,6 +14238,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     delegatedBy?: UserUpdateOneWithoutDelegatedTasksNestedInput
     template?: TaskTemplateUpdateOneWithoutTasksNestedInput
+    updates?: TaskUpdateUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutAssignedToInput = {
@@ -10794,6 +14256,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     delegatedById?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: NullableStringFieldUpdateOperationsInput | string | null
+    updates?: TaskUpdateUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutAssignedToInput = {
@@ -10828,6 +14291,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTo?: UserUpdateOneWithoutAssignedTasksNestedInput
     template?: TaskTemplateUpdateOneWithoutTasksNestedInput
+    updates?: TaskUpdateUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutDelegatedByInput = {
@@ -10845,6 +14309,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: NullableStringFieldUpdateOperationsInput | string | null
+    updates?: TaskUpdateUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutDelegatedByInput = {
@@ -10888,6 +14353,65 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UpdateCommentUpdateWithoutAuthorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    update?: TaskUpdateUpdateOneRequiredWithoutCommentsNestedInput
+  }
+
+  export type UpdateCommentUncheckedUpdateWithoutAuthorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    updateId?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UpdateCommentUncheckedUpdateManyWithoutAuthorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    updateId?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskUpdateCreateManyTaskInput = {
+    id?: string
+    remark: string
+    files?: TaskUpdateCreatefilesInput | string[]
+    images?: TaskUpdateCreateimagesInput | string[]
+    hasVoice?: boolean
+    createdAt?: Date | string
+  }
+
+  export type TaskUpdateUpdateWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    comments?: UpdateCommentUpdateManyWithoutUpdateNestedInput
+  }
+
+  export type TaskUpdateUncheckedUpdateWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    comments?: UpdateCommentUncheckedUpdateManyWithoutUpdateNestedInput
+  }
+
+  export type TaskUpdateUncheckedUpdateManyWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    remark?: StringFieldUpdateOperationsInput | string
+    files?: TaskUpdateUpdatefilesInput | string[]
+    images?: TaskUpdateUpdateimagesInput | string[]
+    hasVoice?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TaskCreateManyTemplateInput = {
     id?: string
     title: string
@@ -10920,6 +14444,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTo?: UserUpdateOneWithoutAssignedTasksNestedInput
     delegatedBy?: UserUpdateOneWithoutDelegatedTasksNestedInput
+    updates?: TaskUpdateUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutTemplateInput = {
@@ -10937,6 +14462,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     delegatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    updates?: TaskUpdateUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutTemplateInput = {
@@ -10954,6 +14480,34 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     delegatedById?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UpdateCommentCreateManyUpdateInput = {
+    id?: string
+    text: string
+    authorId: string
+    createdAt?: Date | string
+  }
+
+  export type UpdateCommentUpdateWithoutUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    author?: UserUpdateOneRequiredWithoutUpdateCommentsNestedInput
+  }
+
+  export type UpdateCommentUncheckedUpdateWithoutUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    authorId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UpdateCommentUncheckedUpdateManyWithoutUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    authorId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

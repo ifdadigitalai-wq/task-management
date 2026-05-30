@@ -25,6 +25,7 @@ interface UpdateComment {
   id: string;
   text: string;
   createdAt: string;
+  author?: { id: string; name: string };
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -254,36 +255,50 @@ export function TaskDetailPanel({
   const [showVoice, setShowVoice] = useState(false);
   const [hasVoice, setHasVoice]   = useState(false);
   const [showStatusPicker, setShowStatusPicker] = useState(false);
-
   const fileRef  = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
 
   const prio     = PRIORITY[task.priority] ?? PRIORITY.MEDIUM;
   const tagParts = task.tag ? task.tag.split(" · ").filter(Boolean) : [];
 
-  const submitUpdate = () => {
-    if (!remark.trim()) return;
-    const entry: TaskUpdate = {
-      id: crypto.randomUUID(),
+const submitUpdate = async () => {
+  if (!remark.trim()) return;
+  const res = await fetch(`/api/tasks/${task.id}/updates`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       remark: remark.trim(),
       files: updateFiles.map(f => f.name),
       images: updateImages.map(f => f.name),
       hasVoice,
-      createdAt: new Date().toISOString(),
-      comments: [],
-    };
-    setUpdates(prev => [entry, ...prev]);
-    setRemark(""); setUpdateFiles([]); setUpdateImages([]); setHasVoice(false);
-    setShowVoice(false); setShowUpdateForm(false);
-  };
+    }),
+  });
+  const saved = await res.json();
+  setUpdates(prev => [saved, ...prev]);
+  setRemark(""); setUpdateFiles([]); setUpdateImages([]); setHasVoice(false);
+  setShowVoice(false); setShowUpdateForm(false);
+};
+  // updat the taskstatus to completed if the update remark contains "completed" or "finished"
+  useEffect(() => {
+  fetch(`/api/tasks/${task.id}/updates`)
+    .then(r => r.json())
+    .then(setUpdates)
+    .catch(console.error);
+}, [task.id]);
 
-  const addCommentToUpdate = (updateId: string, text: string) => {
-    setUpdates(prev => prev.map(u =>
-      u.id === updateId
-        ? { ...u, comments: [...u.comments, { id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }] }
-        : u
-    ));
-  };
+const addCommentToUpdate = async (updateId: string, text: string) => {
+  const res = await fetch(`/api/tasks/${task.id}/updates/${updateId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  const saved = await res.json();
+  setUpdates(prev => prev.map(u =>
+    u.id === updateId
+      ? { ...u, comments: [...u.comments, saved] }
+      : u
+  ));
+};
   const handleDelete = async () => {
   try {
     await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
@@ -544,12 +559,21 @@ const handleFinish = async () => {
       </div>
 
       {/* Comment popup (task-level) */}
-      {showCommentPopup && (
-        <CommentPopup
-          onSubmit={text => console.log("Task comment:", text)}
-          onClose={() => setShowCommentPopup(false)}
-        />
-      )}
+     {showCommentPopup && (
+  <CommentPopup
+    onSubmit={async (text) => {
+      const res = await fetch(`/api/tasks/${task.id}/updates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remark: text, files: [], images: [], hasVoice: false }),
+      });
+      const saved = await res.json();
+      setUpdates(prev => [saved, ...prev]);
+      setShowCommentPopup(false);
+    }}
+    onClose={() => setShowCommentPopup(false)}
+  />
+)}
 
       {/* Delete confirm */}
       {showDeleteConfirm && (

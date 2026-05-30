@@ -185,6 +185,24 @@ exports.Prisma.NotificationScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.TaskUpdateScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  remark: 'remark',
+  files: 'files',
+  images: 'images',
+  hasVoice: 'hasVoice',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UpdateCommentScalarFieldEnum = {
+  id: 'id',
+  updateId: 'updateId',
+  text: 'text',
+  authorId: 'authorId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -223,7 +241,9 @@ exports.Prisma.ModelName = {
   TaskTemplate: 'TaskTemplate',
   Holiday: 'Holiday',
   Activity: 'Activity',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  TaskUpdate: 'TaskUpdate',
+  UpdateComment: 'UpdateComment'
 };
 
 /**

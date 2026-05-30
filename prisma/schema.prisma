@@ -27,6 +27,7 @@ model User {
   assignedTasks  Task[]        @relation("AssignedTo")
   delegatedTasks Task[]        @relation("DelegatedBy")
   notifications  Notification[]
+  updateComments UpdateComment[]
 }
 
 model Task {
@@ -48,6 +49,7 @@ model Task {
   delegatedBy   User?         @relation("DelegatedBy", fields: [delegatedById], references: [id])
   templateId    String?
   template      TaskTemplate? @relation(fields: [templateId], references: [id])
+  updates       TaskUpdate[]
 }
 
 model TaskTemplate {
@@ -98,3 +100,24 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
+model TaskUpdate {
+  id        String          @id @default(cuid())
+  taskId    String
+  task      Task            @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  remark    String
+  files     String[]
+  images    String[]
+  hasVoice  Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  comments  UpdateComment[]
+}
+
+model UpdateComment {
+  id        String     @id @default(cuid())
+  updateId  String
+  update    TaskUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+  text      String
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id])
+  createdAt DateTime   @default(now())
+}
