@@ -26,18 +26,42 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
+  const { remark, files, images, hasVoice } = await req.json();
+
+  const task = await prisma.task.findUnique({
+    where: { id },
+    select: { id: true, title: true, assignedToId: true, delegatedById: true },
+  });
+
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
 
   const update = await prisma.taskUpdate.create({
     data: {
       taskId: id,
-      remark: body.remark,
-      files: body.files ?? [],
-      images: body.images ?? [],
-      hasVoice: body.hasVoice ?? false,
+      remark,
+      files: files || [],
+      images: images || [],
+      hasVoice: hasVoice || false,
     },
-    include: { comments: true },
+    include: {
+      comments: true,
+    },
   });
+
+  const recipientId = session.id === task.assignedToId ? task.delegatedById : task.assignedToId;
+
+  if (recipientId) {
+    const user = await prisma.user.findUnique({ where: { id: session.id }, select: { name: true } });
+    const link = recipientId === task.delegatedById ? "/all-tasks" : "/my-tasks";
+
+    await prisma.notification.create({
+      data: {
+        userId: recipientId,
+        content: `${user?.name ?? "Someone"} posted a new update on task: "${task.title}"`,
+        link,
+      },
+    });
+  }
 
   return NextResponse.json(update, { status: 201 });
 }

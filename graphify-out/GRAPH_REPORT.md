@@ -1,11 +1,11 @@
 # Graph Report - D:\task_manager  (2026-05-30)
 
 ## Corpus Check
-- 76 files · ~111,137 words
+- 76 files · ~197,732 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1127 nodes · 2917 edges · 75 communities detected
+- 1127 nodes · 2915 edges · 88 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 187 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -85,6 +85,19 @@
 - [[_COMMUNITY_Community 72|Community 72]]
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `L()` - 39 edges
@@ -99,182 +112,182 @@
 10. `r()` - 23 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `apiKey()` --calls--> `#a()`  [INFERRED]
-  D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js → D:\task_manager\src\generated\prisma\runtime\client.js
+- `toDateInput()` --calls--> `slice()`  [INFERRED]
+  D:\task_manager\src\components\employees\EditEmployeeModal.tsx → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
+- `initials()` --calls--> `slice()`  [INFERRED]
+  D:\task_manager\src\components\employees\EmployeeTable.tsx → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
+- `#a()` --calls--> `apiKey()`  [INFERRED]
+  D:\task_manager\src\generated\prisma\runtime\client.js → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
 - `middleware()` --calls--> `get()`  [INFERRED]
   D:\task_manager\src\middleware.ts → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
 - `middleware()` --calls--> `clone()`  [INFERRED]
   D:\task_manager\src\middleware.ts → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
-- `middleware()` --calls--> `set()`  [INFERRED]
-  D:\task_manager\src\middleware.ts → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
-- `POST()` --calls--> `compare()`  [INFERRED]
-  D:\task_manager\src\app\api\users\route.ts → D:\task_manager\src\generated\prisma\runtime\wasm-compiler-edge.js
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.01
-Nodes (209): de(), me(), aa(), ad(), addItem(), addMarginSymbol(), Ae(), afterNextNewline() (+201 more)
+Cohesion: 0.05
+Nodes (104): #a(), _d(), deserialize(), em(), enumValues(), get(), getConnectionInfo(), getSingle() (+96 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.03
-Nodes (45): Ad(), ai(), apiKey(), Ba(), Cd(), connect(), Da(), Dd() (+37 more)
+Cohesion: 0.02
+Nodes (34): Ae(), apiKey(), Bm(), connect(), dd(), di(), du(), Fd() (+26 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.05
-Nodes (99): #a(), _d(), deserialize(), em(), enumValues(), getConnectionInfo(), handleAndLogRequestError(), #i() (+91 more)
+Cohesion: 0.03
+Nodes (39): ai(), apiKey(), Ba(), cl(), connect(), Da(), Dd(), dm() (+31 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.05
-Nodes (76): as(), bl(), xl(), toDateInput(), initials(), oe(), _(), allocUnsafeSlow() (+68 more)
-
-### Community 4 - "Community 4"
 Cohesion: 0.09
 Nodes (67): ac(), addErrorMessage(), addField(), addSuggestion(), ar(), asObject(), Be(), cc() (+59 more)
 
-### Community 5 - "Community 5"
-Cohesion: 0.06
-Nodes (27): cm(), rs(), tl(), writeJoined(), $(), a(), F, fe() (+19 more)
+### Community 4 - "Community 4"
+Cohesion: 0.05
+Nodes (35): cm(), rs(), tl(), writeJoined(), $(), a(), F, fe() (+27 more)
 
-### Community 6 - "Community 6"
+### Community 5 - "Community 5"
 Cohesion: 0.13
 Nodes (46): ac(), addErrorMessage(), addField(), addSuggestion(), asObject(), _c(), cc(), dc() (+38 more)
 
-### Community 7 - "Community 7"
+### Community 6 - "Community 6"
 Cohesion: 0.07
-Nodes (36): cl(), clone(), _cloneInto(), constructor(), execute(), forSql(), get(), getAllBatchQueryCallbacks() (+28 more)
+Nodes (36): de(), me(), ad(), bc(), Bd(), clone(), _cloneInto(), constructor() (+28 more)
+
+### Community 7 - "Community 7"
+Cohesion: 0.09
+Nodes (35): e(), Zp(), addMarginSymbol(), afterNextNewline(), cd(), compare(), copy(), equals() (+27 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.07
-Nodes (33): $(), addItem(), ae(), append(), At(), bc(), cp(), de() (+25 more)
+Cohesion: 0.1
+Nodes (33): oe(), _(), addItem(), ao(), Bt(), byteLength(), concat(), cp() (+25 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
-Nodes (33): Am(), Bu(), en(), Fa(), Fl(), fm(), fromContent(), Gu() (+25 more)
+Nodes (31): Bp(), clone(), _cloneInto(), constructor(), ed(), Ep(), Fn(), forSql() (+23 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.11
-Nodes (31): an(), Bd(), ds(), Ei(), Ep(), Fd(), Ge(), Gs() (+23 more)
+Cohesion: 0.09
+Nodes (13): signToken(), verifyToken(), setSingle(), middleware(), DELETE(), emptyHML(), GET(), PATCH() (+5 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.11
-Nodes (10): signToken(), verifyToken(), middleware(), DELETE(), emptyHML(), GET(), PATCH(), POST() (+2 more)
+Nodes (25): Bd(), br(), bs(), Ei(), execute(), getTransaction(), H(), Ia() (+17 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.09
-Nodes (22): isPreviewFeatureOn(), isRawAction(), jl(), km(), Np(), rm(), Ss(), Ua() (+14 more)
+Nodes (25): Bu(), en(), fm(), fromContent(), highlight(), hl(), Hu(), il() (+17 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.14
-Nodes (15): pauseRecording(), resumeRecording(), startRecording(), startTimer(), stopRecording(), stopTimer(), formatTime(), pause() (+7 more)
+Cohesion: 0.09
+Nodes (22): isPreviewFeatureOn(), isRawAction(), jl(), km(), Np(), rm(), Ss(), Ua() (+14 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.1
-Nodes (22): Bp(), e(), Fn(), Fp(), Go(), Gp(), hr(), Ie() (+14 more)
+Nodes (25): append(), bp(), bs(), ei(), Fs(), getAllClientExtensions(), getAllComputedFields(), getAllModelExtensions() (+17 more)
 
 ### Community 15 - "Community 15"
+Cohesion: 0.09
+Nodes (24): Cl(), cr(), El(), em(), fm(), Fr(), handleRequestError(), hc() (+16 more)
+
+### Community 16 - "Community 16"
+Cohesion: 0.12
+Nodes (21): $(), cp(), ee(), Fd(), getAllClientExtensions(), getAllComputedFields(), getAllModelExtensions(), getOrCreate() (+13 more)
+
+### Community 17 - "Community 17"
+Cohesion: 0.1
+Nodes (23): aa(), as(), Bn(), ec(), fp(), Gs(), Jp(), li() (+15 more)
+
+### Community 18 - "Community 18"
+Cohesion: 0.14
+Nodes (15): pauseRecording(), resumeRecording(), startRecording(), startTimer(), stopRecording(), stopTimer(), formatTime(), pause() (+7 more)
+
+### Community 19 - "Community 19"
+Cohesion: 0.21
+Nodes (21): Br(), de(), ep(), findField(), Gc(), getArgumentName(), getArgumentPath(), getOutputTypeDescription() (+13 more)
+
+### Community 20 - "Community 20"
 Cohesion: 0.15
 Nodes (19): ap(), build(), commitTransaction(), dispatchEngineSpans(), #f(), G(), getActiveContext(), getTraceParent() (+11 more)
 
-### Community 16 - "Community 16"
+### Community 21 - "Community 21"
+Cohesion: 0.12
+Nodes (19): $c(), Di(), el(), Fo(), getLocation(), getPlaceholderValues(), ii(), ka() (+11 more)
+
+### Community 22 - "Community 22"
 Cohesion: 0.15
-Nodes (19): aa(), addMarginSymbol(), afterNextNewline(), cancelAllTransactions(), disconnect(), eo(), getCurrentLineLength(), getPrintWidth() (+11 more)
+Nodes (19): as(), bl(), xl(), allocUnsafeSlow(), am(), construct(), dt(), from() (+11 more)
 
-### Community 17 - "Community 17"
+### Community 23 - "Community 23"
+Cohesion: 0.18
+Nodes (18): an(), ds(), Fp(), Ge(), Gp(), Gs(), Hp(), hs() (+10 more)
+
+### Community 24 - "Community 24"
+Cohesion: 0.13
+Nodes (17): addItem(), ae(), append(), At(), bc(), de(), Fe(), getGlobalOmit() (+9 more)
+
+### Community 25 - "Community 25"
+Cohesion: 0.12
+Nodes (16): aa(), cancelAllTransactions(), disconnect(), eo(), getPrintWidth(), Go(), hr(), Ie() (+8 more)
+
+### Community 26 - "Community 26"
 Cohesion: 0.14
-Nodes (14): $c(), Di(), el(), Fo(), getLocation(), ka(), outputEdge(), outputNode() (+6 more)
+Nodes (16): alloc(), allocUnsafe(), destroy(), digest(), digestInto(), eo(), fill(), finish() (+8 more)
 
-### Community 18 - "Community 18"
+### Community 27 - "Community 27"
 Cohesion: 0.17
 Nodes (13): bo(), es(), getAllQueryCallbacks(), Hc(), He(), isEmpty(), lo(), wc() (+5 more)
 
-### Community 19 - "Community 19"
-Cohesion: 0.15
-Nodes (13): ed(), Gd(), generate(), Ln(), Pd(), Sd(), Td(), ts() (+5 more)
+### Community 28 - "Community 28"
+Cohesion: 0.26
+Nodes (13): addMarginSymbol(), afterNextNewline(), getCurrentLineLength(), indent(), setColor(), underline(), unindent(), withIndent() (+5 more)
 
-### Community 20 - "Community 20"
+### Community 29 - "Community 29"
+Cohesion: 0.15
+Nodes (13): cancelAllTransactions(), cs(), disconnect(), Eu(), getPrintWidth(), mapQueryEngineResult(), mm(), ot() (+5 more)
+
+### Community 30 - "Community 30"
+Cohesion: 0.2
+Nodes (10): Am(), Fa(), Fl(), Gu(), handleRequestError(), ja(), tm(), vm() (+2 more)
+
+### Community 31 - "Community 31"
+Cohesion: 0.28
+Nodes (9): Id(), kd(), kr(), Nd(), Od(), Sa(), Ta(), Xe() (+1 more)
+
+### Community 32 - "Community 32"
 Cohesion: 0.25
 Nodes (9): destroy(), digest(), digestInto(), finish(), keccak(), update(), writeInto(), xof() (+1 more)
 
-### Community 21 - "Community 21"
-Cohesion: 0.32
-Nodes (8): Id(), kd(), kr(), Nd(), Od(), Sa(), Xe(), ze()
+### Community 33 - "Community 33"
+Cohesion: 0.33
+Nodes (1): toDateInput()
 
-### Community 22 - "Community 22"
-Cohesion: 0.29
-Nodes (7): br(), bs(), Ia(), J(), ri(), Vp(), Ws()
-
-### Community 23 - "Community 23"
+### Community 34 - "Community 34"
 Cohesion: 0.33
 Nodes (5): DataLoader, MergedExtensionsList, RequestHandler, Skip, TypedSql
 
-### Community 24 - "Community 24"
-Cohesion: 0.4
-Nodes (0): 
-
-### Community 25 - "Community 25"
-Cohesion: 0.4
-Nodes (4): AnyNull, DbNull, JsonNull, PrismaClient
-
-### Community 26 - "Community 26"
-Cohesion: 0.67
-Nodes (2): fetchNotifications(), handleMarkAllAsRead()
-
-### Community 27 - "Community 27"
-Cohesion: 0.67
-Nodes (1): PrismaClient
-
-### Community 28 - "Community 28"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 29 - "Community 29"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 30 - "Community 30"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 31 - "Community 31"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 32 - "Community 32"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 33 - "Community 33"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 34 - "Community 34"
-Cohesion: 1.0
-Nodes (0): 
-
 ### Community 35 - "Community 35"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.4
+Nodes (6): Ad(), Cd(), Ea(), Rd(), vr(), Ye()
 
 ### Community 36 - "Community 36"
-Cohesion: 1.0
+Cohesion: 0.4
 Nodes (0): 
 
 ### Community 37 - "Community 37"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.4
+Nodes (4): AnyNull, DbNull, JsonNull, PrismaClient
 
 ### Community 38 - "Community 38"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (2): fetchNotifications(), handleMarkAllAsRead()
 
 ### Community 39 - "Community 39"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (1): PrismaClient
 
 ### Community 40 - "Community 40"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (1): initials()
 
 ### Community 41 - "Community 41"
 Cohesion: 1.0
@@ -412,113 +425,165 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 75 - "Community 75"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 76 - "Community 76"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 77 - "Community 77"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 78 - "Community 78"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 79 - "Community 79"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 80 - "Community 80"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 81 - "Community 81"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 82 - "Community 82"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 83 - "Community 83"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 84 - "Community 84"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 85 - "Community 85"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 86 - "Community 86"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 87 - "Community 87"
+Cohesion: 1.0
+Nodes (0): 
+
 ## Knowledge Gaps
 - **9 isolated node(s):** `PrismaClient`, `DbNull`, `JsonNull`, `AnyNull`, `DataLoader` (+4 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 28`** (2 nodes): `layout.tsx`, `RootLayout()`
+- **Thin community `Community 41`** (2 nodes): `layout.tsx`, `RootLayout()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (2 nodes): `page.tsx`, `Home()`
+- **Thin community `Community 42`** (2 nodes): `page.tsx`, `Home()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (2 nodes): `layout.tsx`, `DashboardRouteLayout()`
+- **Thin community `Community 43`** (2 nodes): `layout.tsx`, `DashboardRouteLayout()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 31`** (2 nodes): `page.tsx`, `handleDelete()`
+- **Thin community `Community 44`** (2 nodes): `page.tsx`, `handleDelete()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (2 nodes): `page.tsx`, `handleSubmit()`
+- **Thin community `Community 45`** (2 nodes): `page.tsx`, `handleSubmit()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (2 nodes): `TopNav.tsx`, `fetchNotifications()`
+- **Thin community `Community 46`** (2 nodes): `TopNav.tsx`, `fetchNotifications()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (2 nodes): `TaskCard.tsx`, `timeAgo()`
+- **Thin community `Community 47`** (2 nodes): `TaskCard.tsx`, `timeAgo()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (2 nodes): `useTimeTheme.ts`, `useTimeTheme()`
+- **Thin community `Community 48`** (2 nodes): `useTimeTheme.ts`, `useTimeTheme()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 36`** (2 nodes): `prisma.ts`, `makePrismaClient()`
+- **Thin community `Community 49`** (2 nodes): `prisma.ts`, `makePrismaClient()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 37`** (2 nodes): `utils.ts`, `cn()`
+- **Thin community `Community 50`** (2 nodes): `utils.ts`, `cn()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 38`** (1 nodes): `eslint.config.mjs`
+- **Thin community `Community 51`** (1 nodes): `eslint.config.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (1 nodes): `next-env.d.ts`
+- **Thin community `Community 52`** (1 nodes): `next-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 40`** (1 nodes): `next.config.ts`
+- **Thin community `Community 53`** (1 nodes): `next.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 41`** (1 nodes): `postcss.config.mjs`
+- **Thin community `Community 54`** (1 nodes): `postcss.config.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (1 nodes): `prisma.config.ts`
+- **Thin community `Community 55`** (1 nodes): `prisma.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (1 nodes): `page.tsx`
+- **Thin community `Community 56`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 44`** (1 nodes): `page.tsx`
+- **Thin community `Community 57`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 45`** (1 nodes): `page.tsx`
+- **Thin community `Community 58`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 46`** (1 nodes): `page.tsx`
+- **Thin community `Community 59`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 47`** (1 nodes): `page.tsx`
+- **Thin community `Community 60`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 48`** (1 nodes): `page.tsx`
+- **Thin community `Community 61`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 49`** (1 nodes): `page.tsx`
+- **Thin community `Community 62`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 50`** (1 nodes): `page.tsx`
+- **Thin community `Community 63`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 51`** (1 nodes): `PerformanceAnalytics.tsx`
+- **Thin community `Community 64`** (1 nodes): `PerformanceAnalytics.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 52`** (1 nodes): `DashboardLayout.tsx`
+- **Thin community `Community 65`** (1 nodes): `DashboardLayout.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 53`** (1 nodes): `FilterBar.tsx`
+- **Thin community `Community 66`** (1 nodes): `FilterBar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (1 nodes): `Sidebar.tsx`
+- **Thin community `Community 67`** (1 nodes): `Sidebar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 55`** (1 nodes): `TaskList.tsx`
+- **Thin community `Community 68`** (1 nodes): `TaskList.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 56`** (1 nodes): `DateRangePicker.tsx`
+- **Thin community `Community 69`** (1 nodes): `DateRangePicker.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 57`** (1 nodes): `NotificationBell.tsx`
+- **Thin community `Community 70`** (1 nodes): `NotificationBell.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 58`** (1 nodes): `SearchBar.tsx`
+- **Thin community `Community 71`** (1 nodes): `SearchBar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 59`** (1 nodes): `ThemeToggle.tsx`
+- **Thin community `Community 72`** (1 nodes): `ThemeToggle.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 60`** (1 nodes): `UserAvatar.tsx`
+- **Thin community `Community 73`** (1 nodes): `UserAvatar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 61`** (1 nodes): `client.d.ts`
+- **Thin community `Community 74`** (1 nodes): `client.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 62`** (1 nodes): `client.js`
+- **Thin community `Community 75`** (1 nodes): `client.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 63`** (1 nodes): `default.d.ts`
+- **Thin community `Community 76`** (1 nodes): `default.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 64`** (1 nodes): `default.js`
+- **Thin community `Community 77`** (1 nodes): `default.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 65`** (1 nodes): `edge.d.ts`
+- **Thin community `Community 78`** (1 nodes): `edge.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 66`** (1 nodes): `edge.js`
+- **Thin community `Community 79`** (1 nodes): `edge.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 67`** (1 nodes): `index.js`
+- **Thin community `Community 80`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 68`** (1 nodes): `query_compiler_fast_bg.wasm-base64.js`
+- **Thin community `Community 81`** (1 nodes): `query_compiler_fast_bg.wasm-base64.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 69`** (1 nodes): `wasm-edge-light-loader.mjs`
+- **Thin community `Community 82`** (1 nodes): `wasm-edge-light-loader.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 70`** (1 nodes): `wasm-worker-loader.mjs`
+- **Thin community `Community 83`** (1 nodes): `wasm-worker-loader.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 71`** (1 nodes): `index-browser.d.ts`
+- **Thin community `Community 84`** (1 nodes): `index-browser.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 72`** (1 nodes): `useTaskStore.ts`
+- **Thin community `Community 85`** (1 nodes): `useTaskStore.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 73`** (1 nodes): `useThemeStore.ts`
+- **Thin community `Community 86`** (1 nodes): `useThemeStore.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 74`** (1 nodes): `index.ts`
+- **Thin community `Community 87`** (1 nodes): `index.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `from()` connect `Community 3` to `Community 0`, `Community 2`, `Community 4`, `Community 7`, `Community 10`, `Community 11`, `Community 12`, `Community 14`, `Community 19`, `Community 21`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Why does `#a()` connect `Community 2` to `Community 0`, `Community 1`, `Community 7`, `Community 10`, `Community 13`, `Community 15`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `#n()` connect `Community 2` to `Community 0`, `Community 1`, `Community 4`, `Community 5`, `Community 7`, `Community 10`, `Community 11`, `Community 12`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+- **Why does `from()` connect `Community 22` to `Community 0`, `Community 1`, `Community 3`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 13`, `Community 15`, `Community 19`, `Community 23`, `Community 25`, `Community 26`, `Community 29`, `Community 31`?**
+  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+- **Why does `includes()` connect `Community 13` to `Community 0`, `Community 1`, `Community 6`, `Community 12`, `Community 15`, `Community 16`, `Community 17`, `Community 19`, `Community 23`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+- **Why does `#n()` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`, `Community 10`, `Community 11`, `Community 13`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
 - **Are the 11 inferred relationships involving `from()` (e.g. with `GET()` and `ro()`) actually correct?**
   _`from()` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `interpretNode()` (e.g. with `#u()` and `reverse()`) actually correct?**
