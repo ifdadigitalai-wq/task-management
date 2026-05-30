@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
 import { AssignTaskModal } from "@/components/AssignTaskModal";
 import Link from "next/link";
+import { useTimeTheme } from "@/hooks/useTimeTheme";
 
 const DATE_OPTIONS = [
   "Today", "Yesterday", "Tomorrow", "This week", "Last week", "This month", "Last month",
@@ -228,56 +229,7 @@ export function TopNav() {
   const [showToast, setShowToast] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const [timeTheme, setTimeTheme] = useState<{
-    background: string;
-    borderBottom: string;
-    textColor: string;
-    greeting: string;
-    icon: string;
-  }>({
-    background: "#ffffff",
-    borderBottom: "1px solid #f0f0f0",
-    textColor: "#111827",
-    greeting: "Hello",
-    icon: "👋",
-  });
-
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) {
-      setTimeTheme({
-        background: "linear-gradient(135deg, #fef9c3 0%, #ffffff 100%)",
-        borderBottom: "1px solid #fef08a",
-        textColor: "#1b2a47",
-        greeting: "Good morning",
-        icon: "☀️",
-      });
-    } else if (hour >= 12 && hour < 17) {
-      setTimeTheme({
-        background: "linear-gradient(135deg, #fef3c7 0%, #ffffff 100%)",
-        borderBottom: "1px solid #fde68a",
-        textColor: "#1b2a47",
-        greeting: "Good afternoon",
-        icon: "🌤️",
-      });
-    } else if (hour >= 17 && hour < 20) {
-      setTimeTheme({
-        background: "linear-gradient(135deg, #ffedd5 0%, #fee2e2 50%, #ffffff 100%)",
-        borderBottom: "1px solid #fed7aa",
-        textColor: "#1b2a47",
-        greeting: "Good evening",
-        icon: "🌇",
-      });
-    } else {
-      setTimeTheme({
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        borderBottom: "1px solid #334155",
-        textColor: "#ffffff",
-        greeting: "Good night",
-        icon: "🌙",
-      });
-    }
-  }, []);
+  const timeTheme = useTimeTheme();
 
   const fetchNotifications = async () => {
     try {
@@ -566,12 +518,14 @@ export function TopNav() {
                 height: "34px",
                 padding: "0 14px",
                 borderRadius: "8px",
-                backgroundColor: assignAnchorRect ? "#4338ca" : "#4f46e5",
+                backgroundColor: assignAnchorRect ? timeTheme.accentColor : timeTheme.accentColor,
                 border: "none",
                 color: "#ffffff",
                 fontSize: "13px",
                 fontWeight: 500,
                 cursor: "pointer",
+                opacity: assignAnchorRect ? 0.9 : 1,
+                transition: "opacity 0.15s",
               }}
             >
               <Plus style={{ height: "14px", width: "14px" }} />
@@ -589,7 +543,7 @@ export function TopNav() {
         )}
 
         {/* Divider */}
-        <div style={{ height: "20px", width: "1px", backgroundColor: "#e5e7eb", flexShrink: 0, margin: "0 4px" }} />
+        <div style={{ height: "20px", width: "1px", backgroundColor: timeTheme.dividerColor, flexShrink: 0, margin: "0 4px" }} />
 
         {/* Date range dropdown */}
         <div style={{ position: "relative", flexShrink: 0 }}>
@@ -598,21 +552,22 @@ export function TopNav() {
               height: "34px",
               appearance: "none",
               borderRadius: "8px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
+              border: `1px solid ${timeTheme.cardBorder}`,
+              backgroundColor: timeTheme.inputBackground,
               paddingLeft: "12px",
               paddingRight: "28px",
               fontSize: "13px",
               fontWeight: 500,
-              color: "#374151",
+              color: timeTheme.textColor,
               outline: "none",
               cursor: "pointer",
+              transition: "background 1.2s ease, color 0.6s ease",
             }}
           >
             <option value="" disabled selected>Date range</option>
             {DATE_OPTIONS.map((opt) => <option key={`range-${opt}`} value={opt}>{opt}</option>)}
           </select>
-          <ChevronDown style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", height: "14px", width: "14px", pointerEvents: "none", color: "#9ca3af" }} />
+          <ChevronDown style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", height: "14px", width: "14px", pointerEvents: "none", color: timeTheme.mutedTextColor }} />
         </div>
 
         {/* Filters */}
@@ -620,17 +575,21 @@ export function TopNav() {
           style={{
             flexShrink: 0, display: "flex", alignItems: "center", gap: "6px",
             height: "34px", padding: "0 14px", borderRadius: "8px",
-            border: "1px solid #e5e7eb", backgroundColor: "#ffffff",
-            fontSize: "13px", fontWeight: 500, color: "#374151", cursor: "pointer",
+            border: `1px solid ${timeTheme.cardBorder}`,
+            backgroundColor: timeTheme.inputBackground,
+            fontSize: "13px", fontWeight: 500,
+            color: timeTheme.subTextColor,
+            cursor: "pointer",
+            transition: "background 1.2s ease",
           }}
         >
-          <Filter style={{ height: "14px", width: "14px", color: "#9ca3af" }} />
+          <Filter style={{ height: "14px", width: "14px", color: timeTheme.mutedTextColor }} />
           Filters
         </button>
 
         {/* Search bar */}
         <div style={{ position: "relative", flexShrink: 0, width: "220px" }}>
-          <Search style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", height: "14px", width: "14px", color: "#9ca3af", pointerEvents: "none" }} />
+          <Search style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", height: "14px", width: "14px", color: timeTheme.mutedTextColor, pointerEvents: "none" }} />
           <input
             type="text"
             placeholder="Search tasks..."
@@ -638,12 +597,12 @@ export function TopNav() {
             onBlur={() => setSearchFocused(false)}
             style={{
               height: "34px", width: "100%", borderRadius: "8px",
-              border: `1px solid ${searchFocused ? "#4f46e5" : "#e5e7eb"}`,
-              backgroundColor: searchFocused ? "#ffffff" : "#f9fafb",
+              border: `1px solid ${searchFocused ? timeTheme.accentColor : timeTheme.cardBorder}`,
+              backgroundColor: searchFocused ? timeTheme.inputBackground : timeTheme.inputBackground,
               paddingLeft: "32px", paddingRight: "12px", fontSize: "13px",
-              color: "#111827", outline: "none", boxSizing: "border-box",
-              boxShadow: searchFocused ? "0 0 0 3px rgba(79,70,229,0.1)" : "none",
-              transition: "border-color 0.15s, box-shadow 0.15s",
+              color: timeTheme.textColor, outline: "none", boxSizing: "border-box",
+              boxShadow: searchFocused ? `0 0 0 3px ${timeTheme.accentColor}18` : "none",
+              transition: "border-color 0.2s, box-shadow 0.2s, background 1.2s ease",
             }}
           />
         </div>

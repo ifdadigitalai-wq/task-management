@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
 import { useRouter } from "next/navigation";
 import { Bell, Check, ExternalLink } from "lucide-react";
+import { useTimeTheme } from "@/hooks/useTimeTheme";
 
 interface Notification {
   id: string;
@@ -19,6 +20,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const timeTheme = useTimeTheme();
 
   const fetchNotifications = async () => {
     try {
@@ -73,10 +75,10 @@ export default function NotificationsPage() {
     <div style={{ padding: "32px", maxWidth: "800px", margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
         <div>
-          <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#111827", margin: 0 }}>
+          <h1 style={{ fontSize: "20px", fontWeight: 700, color: timeTheme.textColor, margin: 0, transition: "color 0.6s ease" }}>
             Notifications
           </h1>
-          <p style={{ fontSize: "13px", color: "#9ca3af", marginTop: "4px" }}>
+          <p style={{ fontSize: "13px", color: timeTheme.mutedTextColor, marginTop: "4px", transition: "color 0.6s ease" }}>
             View and manage your task assignments and alerts
           </p>
         </div>
@@ -90,13 +92,13 @@ export default function NotificationsPage() {
               height: "34px",
               padding: "0 14px",
               borderRadius: "8px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
+              border: `1px solid ${timeTheme.cardBorder}`,
+              backgroundColor: timeTheme.cardBackground,
               fontSize: "12px",
               fontWeight: 500,
-              color: "#374151",
+              color: timeTheme.textColor,
               cursor: "pointer",
-              transition: "all 0.15s"
+              transition: "all 0.3s ease"
             }}
           >
             <Check style={{ height: "14px", width: "14px" }} /> Mark all as read
@@ -109,9 +111,9 @@ export default function NotificationsPage() {
           Loading notifications...
         </div>
       ) : notifications.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "80px 0", backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #f0f0f0" }}>
+        <div style={{ textAlign: "center", padding: "80px 0", backgroundColor: timeTheme.cardBackground, borderRadius: "12px", border: `1px solid ${timeTheme.cardBorder}`, transition: "background 1.2s ease" }}>
           <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔔</div>
-          <p style={{ fontSize: "14px", color: "#9ca3af", fontWeight: 500 }}>
+          <p style={{ fontSize: "14px", color: timeTheme.mutedTextColor, fontWeight: 500 }}>
             You have no notifications yet
           </p>
         </div>
@@ -126,24 +128,25 @@ export default function NotificationsPage() {
                 alignItems: "flex-start",
                 gap: "12px",
                 padding: "16px",
-                backgroundColor: notif.isSeen ? "#ffffff" : "#f0fdf4",
+                backgroundColor: notif.isSeen ? timeTheme.cardBackground : `${timeTheme.accentColor}12`,
                 border: "1px solid",
-                borderColor: notif.isSeen ? "#f0f0f0" : "#bbf7d0",
+                borderColor: notif.isSeen ? timeTheme.cardBorder : `${timeTheme.accentColor}44`,
                 borderRadius: "10px",
                 cursor: "pointer",
-                transition: "all 0.15s"
+                transition: "all 0.3s ease"
               }}
             >
               <div style={{
                 height: "32px",
                 width: "32px",
                 borderRadius: "50%",
-                backgroundColor: notif.isSeen ? "#f3f4f6" : "#dcfce7",
+                backgroundColor: notif.isSeen ? timeTheme.dividerColor : `${timeTheme.accentColor}22`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: notif.isSeen ? "#9ca3af" : "#22c55e",
-                flexShrink: 0
+                color: notif.isSeen ? timeTheme.mutedTextColor : timeTheme.accentColor,
+                flexShrink: 0,
+                transition: "all 0.3s ease",
               }}>
                 <Bell style={{ height: "14px", width: "14px" }} />
               </div>
@@ -151,7 +154,7 @@ export default function NotificationsPage() {
                 <p style={{
                   fontSize: "13px",
                   fontWeight: notif.isSeen ? 500 : 600,
-                  color: "#111827",
+                  color: timeTheme.textColor,
                   margin: 0,
                   lineHeight: "1.4"
                 }}>

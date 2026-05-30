@@ -6,6 +6,7 @@ import EmployeeTable from "@/components/employees/EmployeeTable";
 import AddEmployeeModal from "@/components/employees/AddEmployeeModal";
 import EditEmployeeModal from "@/components/employees/EditEmployeeModal";
 import type { Employee } from "@/components/employees/EmployeeTable";
+import { useTimeTheme } from "@/hooks/useTimeTheme";
 
 // ── Delete confirmation popup ────────────────────────────────────────────────
 
@@ -148,6 +149,7 @@ function DeleteConfirmModal({
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function EmployeesPage() {
+  const timeTheme = useTimeTheme();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -203,17 +205,18 @@ export default function EmployeesPage() {
             style={{
               fontSize: 20,
               fontWeight: 700,
-              color: "#111827",
+              color: timeTheme.textColor,
               margin: "0 0 4px",
               display: "flex",
               alignItems: "center",
               gap: 10,
+              transition: "color 0.6s ease",
             }}
           >
-            <Users style={{ height: 22, width: 22, color: "#4f46e5" }} />
+            <Users style={{ height: 22, width: 22, color: timeTheme.accentColor }} />
             Employees
           </h1>
-          <p style={{ fontSize: 13, color: "#9ca3af", margin: 0 }}>
+          <p style={{ fontSize: 13, color: timeTheme.mutedTextColor, margin: 0, transition: "color 0.6s ease" }}>
             Manage your team members and their details.
           </p>
         </div>
@@ -228,18 +231,12 @@ export default function EmployeesPage() {
             padding: "0 18px",
             borderRadius: 8,
             border: "none",
-            backgroundColor: "#4f46e5",
+            backgroundColor: timeTheme.accentColor,
             color: "#ffffff",
             fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
-            transition: "background-color 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#4338ca";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#4f46e5";
+            transition: "background-color 0.3s ease",
           }}
         >
           <Plus style={{ height: 16, width: 16 }} />
@@ -281,23 +278,23 @@ export default function EmployeesPage() {
               width: "100%",
               height: 38,
               borderRadius: 8,
-              border: "1px solid #e5e7eb",
+              border: `1px solid ${timeTheme.inputBorder}`,
               paddingLeft: 36,
               paddingRight: 14,
               fontSize: 13,
-              color: "#111827",
+              color: timeTheme.textColor,
               outline: "none",
               boxSizing: "border-box",
-              backgroundColor: "#ffffff",
+              backgroundColor: timeTheme.inputBackground,
               fontFamily: "inherit",
+              transition: "background 1.2s ease, border-color 0.2s",
             }}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#4f46e5";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 3px rgba(79,70,229,0.08)";
+              e.currentTarget.style.borderColor = timeTheme.accentColor;
+              e.currentTarget.style.boxShadow = `0 0 0 3px ${timeTheme.accentColor}18`;
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "#e5e7eb";
+              e.currentTarget.style.borderColor = timeTheme.inputBorder;
               e.currentTarget.style.boxShadow = "none";
             }}
           />
@@ -309,7 +306,8 @@ export default function EmployeesPage() {
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: "#6b7280",
+              color: timeTheme.mutedTextColor,
+              transition: "color 0.6s ease",
             }}
           >
             {filtered.length}{" "}
@@ -350,10 +348,11 @@ export default function EmployeesPage() {
       {/* Table card */}
       <div
         style={{
-          backgroundColor: "#ffffff",
-          border: "1px solid #f0f0f0",
+          backgroundColor: timeTheme.cardBackground,
+          border: `1px solid ${timeTheme.cardBorder}`,
           borderRadius: 12,
           overflow: "hidden",
+          transition: "background 1.2s ease",
         }}
       >
         {loading ? (

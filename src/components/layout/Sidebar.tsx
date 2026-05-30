@@ -18,6 +18,7 @@ import {
 
 import { useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
+import { useTimeTheme } from "@/hooks/useTimeTheme";
 
 const NAV_SECTIONS = [
   {
@@ -44,6 +45,7 @@ const NAV_SECTIONS = [
 export function Sidebar() {
   const pathname = usePathname();
   const { currentUser, fetchCurrentUser } = useTaskStore();
+  const timeTheme = useTimeTheme();
 
   useEffect(() => {
     if (!currentUser) {
@@ -70,9 +72,10 @@ export function Sidebar() {
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#ffffff",
-        borderRight: "1px solid #f0f0f0",
+        backgroundColor: timeTheme.cardBackground,
+        borderRight: `1px solid ${timeTheme.cardBorder}`,
         height: "100%",
+        transition: "background 1.2s ease, border-color 0.6s ease",
       }}
     >
       {/* Brand Header */}
@@ -91,7 +94,7 @@ export function Sidebar() {
             height: "36px",
             width: "36px",
             borderRadius: "8px",
-            backgroundColor: "#4F46E5",
+            backgroundColor: timeTheme.accentColor,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -99,6 +102,7 @@ export function Sidebar() {
             fontSize: "11px",
             fontWeight: 700,
             letterSpacing: "0.05em",
+            transition: "background 0.6s ease",
           }}
         >
           IFDA
@@ -107,8 +111,9 @@ export function Sidebar() {
           style={{
             fontSize: "17px",
             fontWeight: 700,
-            color: "#111827",
+            color: timeTheme.textColor,
             letterSpacing: "-0.01em",
+            transition: "color 0.6s ease",
           }}
         >
           Intelligence
@@ -136,8 +141,9 @@ export function Sidebar() {
                 fontSize: "11px",
                 fontWeight: 600,
                 letterSpacing: "0.1em",
-                color: "#9ca3af",
+                color: timeTheme.mutedTextColor,
                 textTransform: "uppercase",
+                transition: "color 0.6s ease",
               }}
             >
               {section.label}
@@ -163,20 +169,20 @@ export function Sidebar() {
                       fontSize: "14px",
                       fontWeight: 500,
                       textDecoration: "none",
-                      transition: "background-color 0.15s, color 0.15s",
-                      backgroundColor: isActive ? "#eef2ff" : "transparent",
-                      color: isActive ? "#4338ca" : "#6b7280",
+                      transition: "background-color 0.2s, color 0.2s",
+                      backgroundColor: isActive ? `${timeTheme.accentColor}18` : "transparent",
+                      color: isActive ? timeTheme.accentColor : timeTheme.mutedTextColor,
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
-                        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#f9fafb";
-                        (e.currentTarget as HTMLAnchorElement).style.color = "#111827";
+                        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${timeTheme.accentColor}10`;
+                        (e.currentTarget as HTMLAnchorElement).style.color = timeTheme.textColor;
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) {
                         (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
-                        (e.currentTarget as HTMLAnchorElement).style.color = "#6b7280";
+                        (e.currentTarget as HTMLAnchorElement).style.color = timeTheme.mutedTextColor;
                       }
                     }}
                   >
@@ -185,7 +191,8 @@ export function Sidebar() {
                         height: "18px",
                         width: "18px",
                         flexShrink: 0,
-                        color: isActive ? "#4f46e5" : "#9ca3af",
+                        color: isActive ? timeTheme.accentColor : timeTheme.mutedTextColor,
+                        transition: "color 0.2s",
                       }}
                       strokeWidth={isActive ? 2.5 : 2}
                     />

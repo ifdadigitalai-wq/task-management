@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTimeTheme } from "@/hooks/useTimeTheme";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const timeTheme = useTimeTheme();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -153,12 +155,12 @@ export default function LoginPage() {
         /* ── RIGHT PANEL ── */
         .right-panel {
           flex: 0 0 50%;
-          background: #ffffff;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           padding: 60px 72px;
+          transition: background 1.2s ease;
         }
 
         .right-inner {
@@ -381,30 +383,47 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="right-panel">
+        <div className="right-panel" style={{ background: timeTheme.cardBackground }}>
           <div className="right-inner">
             <div className="right-logo">
               <img src="https://tse2.mm.bing.net/th/id/OIP.NlNOpdTzHb0YVEGsahv1WAHaCN?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="IFDA Institute" width={220} height={72} style={{ objectFit: "contain" }} />
             </div>
 
-            <div className="secure-badge">
-              <span className="secure-dot" />
+            <div className="secure-badge" style={{ background: `${timeTheme.accentColor}18`, borderColor: `${timeTheme.accentColor}44`, color: timeTheme.accentColor }}>
+              <span className="secure-dot" style={{ background: timeTheme.accentColor }} />
               Secure Portal
             </div>
 
-            <h2 className="form-heading">
+            {/* Time-based greeting */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "10px",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              color: timeTheme.accentColor,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              transition: "color 0.6s ease",
+            }}>
+              <span style={{ fontSize: "1.1rem" }}>{timeTheme.icon}</span>
+              {timeTheme.greeting}
+            </div>
+
+            <h2 className="form-heading" style={{ color: timeTheme.textColor }}>
               Task Management
-              <span>System Portal</span>
+              <span style={{ color: timeTheme.accentColor }}>System Portal</span>
             </h2>
-            <div className="heading-rule" />
-            <p className="form-subtitle">
+            <div className="heading-rule" style={{ background: timeTheme.accentColor }} />
+            <p className="form-subtitle" style={{ color: timeTheme.mutedTextColor }}>
               Sign in with your admin credentials to access the dashboard.
             </p>
 
             <form onSubmit={handleSubmit}>
               {/* Email */}
               <div className="field-group">
-                <label className="field-label" htmlFor="email">Email Address</label>
+                <label className="field-label" htmlFor="email" style={{ color: timeTheme.subTextColor }}>Email Address</label>
                 <div className="field-wrap">
                   <span className="field-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -416,6 +435,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     className="field-input"
+                    style={{ background: timeTheme.inputBackground, borderColor: timeTheme.inputBorder, color: timeTheme.textColor }}
                     placeholder="admin@ifdadigitalai.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -427,7 +447,7 @@ export default function LoginPage() {
 
               {/* Password */}
               <div className="field-group">
-                <label className="field-label" htmlFor="password">Password</label>
+                <label className="field-label" htmlFor="password" style={{ color: timeTheme.subTextColor }}>Password</label>
                 <div className="field-wrap">
                   <span className="field-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -439,6 +459,7 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     className="field-input"
+                    style={{ background: timeTheme.inputBackground, borderColor: timeTheme.inputBorder, color: timeTheme.textColor }}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -469,12 +490,12 @@ export default function LoginPage() {
 
               {error && <div className="error-msg">{error}</div>}
 
-              <button type="submit" className="submit-btn" disabled={loading}>
+              <button type="submit" className="submit-btn" style={{ background: timeTheme.accentColor }} disabled={loading}>
                 {loading ? "Signing in…" : "Sign In to Dashboard"}
               </button>
             </form>
 
-            <div className="form-footer">
+            <div className="form-footer" style={{ color: timeTheme.mutedTextColor }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
