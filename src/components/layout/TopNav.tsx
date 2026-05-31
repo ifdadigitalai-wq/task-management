@@ -12,12 +12,14 @@ import {
   ClipboardList,
   FileText,
   Sparkles,
+  Route,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
 import { AssignTaskModal } from "@/components/AssignTaskModal";
 import Link from "next/link";
 import { useTimeTheme } from "@/hooks/useTimeTheme";
+import { routeModule } from "next/dist/build/templates/pages";
 
 const DATE_OPTIONS = [
   "Today", "Yesterday", "Tomorrow", "This week", "Last week", "This month", "Last month",
@@ -432,6 +434,25 @@ export function TopNav() {
                   width: "160px",
                   padding: "6px",
                 }}>
+  <Link 
+  href="/profile"
+  style={{
+    display: "block", // Ensures it takes the full width
+    width: "100%",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    border: "none",
+    backgroundColor: "transparent",
+    color: "#571313",
+    fontSize: "13px",
+    fontWeight: 500,
+    cursor: "pointer",
+    textAlign: "left",
+    textDecoration: "none" // Prevents default link underline
+  }}
+>
+  💻 Profile
+</Link>
                   <button
                     onClick={async () => {
                       await fetch("/api/auth/logout", { method: "POST" });

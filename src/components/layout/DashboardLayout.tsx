@@ -2,72 +2,92 @@
 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
-import { useTaskStore } from "@/store/useTaskStore";
-import { useRouter } from "next/navigation";
 import { useTimeTheme } from "@/hooks/useTimeTheme";
+import { usePathname } from "next/navigation"; // 1. Import usePathname
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { currentUser } = useTaskStore();
-  const router = useRouter();
   const timeTheme = useTimeTheme();
+  const pathname = usePathname(); // 2. Get the current route path
+
+  // Check if we are on the profile page (or any sub-route of it)
+  const isProfilePage = pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
     <div
-      className="flex h-screen w-full font-sans overflow-hidden"
       style={{
-        background: timeTheme.background,
+        display: "flex",
+        height: "100vh",
+        overflow: "hidden",
+        backgroundColor: timeTheme.background,
         color: timeTheme.textColor,
-        transition: "background 1.2s ease, color 0.6s ease",
+        transition: "background-color 0.5s ease, color 0.5s ease",
       }}
     >
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden relative">
-        <TopNav />
+      {/* Sidebar (Always visible) */}
+      <div style={{ flexShrink: 0, zIndex: 20 }}>
+        <Sidebar />
+      </div>
 
-        {currentUser?.mustResetPassword && (
-          <div style={{
-            backgroundColor: timeTheme.cardBackground,
-            borderBottom: `1px solid ${timeTheme.cardBorder}`,
-            padding: "10px 28px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontSize: "13px",
-            color: timeTheme.textColor,
-            fontWeight: 500,
-            flexShrink: 0,
-            transition: "background 1.2s ease",
-          }}>
-            <span>🔐 You're using a temporary password. Please reset it to secure your account.</span>
-            <button
-              onClick={() => router.push("/reset-password")}
-              style={{
-                backgroundColor: timeTheme.accentColor,
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "6px",
-                padding: "6px 14px",
-                fontSize: "12px",
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "background 0.3s ease",
-              }}
-            >
-              Reset now
-            </button>
-          </div>
-        )}
+      {/* Main Content Area */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minWidth: 0,
+          overflow: "hidden",
+        }}
+      >
+        {/* 3. Conditionally render the TopNav */}
+        {!isProfilePage && <TopNav />}
 
-        <main className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          <div className="mx-auto max-w-6xl w-full">
+        {/* Scrollable Content */}
+        <main
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "24px",
+            backgroundColor: timeTheme.background,
+            transition: "background-color 0.5s ease",
+            // Add custom scrollbar styling directly
+            scrollbarWidth: "thin",
+            scrollbarColor: `${
+              timeTheme.textColor === "#ffffff" ? "#475569" : "#cbd5e1"
+            } transparent`,
+          }}
+        >
+          {/* Main Container max-width */}
+          <div
+            style={{
+              maxWidth: "1600px",
+              margin: "0 auto",
+              height: "100%",
+            }}
+          >
             {children}
           </div>
         </main>
       </div>
+
+      {/* Global Scrollbar Styles for Webkit (Chrome/Safari/Edge) */}
+      <style>{`
+        main::-webkit-scrollbar {
+          width: 6px;
+        }
+        main::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        main::-webkit-scrollbar-thumb {
+          background-color: ${
+            timeTheme.textColor === "#ffffff" ? "#475569" : "#cbd5e1"
+          };
+          border-radius: 20px;
+        }
+      `}</style>
     </div>
   );
 }

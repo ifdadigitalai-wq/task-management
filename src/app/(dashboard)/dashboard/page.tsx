@@ -45,7 +45,7 @@ export default function DashboardPage() {
           }}>
             Here&apos;s your performance overview for today.
           </p>
-        </div>
+        </div> 
 
         {/* Live time badge */}
         <div style={{

@@ -53,7 +53,7 @@ export default function ActivitiesPage() {
         }}>
           <span>{timeTheme.icon}</span>
           {timeTheme.greeting} — Page Under Construction
-        </div>
+      </div>
       </div>
     </div>
   );
