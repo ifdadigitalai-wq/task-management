@@ -1,137 +1,190 @@
 "use client";
 
-import { useState } from "react";
-import { Task } from "@/types";
-import { TaskDetailPanel } from "./TaskDetailPanel";
+import React, { useState, useEffect } from "react";
+import { Task, TaskStatus, Priority } from "@/types";
 import { useTaskStore } from "@/store/useTaskStore";
+import { Calendar } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function timeAgo(dateStr: string): string {
+// Time ago formatter helper
+function timeAgo(dateStr: string | Date): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const days = Math.floor(diff / 86400000);
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
-  if (days < 30) return `${days} days ago`;
+  if (days < 30) return `${days}d ago`;
   const weeks = Math.floor(days / 7);
   if (weeks < 5) return `${weeks}w ago`;
   const months = Math.floor(days / 30);
   return `${months}mo ago`;
 }
 
-const PRIORITY_DOT: Record<string, string> = {
-  HIGH: "#ef4444", MEDIUM: "#f59e0b", LOW: "#22c55e",
+const PRIORITY_BORDER: Record<Priority, string> = {
+  LOW: "border-l-priority-low-text",
+  MEDIUM: "border-l-priority-medium-text",
+  HIGH: "border-l-priority-high-text",
+  CRITICAL: "border-l-priority-critical-text",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: "Pending", IN_PROGRESS: "In Progress",
-  COMPLETED: "Completed", DELETED: "Deleted",
+const STATUS_TEXT: Record<TaskStatus, string> = {
+  TODO: "To Do",
+  IN_PROGRESS: "In Progress",
+  IN_REVIEW: "In Review",
+  DONE: "Completed",
+  CANCELLED: "Cancelled",
 };
 
-// ── Hover Tooltip ──────────────────────────────────────────────────────────────
+const STATUS_CLASSES: Record<TaskStatus, string> = {
+  TODO: "bg-status-todo-bg text-status-todo-text",
+  IN_PROGRESS: "bg-status-progress-bg text-status-progress-text",
+  IN_REVIEW: "bg-status-review-bg text-status-review-text",
+  DONE: "bg-status-done-bg text-status-done-text",
+  CANCELLED: "bg-status-cancelled-bg text-status-cancelled-text",
+};
 
-function HoverTooltip({ task }: { task: Task }) {
-  const tagParts = task.tag ? task.tag.split(" · ").filter(Boolean) : [];
-  return (
-    <div style={{
-      position: "absolute", left: 0, top: "calc(100% + 6px)",
-      zIndex: 300, width: "320px",
-      backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
-      borderRadius: "12px", boxShadow: "0 12px 32px rgba(0,0,0,0.12)",
-      padding: "16px", pointerEvents: "none",
-    }}>
-      {/* Title */}
-      <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827", margin: "0 0 6px" }}>{task.title}</p>
 
-      {/* Description */}
-      {task.description && (
-        <p style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.5", margin: "0 0 10px" }}>
-          {task.description.length > 120 ? task.description.slice(0, 120) + "…" : task.description}
-        </p>
-      )}
 
-      {/* Chips row */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "10px" }}>
-        {/* Priority */}
-        <span style={{
-          padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600,
-          backgroundColor: task.priority === "HIGH" ? "#fef2f2" : task.priority === "MEDIUM" ? "#fffbeb" : "#f0fdf4",
-          color: PRIORITY_DOT[task.priority],
-        }}>
-          {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()} Priority
-        </span>
-        {/* Status */}
-        <span style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, backgroundColor: "#f3f4f6", color: "#6b7280" }}>
-          {STATUS_LABEL[task.status] ?? task.status}
-        </span>
-        {tagParts.map((t, i) => (
-          <span key={i} style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, backgroundColor: "#eef2ff", color: "#4f46e5" }}>{t}</span>
-        ))}
-      </div>
-
-      {/* Due date + assigned */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af" }}>
-        <span>📅 {task.dueDate ? new Date(task.dueDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "No due date"}</span>
-        {task.assignedTo && <span>👤 {task.assignedTo.name}</span>}
-      </div>
-    </div>
-  );
+interface TaskCardProps {
+  task: Task;
 }
 
-// ── Task Card Row ──────────────────────────────────────────────────────────────
+export default function TaskCard({ task }: TaskCardProps) {
+  const { setSelectedTask } = useTaskStore();
+  const [isDragging, setIsDragging] = useState(false);
 
-export default function TaskCard({ task }: { task: Task }) {
-  const [hovered, setHovered]     = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
-  const { deleteTask } = useTaskStore();
-  const {finishTask} = useTaskStore();
+  const isOverdue =
+    task.dueDate &&
+    new Date(task.dueDate) < new Date() &&
+    task.status !== "DONE" &&
+    task.status !== "CANCELLED";
 
-  const shortId = task.id.slice(0, 8).toUpperCase();
-  const dotColor = PRIORITY_DOT[task.priority] ?? "#9ca3af";
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true);
+    e.dataTransfer.setData("text/plain", task.id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const assigneeInitials = task.assignee
+    ? task.assignee.name
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
+    : "U";
+
+  const visibleTags = task.tags?.slice(0, 2) || [];
+  const overflowTags = (task.tags?.length || 0) - 2;
 
   return (
-    <>
-      <div
-        style={{ position: "relative" }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        <div
-          onClick={() => setPanelOpen(true)}
-          style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "14px 18px", backgroundColor: "#ffffff",
-            border: "1px solid #f0f0f0", borderRadius: "10px",
-            cursor: "pointer", transition: "all 0.15s",
-            boxShadow: hovered ? "0 4px 16px rgba(0,0,0,0.07)" : "0 1px 3px rgba(0,0,0,0.04)",
-            borderColor: hovered ? "#e0e7ff" : "#f0f0f0",
-          }}
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onClick={() => setSelectedTask(task)}
+      className={cn(
+        "bg-surface border border-border p-2 mb-0 hover:border-border-strong hover:shadow-sm transition-all duration-150 cursor-pointer select-none rounded-r-lg rounded-l-none border-l-[3px]",
+        PRIORITY_BORDER[task.priority] || PRIORITY_BORDER.MEDIUM,
+        isDragging && "opacity-40 scale-95"
+      )}
+    >
+      {/* First Row: Title + Status */}
+      <div className="flex items-start justify-between gap-3 mb-1.5">
+        <h3 className="text-[12.5px] font-semibold text-text-primary leading-tight flex-1 line-clamp-2 pr-2">
+          {task.title}
+        </h3>
+        <span
+          className={cn(
+            "text-[9px] font-medium py-0.5 px-1.5 rounded-full shrink-0 uppercase tracking-[0.02em]",
+            STATUS_CLASSES[task.status] || STATUS_CLASSES.TODO
+          )}
         >
-          {/* Left: dot + ID + title */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-            <span style={{ height: "8px", width: "8px", borderRadius: "50%", backgroundColor: dotColor, flexShrink: 0 }} />
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "#9ca3af", flexShrink: 0, fontFamily: "monospace" }}>
-              #{shortId}
-            </span>
-            <span style={{ fontSize: "13px", fontWeight: 500, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {task.title}
-            </span>
-          </div>
-
-          {/* Right: time ago */}
-          <span style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 500, flexShrink: 0, marginLeft: "16px" }}>
-            {timeAgo(task.createdAt)}
-          </span>
-        </div>
-
-        {/* Hover tooltip */}
-        {hovered && <HoverTooltip task={task} />}
+          {STATUS_TEXT[task.status]}
+        </span>
       </div>
 
-      {/* Detail panel */}
-      {panelOpen && (
-        <TaskDetailPanel task={task} onClose={() => setPanelOpen(false)} onDelete={() => { deleteTask(task.id); setPanelOpen(false); }} onFinish={(id) => { finishTask(id); setPanelOpen(false); }} />
-      )}
-    </>
+      {/* Second Row: Meta Info */}
+      <div className="flex items-center gap-1.5 flex-wrap text-text-secondary leading-none">
+        {/* Assignee Avatar + Name */}
+        {task.assignee ? (
+          <div className="flex items-center gap-1 min-w-0" title={`Assigned to ${task.assignee.name}`}>
+            <div className="w-[18px] h-[18px] rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-brand-light text-brand-text text-[8px] font-medium border border-border">
+              {task.assignee.avatarUrl ? (
+                <img
+                  src={task.assignee.avatarUrl}
+                  alt={task.assignee.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{assigneeInitials}</span>
+              )}
+            </div>
+            <span className="text-[9.5px] text-text-secondary truncate max-w-[85px]">
+              {task.assignee.name.split(" ")[0]}
+            </span>
+          </div>
+        ) : (
+          <span className="text-[9.5px] text-text-tertiary">Unassigned</span>
+        )}
+
+        {/* Separator Dot */}
+        <span className="text-text-tertiary shrink-0">&bull;</span>
+
+        {/* Due date */}
+        {task.dueDate ? (
+          <span
+            className={cn(
+              "text-[9.5px] shrink-0 flex items-center gap-1",
+              isOverdue ? "text-priority-critical-text font-medium" : "text-text-tertiary"
+            )}
+          >
+            <Calendar className="w-2.5 h-2.5" />
+            <span>
+              {new Date(task.dueDate).toLocaleDateString([], {
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          </span>
+        ) : (
+          <span className="text-[9.5px] text-text-tertiary shrink-0">No due date</span>
+        )}
+
+        {/* Tags */}
+        {task.tags && task.tags.length > 0 && (
+          <>
+            <span className="text-text-tertiary shrink-0">&bull;</span>
+            <div className="flex items-center gap-1 shrink-0">
+              {visibleTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[8.5px] bg-bg border border-border rounded-full px-1.5 py-0.2 text-text-secondary shrink-0 font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+              {overflowTags > 0 && (
+                <span className="text-[8.5px] text-text-tertiary shrink-0 font-medium">
+                  +{overflowTags} more
+                </span>
+              )}
+            </div>
+          </>
+        )}
+
+      </div>
+
+      {/* Third Row: TimeAgo (Float Right) */}
+      <div className="flow-root mt-1">
+        <span className="text-[8px] text-text-tertiary float-right">
+          {timeAgo(task.createdAt)}
+        </span>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,164 @@
+/* ── Design Tokens — Dark-mode-first (matches globals.css @theme values) ── */
+:root {
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Font sizes — minimum 12px (0.75rem) */
+  --font-size-xs:   0.75rem;   /* 12px — tertiary / timestamps */
+  --font-size-sm:   0.8125rem; /* 13px — secondary / meta */
+  --font-size-base: 0.9375rem; /* 15px — body / nav / card titles */
+  --font-size-md:   1rem;      /* 16px — card titles */
+  --font-size-lg:   1.125rem;  /* 18px — section headings */
+  --font-size-xl:   1.375rem;  /* 22px — page h1 / greeting */
+  --font-size-2xl:  2rem;      /* 32px — KPI values */
+  --font-size-3xl:  2.25rem;   /* 36px — large KPI values */
+
+  /* Font weights */
+  --font-weight-normal:    400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+
+  /* Line heights */
+  --line-height-tight:  1.3;
+  --line-height-normal: 1.6;
+
+  /* Letter spacing */
+  --letter-spacing-tight:   -0.01em;
+  --letter-spacing-normal:  0;
+  --letter-spacing-wide:    0.06em;
+  --letter-spacing-wider:   0.08em;
+  --letter-spacing-widest:  0.1em;
+
+  /* ── Spacing scale ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ── Radius ── */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.25), 0 1px 2px rgb(0 0 0 / 0.15);
+  --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.35), 0 2px 6px rgb(0 0 0 / 0.20);
+
+  /* ── Brand (Light Mode) ── */
+  --theme-brand:       #4F46E5;
+  --theme-brand-hover: #4338CA;
+  --theme-brand-light: rgba(79, 70, 229, 0.08);
+  --theme-brand-text:  #4F46E5;
+
+  /* ── Semantic colors (Light Mode) ── */
+  --theme-bg:             #F8FAFC;
+  --theme-surface:        #FFFFFF;
+  --theme-surface-raised: #F1F5F9;
+  --theme-border:         rgba(15, 23, 42, 0.06);
+  --theme-border-strong:  rgba(15, 23, 42, 0.12);
+
+  /* Text hierarchy (Light Mode) */
+  --theme-text-primary:   #0F172A;
+  --theme-text-secondary: #475569;
+  --theme-text-tertiary:  #64748B;
+  --theme-text-disabled:  #94A3B8;
+
+  /* ── Status colors (Light Mode) ── */
+  --theme-status-todo-bg:       rgba(71, 85, 105, 0.08);
+  --theme-status-todo-text:     #475569;
+  --theme-status-progress-bg:   rgba(37, 99, 235, 0.08);
+  --theme-status-progress-text: #1D4ED8;
+  --theme-status-review-bg:     rgba(124, 58, 237, 0.08);
+  --theme-status-review-text:   #6D28D9;
+  --theme-status-done-bg:       rgba(5, 150, 105, 0.08);
+  --theme-status-done-text:     #047857;
+  --theme-status-cancelled-bg:  rgba(220, 38, 38, 0.08);
+  --theme-status-cancelled-text:#B91C1C;
+
+  /* ── Priority colors (Light Mode) ── */
+  --theme-priority-low-bg:       rgba(71, 85, 105, 0.08);
+  --theme-priority-low-text:     #475569;
+  --theme-priority-medium-bg:    rgba(37, 99, 235, 0.08);
+  --theme-priority-medium-text:  #1D4ED8;
+  --theme-priority-high-bg:      rgba(217, 119, 6, 0.08);
+  --theme-priority-high-text:    #B45309;
+  --theme-priority-critical-bg:  rgba(220, 38, 38, 0.08);
+  --theme-priority-critical-text:#B91C1C;
+
+  /* ── Semantic utility colors (Light Mode) ── */
+  --theme-success-text: #059669;
+  --theme-success-bg:   rgba(16, 185, 129, 0.08);
+  --theme-warning-text: #D97706;
+  --theme-warning-bg:   rgba(251, 191, 36, 0.08);
+  --theme-danger-text:  #DC2626;
+  --theme-danger-bg:    rgba(220, 38, 38, 0.08);
+  --theme-info-text:    #2563EB;
+  --theme-info-bg:      rgba(96, 165, 250, 0.08);
+
+  /* ── Sidebar (Light Mode) ── */
+  --theme-sidebar-bg: #FFFFFF;
+}
+
+/* ── Dark Mode Overrides ── */
+.dark {
+  /* Brand */
+  --theme-brand:       #6366F1;
+  --theme-brand-hover: #4F46E5;
+  --theme-brand-light: rgba(99, 102, 241, 0.12);
+  --theme-brand-text:  #818CF8;
+
+  /* Semantic colors */
+  --theme-bg:             #0F1117;
+  --theme-surface:        #1A1D2E;
+  --theme-surface-raised: #1E2130;
+  --theme-border:         rgba(255, 255, 255, 0.07);
+  --theme-border-strong:  rgba(255, 255, 255, 0.12);
+
+  /* Text hierarchy */
+  --theme-text-primary:   #F9FAFB;
+  --theme-text-secondary: #9CA3AF;
+  --theme-text-tertiary:  #6B7280;
+  --theme-text-disabled:  #374151;
+
+  /* Status colors */
+  --theme-status-todo-bg:       rgba(148, 163, 184, 0.12);
+  --theme-status-todo-text:     #94A3B8;
+  --theme-status-progress-bg:   rgba(96, 165, 250, 0.12);
+  --theme-status-progress-text: #60A5FA;
+  --theme-status-review-bg:     rgba(167, 139, 250, 0.12);
+  --theme-status-review-text:   #A78BFA;
+  --theme-status-done-bg:       rgba(52, 211, 153, 0.12);
+  --theme-status-done-text:     #34D399;
+  --theme-status-cancelled-bg:  rgba(248, 113, 113, 0.12);
+  --theme-status-cancelled-text:#F87171;
+
+  /* Priority colors */
+  --theme-priority-low-bg:       rgba(100, 116, 139, 0.12);
+  --theme-priority-low-text:     #94A3B8;
+  --theme-priority-medium-bg:    rgba(96, 165, 250, 0.12);
+  --theme-priority-medium-text:  #60A5FA;
+  --theme-priority-high-bg:      rgba(251, 146, 60, 0.12);
+  --theme-priority-high-text:    #FB923C;
+  --theme-priority-critical-bg:  rgba(248, 113, 113, 0.12);
+  --theme-priority-critical-text:#F87171;
+
+  /* Semantic utility colors */
+  --theme-success-text: #34D399;
+  --theme-success-bg:   rgba(16, 185, 129, 0.12);
+  --theme-warning-text: #FBBF24;
+  --theme-warning-bg:   rgba(251, 191, 36, 0.12);
+  --theme-danger-text:  #F87171;
+  --theme-danger-bg:    rgba(248, 113, 113, 0.12);
+  --theme-info-text:    #60A5FA;
+  --theme-info-bg:      rgba(96, 165, 250, 0.12);
+
+  /* Sidebar */
+  --theme-sidebar-bg: #13151F;
+}

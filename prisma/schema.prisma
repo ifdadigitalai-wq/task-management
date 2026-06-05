@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -12,112 +11,190 @@ enum Role {
   EMPLOYEE
 }
 
-model User {
-  id             String        @id @default(cuid())
-  name           String
-  email          String        @unique
-  image          String?
-  phone          String?
-  department     String?
-  password       String
-  role           Role      @default(EMPLOYEE)
-  mustResetPassword Boolean   @default(true)
-  joinedAt       DateTime?
-  createdAt      DateTime      @default(now())
-  assignedTasks  Task[]        @relation("AssignedTo")
-  delegatedTasks Task[]        @relation("DelegatedBy")
-  notifications  Notification[]
-  updateComments UpdateComment[]
-}
-
-model Task {
-  id            String        @id @default(cuid())
-  title         String
-  description   String?
-  status        TaskStatus    @default(PENDING)
-  priority      Priority      @default(MEDIUM)
-  progress      Int           @default(0)
-  tag           String?
-  dueDate       DateTime?
-  targetDate    DateTime?
-  isDeleted     Boolean       @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  assignedToId  String?
-  delegatedById String?
-  assignedTo    User?         @relation("AssignedTo",  fields: [assignedToId],  references: [id])
-  delegatedBy   User?         @relation("DelegatedBy", fields: [delegatedById], references: [id])
-  templateId    String?
-  template      TaskTemplate? @relation(fields: [templateId], references: [id])
-  updates       TaskUpdate[]
-}
-
-model TaskTemplate {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  priority    Priority @default(MEDIUM)
-  tag         String?
-  tasks       Task[]
-  createdAt   DateTime @default(now())
-}
-
-model Holiday {
-  id        String   @id @default(cuid())
-  name      String
-  date      DateTime
-  createdAt DateTime @default(now())
-}
-
-model Activity {
-  id        String   @id @default(cuid())
-  action    String
-  taskId    String?
-  userId    String?
-  createdAt DateTime @default(now())
+enum EventType {
+  LEAVE
+  EVENT
+  OFFICIAL
 }
 
 enum TaskStatus {
-  PENDING
+  TODO
   IN_PROGRESS
-  COMPLETED
-  DELETED
+  IN_REVIEW
+  DONE
+  CANCELLED
 }
 
 enum Priority {
   LOW
   MEDIUM
   HIGH
+  CRITICAL
+}
+
+enum UpdateType {
+  COMMENT
+  STATUS_CHANGE
+  ASSIGNMENT
+  TIME_LOG
+}
+
+model User {
+  id                String         @id @default(cuid())
+  name              String
+  email             String         @unique
+  passwordHash      String
+  role              Role           @default(EMPLOYEE)
+  department        String?
+  jobTitle          String?
+  avatarUrl         String?
+  phone             String?
+  joinedAt          DateTime?
+  isActive          Boolean        @default(true)
+  mustResetPassword Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relations
+  assignedTasks     Task[]         @relation("AssignedTo")
+  createdTasks      Task[]         @relation("CreatedBy")
+  updates           TaskUpdate[]
+  comments          TaskComment[]
+  timers            TaskTimer[]
+  notifications     Notification[]
+  activities        Activity[]
+  templates         TaskTemplate[]
+  calendarEvents    CalendarEvent[]
+}
+
+model Task {
+  id               String         @id @default(cuid())
+  title            String
+  description      String?
+  status           TaskStatus     @default(TODO)
+  priority         Priority       @default(MEDIUM)
+  dueDate          DateTime?
+  estimatedMinutes Int?
+  actualMinutes    Int?           @default(0)
+  creatorId        String?
+  creator          User?          @relation("CreatedBy", fields: [creatorId], references: [id])
+  assigneeId       String?
+  assignee         User?          @relation("AssignedTo", fields: [assigneeId], references: [id])
+  templateId       String?
+  template         TaskTemplate?  @relation(fields: [templateId], references: [id])
+  parentTaskId     String?
+  parentTask       Task?          @relation("SubTasks", fields: [parentTaskId], references: [id])
+  subTasks         Task[]         @relation("SubTasks")
+  tags             String[]
+  attachments      Json?          // Array of attachment metadata: { name: string, size?: number, url?: string }
+  recurrence       Json?          // Recurrence rule: { rule: "NONE" | "DAILY" | "WEEKLY" | "MONTHLY", interval?: number, nextDue?: DateTime }
+  checklistItems   Json?          // Array of checklist items: { text: string, completed: boolean }[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  // Relations
+  updates          TaskUpdate[]
+  timers           TaskTimer[]
+  activities       Activity[]
+
+  @@index([assigneeId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([creatorId])
+}
+
+model TaskUpdate {
+  id          String        @id @default(cuid())
+  taskId      String
+  task        Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  content     String
+  type        UpdateType    @default(COMMENT)
+  attachments Json?         // Array of attachment metadata: { name: string, size?: number, url?: string }
+  createdAt   DateTime      @default(now())
+
+  // Relations
+  comments  TaskComment[]
+}
+
+model TaskComment {
+  id           String     @id @default(cuid())
+  taskUpdateId String
+  taskUpdate   TaskUpdate @relation(fields: [taskUpdateId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  body         String
+  createdAt    DateTime   @default(now())
+}
+
+model TaskTimer {
+  id              String    @id @default(cuid())
+  taskId          String
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  startedAt       DateTime
+  stoppedAt       DateTime?
+  durationMinutes Int       @default(0)
+}
+
+model TaskTemplate {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  defaultPriority Priority  @default(MEDIUM)
+  checklistItems  Json?     // Array of checklist items: string[]
+  createdById     String?
+  createdBy       User?     @relation(fields: [createdById], references: [id])
+  tasks           Task[]
+  createdAt       DateTime  @default(now())
 }
 
 model Notification {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content   String
-  isSeen    Boolean  @default(false)
+  type      String   @default("INFO")
+  message   String
+  read      Boolean  @default(false)
   link      String?
   createdAt DateTime @default(now())
 }
 
-model TaskUpdate {
-  id        String          @id @default(cuid())
-  taskId    String
-  task      Task            @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  remark    String
-  files     String[]
-  images    String[]
-  hasVoice  Boolean         @default(false)
-  createdAt DateTime        @default(now())
-  comments  UpdateComment[]
+model Holiday {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  isRecurring Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
-model UpdateComment {
-  id        String     @id @default(cuid())
-  updateId  String
-  update    TaskUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
-  text      String
-  authorId  String
-  author    User       @relation(fields: [authorId], references: [id])
-  createdAt DateTime   @default(now())
+model CalendarEvent {
+  id        String    @id @default(cuid())
+  title     String
+  fromDate  DateTime
+  toDate    DateTime
+  time      String?   // Optional time string e.g. "14:30" for timed events
+  type      EventType @default(EVENT)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([fromDate])
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+  taskId     String?
+  task       Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
 }

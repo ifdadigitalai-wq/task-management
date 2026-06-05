@@ -1,33 +1,37 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Search, Users, RefreshCw, AlertTriangle } from "lucide-react";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import AddEmployeeModal from "@/components/employees/AddEmployeeModal";
 import EditEmployeeModal from "@/components/employees/EditEmployeeModal";
-import type { Employee } from "@/components/employees/EmployeeTable";
+import { User as UserType } from "@/types";
 import { useTimeTheme } from "@/hooks/useTimeTheme";
-
-// ── Delete confirmation popup ────────────────────────────────────────────────
+import { useToast } from "@/hooks/useToast";
 
 function DeleteConfirmModal({
   employee,
   onCancel,
   onConfirm,
 }: {
-  employee: Employee;
+  employee: UserType;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const toast = useToast();
 
   const handleDelete = async () => {
     setDeleting(true);
     try {
       const res = await fetch(`/api/users/${employee.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      const payload = await res.json();
+      if (!payload.success) throw new Error(payload.error || "Failed to delete.");
+      
+      toast.success(`${employee.name} deactivated successfully.`);
       onConfirm();
-    } catch {
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete user.");
       setDeleting(false);
     }
   };
@@ -36,109 +40,36 @@ function DeleteConfirmModal({
     <>
       <div
         onClick={onCancel}
-        style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.25)",
-          zIndex: 80,
-        }}
+        className="fixed inset-0 bg-black/35 backdrop-blur-xs z-50 transition-opacity"
       />
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 90,
-          backgroundColor: "#ffffff",
-          borderRadius: 14,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
-          width: 400,
-          maxWidth: "calc(100vw - 32px)",
-          padding: 28,
-        }}
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200 text-center"
       >
-        {/* Icon */}
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: "50%",
-            background: "#fef2f2",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 16px",
-          }}
-        >
-          <AlertTriangle style={{ height: 22, width: 22, color: "#ef4444" }} />
+        <div className="w-12 h-12 bg-rose-50 dark:bg-rose-955/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertTriangle className="w-6 h-6" />
         </div>
 
-        <h3
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: "#111827",
-            textAlign: "center",
-            margin: "0 0 8px",
-          }}
-        >
-          Delete employee?
+        <h3 className="text-base font-extrabold text-slate-850 dark:text-slate-100 mb-1.5">
+          Deactivate Employee?
         </h3>
-        <p
-          style={{
-            fontSize: 13,
-            color: "#6b7280",
-            textAlign: "center",
-            margin: "0 0 24px",
-            lineHeight: 1.5,
-          }}
-        >
-          Are you sure you want to delete{" "}
-          <strong style={{ color: "#111827" }}>{employee.name}</strong>? This
-          action cannot be undone.
+        <p className="text-xs text-slate-450 dark:text-slate-400 mb-6 leading-relaxed">
+          Are you sure you want to deactivate <strong className="text-slate-800 dark:text-slate-200">{employee.name}</strong>? They will no longer be able to log in or manage tasks.
         </p>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 10,
-          }}
-        >
+        <div className="flex items-center justify-center gap-3">
           <button
             onClick={onCancel}
-            style={{
-              height: 36,
-              padding: "0 20px",
-              borderRadius: 8,
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#374151",
-              cursor: "pointer",
-            }}
+            className="px-5 py-2.5 border border-slate-200 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-650 dark:text-slate-400 font-bold text-xs rounded-xl transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleDelete}
             disabled={deleting}
-            style={{
-              height: 36,
-              padding: "0 20px",
-              borderRadius: 8,
-              border: "none",
-              backgroundColor: deleting ? "#fca5a5" : "#ef4444",
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#ffffff",
-              cursor: deleting ? "not-allowed" : "pointer",
-            }}
+            className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white font-bold text-xs rounded-xl shadow-md active:scale-95 transition-all"
           >
-            {deleting ? "Deleting…" : "Delete"}
+            {deleting ? "Deactivating..." : "Deactivate"}
           </button>
         </div>
       </div>
@@ -146,26 +77,28 @@ function DeleteConfirmModal({
   );
 }
 
-// ── Main page ────────────────────────────────────────────────────────────────
-
 export default function EmployeesPage() {
   const timeTheme = useTimeTheme();
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const toast = useToast();
+  
+  const [employees, setEmployees] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
 
-  // Modal state
+  // Modals state
   const [showAdd, setShowAdd] = useState(false);
-  const [editTarget, setEditTarget] = useState<Employee | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
+  const [editTarget, setEditTarget] = useState<UserType | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserType | null>(null);
 
   const fetchEmployees = useCallback(async () => {
     try {
       const res = await fetch("/api/users");
-      const data = await res.json();
-      setEmployees(data);
+      const payload = await res.json();
+      if (payload.success) {
+        setEmployees(payload.data || []);
+      }
     } catch (err) {
       console.error("Failed to fetch employees:", err);
+      toast.error("Failed to load employees list.");
     } finally {
       setLoading(false);
     }
@@ -175,219 +108,61 @@ export default function EmployeesPage() {
     fetchEmployees();
   }, [fetchEmployees]);
 
-  // Filtered list
-  const filtered = employees.filter((emp) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      emp.name.toLowerCase().includes(q) ||
-      emp.email.toLowerCase().includes(q) ||
-      (emp.department ?? "").toLowerCase().includes(q) ||
-      (emp.phone ?? "").toLowerCase().includes(q)
-    );
-  });
-
   return (
-    <div style={{ padding: "24px 28px", maxWidth: 1200 }}>
-      {/* Page header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 24,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex items-center justify-between p-6 bg-white/40 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl backdrop-blur-md flex-wrap gap-4">
         <div>
-          <h1
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              color: timeTheme.textColor,
-              margin: "0 0 4px",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              transition: "color 0.6s ease",
-            }}
-          >
-            <Users style={{ height: 22, width: 22, color: timeTheme.accentColor }} />
-            Employees
-          </h1>
-          <p style={{ fontSize: 13, color: timeTheme.mutedTextColor, margin: 0, transition: "color 0.6s ease" }}>
-            Manage your team members and their details.
+          <div className="flex items-center gap-2.5 mb-1">
+            <Users className="w-5 h-5" style={{ color: timeTheme.accentColor }} />
+            <h1 className="text-lg font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+              Team Management
+            </h1>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Manage your organization team members, profiles, job roles, and login access.
           </p>
         </div>
 
-        <button
-          onClick={() => setShowAdd(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            height: 38,
-            padding: "0 18px",
-            borderRadius: 8,
-            border: "none",
-            backgroundColor: timeTheme.accentColor,
-            color: "#ffffff",
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "background-color 0.3s ease",
-          }}
-        >
-          <Plus style={{ height: 16, width: 16 }} />
-          Add Employee
-        </button>
-      </div>
-
-      {/* Toolbar strip */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-          gap: 12,
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Search */}
-        <div style={{ position: "relative", maxWidth: 320, flex: 1 }}>
-          <Search
-            style={{
-              position: "absolute",
-              left: 12,
-              top: "50%",
-              transform: "translateY(-50%)",
-              height: 15,
-              width: 15,
-              color: "#9ca3af",
-              pointerEvents: "none",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search by name, email, department…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: "100%",
-              height: 38,
-              borderRadius: 8,
-              border: `1px solid ${timeTheme.inputBorder}`,
-              paddingLeft: 36,
-              paddingRight: 14,
-              fontSize: 13,
-              color: timeTheme.textColor,
-              outline: "none",
-              boxSizing: "border-box",
-              backgroundColor: timeTheme.inputBackground,
-              fontFamily: "inherit",
-              transition: "background 1.2s ease, border-color 0.2s",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = timeTheme.accentColor;
-              e.currentTarget.style.boxShadow = `0 0 0 3px ${timeTheme.accentColor}18`;
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = timeTheme.inputBorder;
-              e.currentTarget.style.boxShadow = "none";
-            }}
-          />
-        </div>
-
-        {/* Right side: count + refresh */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: timeTheme.mutedTextColor,
-              transition: "color 0.6s ease",
-            }}
-          >
-            {filtered.length}{" "}
-            {filtered.length === 1 ? "employee" : "employees"}
-          </span>
+        <div className="flex items-center gap-3">
           <button
             onClick={() => {
               setLoading(true);
               fetchEmployees();
             }}
-            title="Refresh"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              border: "1px solid #e5e7eb",
-              background: "#fff",
-              color: "#6b7280",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#4f46e5";
-              e.currentTarget.style.color = "#4f46e5";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#e5e7eb";
-              e.currentTarget.style.color = "#6b7280";
-            }}
+            className="p-2 border border-slate-200 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-slate-550 active:scale-95 transition-all"
+            title="Refresh team list"
           >
-            <RefreshCw style={{ height: 14, width: 14 }} />
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Add Employee
           </button>
         </div>
       </div>
 
-      {/* Table card */}
-      <div
-        style={{
-          backgroundColor: timeTheme.cardBackground,
-          border: `1px solid ${timeTheme.cardBorder}`,
-          borderRadius: 12,
-          overflow: "hidden",
-          transition: "background 1.2s ease",
-        }}
-      >
+      {/* Employees Table Card */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/65 dark:border-slate-800/65 rounded-3xl shadow-sm overflow-hidden">
         {loading ? (
-          <div
-            style={{
-              padding: "48px 24px",
-              textAlign: "center",
-              fontSize: 13,
-              color: "#9ca3af",
-            }}
-          >
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                border: "3px solid #eef2ff",
-                borderTopColor: "#4f46e5",
-                borderRadius: "50%",
-                margin: "0 auto 12px",
-                animation: "spin 0.8s linear infinite",
-              }}
-            />
-            Loading employees…
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400 text-xs">
+            <div className="w-6 h-6 border-2 border-indigo-50 border-t-indigo-600 rounded-full animate-spin mb-2" />
+            Loading team profiles...
           </div>
         ) : (
           <EmployeeTable
-            employees={filtered}
+            employees={employees}
             onEdit={(emp) => setEditTarget(emp)}
             onDelete={(emp) => setDeleteTarget(emp)}
           />
         )}
       </div>
 
-      {/* Modals */}
+      {/* Add Employee Modal */}
       {showAdd && (
         <AddEmployeeModal
           onClose={() => setShowAdd(false)}
@@ -395,6 +170,7 @@ export default function EmployeesPage() {
         />
       )}
 
+      {/* Edit Employee Modal */}
       {editTarget && (
         <EditEmployeeModal
           employee={editTarget}
@@ -403,6 +179,7 @@ export default function EmployeesPage() {
         />
       )}
 
+      {/* Delete/Deactivate Confirmation Modal */}
       {deleteTarget && (
         <DeleteConfirmModal
           employee={deleteTarget}

@@ -1,41 +1,313 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { NextResponse } from "next/server";
+import { ApiResponse, TaskStatus, Priority } from "@/types";
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-  const body = await req.json();
-  
-  // 1. Update the task
-  const updatedTask = await prisma.task.update({
-    where: { id },
-    data: body, // e.g., { status: "COMPLETED" }
-  });
+    const { id } = await params;
 
-  // 2. Determine who to notify
-  const recipientId = session.id === updatedTask.assignedToId 
-    ? updatedTask.delegatedById 
-    : updatedTask.assignedToId;
-
-  // 3. Send Notification
-  if (recipientId) {
-    const user = await prisma.user.findUnique({ where: { id: session.id }, select: { name: true } });
-    const userName = user?.name || "Someone";
-    
-    let actionType = "updated details for";
-    if (body.status) actionType = `changed status to ${body.status} on`;
-
-    await prisma.notification.create({
-      data: {
-        userId: recipientId,
-        content: `${userName} ${actionType} task: "${updatedTask.title}"`,
-        link: `/tasks/${updatedTask.id}`,
-      }
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        assignee: {
+          select: { id: true, name: true, email: true, avatarUrl: true, department: true, jobTitle: true },
+        },
+        creator: {
+          select: { id: true, name: true, email: true, avatarUrl: true },
+        },
+        subTasks: {
+          include: {
+            assignee: { select: { id: true, name: true, avatarUrl: true } }
+          }
+        },
+        updates: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: {
+              select: { id: true, name: true, avatarUrl: true, role: true },
+            },
+            comments: {
+              orderBy: { createdAt: "asc" },
+              include: {
+                user: {
+                  select: { id: true, name: true, avatarUrl: true, role: true },
+                },
+              },
+            },
+          },
+        },
+      },
     });
-  }
 
-  return NextResponse.json(updatedTask, { status: 200 });
+    if (!task) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Task not found." },
+        { status: 404 }
+      );
+    }
+
+    // Verify access
+    if (session.role === "EMPLOYEE" && task.assigneeId !== session.id && task.creatorId !== session.id) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Forbidden. You do not have permission to view this task." },
+        { status: 403 }
+      );
+    }
+
+    // Filter updates and subtasks for employees
+    if (task && session.role === "EMPLOYEE") {
+      task.updates = task.updates.filter(
+        (up: any) => up.user.role === "ADMIN" || up.userId === session.id
+      );
+      task.subTasks = task.subTasks.filter(
+        (sub: any) => sub.assigneeId === session.id
+      );
+    }
+
+    return NextResponse.json<ApiResponse<any>>({
+      success: true,
+      data: task,
+    });
+  } catch (err) {
+    console.error("[GET TASK BY ID ERROR]", err);
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, error: "Failed to fetch task details." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const existingTask = await prisma.task.findUnique({ where: { id } });
+
+    if (!existingTask) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Task not found." },
+        { status: 404 }
+      );
+    }
+
+    // Employees can only edit tasks assigned to them or created by them
+    if (session.role === "EMPLOYEE" && existingTask.assigneeId !== session.id && existingTask.creatorId !== session.id) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Forbidden. You cannot edit this task." },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+    const updateData: any = {};
+
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.description !== undefined) updateData.description = body.description;
+    if (body.status !== undefined) updateData.status = body.status as TaskStatus;
+    if (body.priority !== undefined) updateData.priority = body.priority as Priority;
+    if (body.dueDate !== undefined) updateData.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+    if (body.estimatedMinutes !== undefined) updateData.estimatedMinutes = body.estimatedMinutes ? parseInt(body.estimatedMinutes) : null;
+    if (body.actualMinutes !== undefined) updateData.actualMinutes = body.actualMinutes ? parseInt(body.actualMinutes) : null;
+    if (body.assigneeId !== undefined) updateData.assigneeId = body.assigneeId;
+    if (body.tags !== undefined) updateData.tags = body.tags;
+    if (body.attachments !== undefined) updateData.attachments = body.attachments;
+    if (body.checklistItems !== undefined) updateData.checklistItems = body.checklistItems;
+    if (body.recurrence !== undefined) updateData.recurrence = body.recurrence;
+
+    const result = await prisma.$transaction(async (tx) => {
+      const task = await tx.task.update({
+        where: { id },
+        data: updateData,
+        include: {
+          assignee: { select: { id: true, name: true } },
+          creator: { select: { id: true, name: true } },
+        },
+      });
+
+      // Log Activity
+      await tx.activity.create({
+        data: {
+          userId: session.id,
+          action: "UPDATE_TASK",
+          entityType: "TASK",
+          entityId: task.id,
+          taskId: task.id,
+          meta: { fieldsUpdated: Object.keys(updateData), status: task.status },
+        },
+      });
+
+      // Send status change notification if status changed
+      if (body.status !== undefined && body.status !== existingTask.status) {
+        if (task.status === "DONE") {
+          const isSubtask = !!task.parentTaskId;
+          if (isSubtask) {
+            let parentAssigneeId: string | null = null;
+            if (task.parentTaskId) {
+              const parent = await tx.task.findUnique({
+                where: { id: task.parentTaskId },
+                select: { assigneeId: true },
+              });
+              parentAssigneeId = parent?.assigneeId || null;
+            }
+
+            // Notify Creator
+            if (task.creatorId && task.creatorId !== session.id) {
+              await tx.notification.create({
+                data: {
+                  userId: task.creatorId,
+                  type: "SUBTASK_COMPLETED",
+                  message: `${session.name} completed the subtask: "${task.title}"`,
+                  link: `/my-tasks?taskId=${task.id}`,
+                },
+              });
+            }
+
+            // Notify Parent Task Assignee
+            if (parentAssigneeId && parentAssigneeId !== session.id && parentAssigneeId !== task.creatorId) {
+              await tx.notification.create({
+                data: {
+                  userId: parentAssigneeId,
+                  type: "SUBTASK_COMPLETED",
+                  message: `${session.name} completed the subtask "${task.title}" on your task`,
+                  link: `/my-tasks?taskId=${task.parentTaskId}`,
+                },
+              });
+            }
+          } else {
+            const recipientId = session.id === task.assigneeId ? task.creatorId : task.assigneeId;
+            if (recipientId) {
+              await tx.notification.create({
+                data: {
+                  userId: recipientId,
+                  type: "TASK_COMPLETED",
+                  message: `${session.name} completed the task: "${task.title}"`,
+                  link: `/my-tasks?taskId=${task.id}`,
+                },
+              });
+            }
+          }
+        } else {
+          const recipientId = session.id === task.assigneeId ? task.creatorId : task.assigneeId;
+          if (recipientId) {
+            await tx.notification.create({
+              data: {
+                userId: recipientId,
+                type: "STATUS_CHANGED",
+                message: `${session.name} updated the status of "${task.title}" to ${task.status}`,
+                link: `/my-tasks?taskId=${task.id}`,
+              },
+            });
+          }
+        }
+      }
+
+      // Send assignment notification if assignee changed
+      if (body.assigneeId !== undefined && body.assigneeId !== existingTask.assigneeId && body.assigneeId) {
+        await tx.notification.create({
+          data: {
+            userId: body.assigneeId,
+            type: "TASK_ASSIGNED",
+            message: `${session.name} assigned you the task: "${task.title}"`,
+            link: `/my-tasks?taskId=${task.id}`,
+          },
+        });
+      }
+
+      // Send general details updated notification
+      const updatedFields = Object.keys(updateData).filter(key => updateData[key] !== undefined && updateData[key] !== (existingTask as any)[key]);
+      const detailKeys = ["title", "description", "priority", "dueDate"];
+      const hasDetailUpdates = updatedFields.some(key => detailKeys.includes(key));
+      if (hasDetailUpdates) {
+        const recipientId = session.id === task.assigneeId ? task.creatorId : task.assigneeId;
+        if (recipientId) {
+          await tx.notification.create({
+            data: {
+              userId: recipientId,
+              type: "TASK_UPDATED",
+              message: `${session.name} updated the details of task: "${task.title}"`,
+              link: `/my-tasks?taskId=${task.id}`,
+            },
+          });
+        }
+      }
+
+      return task;
+    }, { timeout: 30000 });
+
+    return NextResponse.json<ApiResponse<any>>({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    console.error("[PATCH TASK ERROR]", err);
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, error: "Failed to update task." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Unauthorized. Admin access required." },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
+
+    await prisma.$transaction(async (tx) => {
+      const task = await tx.task.delete({
+        where: { id },
+      });
+
+      await tx.activity.create({
+        data: {
+          userId: session.id,
+          action: "DELETE_TASK",
+          entityType: "TASK",
+          entityId: id,
+          meta: { title: task.title },
+        },
+      });
+    }, { timeout: 30000 });
+
+    return NextResponse.json<ApiResponse<null>>({
+      success: true,
+    });
+  } catch (err) {
+    console.error("[DELETE TASK ERROR]", err);
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, error: "Failed to delete task." },
+      { status: 500 }
+    );
+  }
 }

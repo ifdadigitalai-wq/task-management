@@ -1,34 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import {prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/auth";
 import { COOKIE_NAME } from "@/lib/session";
+import { ApiResponse } from "@/types";
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required." },
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Email and password are required." },
         { status: 400 }
       );
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user?.password) {
-      return NextResponse.json(
-        { error: "Invalid email or password." },
+    if (!user || !user.passwordHash || !user.isActive) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Invalid email or password." },
         { status: 401 }
       );
     }
 
-   const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValid) {
-      return NextResponse.json(
-        { error: "Invalid email or password." },
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Invalid email or password." },
         { status: 401 }
       );
     }
@@ -41,9 +42,11 @@ export async function POST(req: NextRequest) {
       mustResetPassword: user.mustResetPassword,
     });
 
-    const response = NextResponse.json({
+    const response = NextResponse.json<ApiResponse<{ mustResetPassword: boolean }>>({
       success: true,
-      mustResetPassword: user.mustResetPassword,
+      data: {
+        mustResetPassword: user.mustResetPassword,
+      },
     });
 
     response.cookies.set(COOKIE_NAME, token, {
@@ -57,8 +60,8 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (err) {
     console.error("[LOGIN ERROR]", err);
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, error: "Something went wrong. Please try again." },
       { status: 500 }
     );
   }

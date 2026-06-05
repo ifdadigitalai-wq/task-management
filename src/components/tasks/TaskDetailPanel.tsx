@@ -1,611 +1,1049 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Task } from "@/types";
-import { useTaskStore } from "@/store/useTaskStore";
+import React, { useState, useEffect, useRef } from "react";
 import {
   X, MessageSquare, Trash2, RefreshCw, Paperclip,
-  Mic, ImageIcon, Send, ChevronDown,
-  StopCircle, Play, Pause, Check,
+  Mic, ImageIcon, Send, ChevronRight, Play, Pause,
+  CheckCircle2, Clock, ListTodo, Plus, Calendar, AlertCircle, Edit, Save, Check, StopCircle
 } from "lucide-react";
+import { Task, TaskStatus, Priority, TaskUpdate, User, ApiResponse } from "@/types";
+import { useTaskStore } from "@/store/useTaskStore";
+import { useToast } from "@/hooks/useToast";
+import { DateRangePicker } from "@/components/ui/DateRangePicker";
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+import { uploadFiles } from "@/lib/uploadthing-client";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+const STATUSES: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"];
 
-interface TaskUpdate {
-  id: string;
-  remark: string;
-  files: string[];
-  images: string[];
-  hasVoice: boolean;
-  createdAt: string;
-  comments: UpdateComment[];
-}
-
-interface UpdateComment {
-  id: string;
-  text: string;
-  createdAt: string;
-  author?: { id: string; name: string };
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-const PRIORITY: Record<string, { label: string; color: string; bg: string }> = {
-  HIGH:   { label: "High",   color: "#ef4444", bg: "#fef2f2" },
-  MEDIUM: { label: "Medium", color: "#f59e0b", bg: "#fffbeb" },
-  LOW:    { label: "Low",    color: "#22c55e", bg: "#f0fdf4" },
+const STATUS_COLORS: Record<TaskStatus, { bg: string; text: string; dot: string }> = {
+  TODO: { bg: "bg-slate-50 dark:bg-slate-800", text: "text-slate-700 dark:text-slate-350", dot: "bg-slate-400" },
+  IN_PROGRESS: { bg: "bg-blue-50 dark:bg-blue-950/20", text: "text-blue-700 dark:text-blue-400", dot: "bg-blue-500" },
+  IN_REVIEW: { bg: "bg-purple-50 dark:bg-purple-950/20", text: "text-purple-700 dark:text-purple-400", dot: "bg-purple-500" },
+  DONE: { bg: "bg-emerald-50 dark:bg-emerald-950/20", text: "text-emerald-700 dark:text-emerald-400", dot: "bg-emerald-500" },
+  CANCELLED: { bg: "bg-rose-50 dark:bg-rose-950/20", text: "text-rose-700 dark:text-rose-450", dot: "bg-rose-500" },
 };
 
-const STATUS_OPTIONS = ["PENDING", "IN_PROGRESS", "COMPLETED"];
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: "Pending", IN_PROGRESS: "In Progress", COMPLETED: "Completed",
+const PRIORITY_COLORS: Record<Priority, { bg: string; text: string }> = {
+  LOW: { bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-700 dark:text-slate-400" },
+  MEDIUM: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-400" },
+  HIGH: { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-700 dark:text-orange-400" },
+  CRITICAL: { bg: "bg-rose-100 dark:bg-rose-900/30", text: "text-rose-700 dark:text-rose-400" },
 };
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleString("en-US", {
-    day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-  });
-}
+export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
+  const { selectedTask: initialTask, updateTask: storeUpdateTask, deleteTask: storeDeleteTask, currentUser } = useTaskStore();
+  const toast = useToast();
+  
+  const [task, setTask] = useState<Task | null>(initialTask);
+  const [activeTab, setActiveTab] = useState<"details" | "updates" | "subtasks">("details");
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-function Avatar({ name, size = 30 }: { name: string; size?: number }) {
-  const colors = ["#6366f1","#8b5cf6","#ec4899","#f59e0b","#10b981","#3b82f6"];
-  const color  = colors[name.charCodeAt(0) % colors.length];
+  // Edit fields
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPriority, setEditPriority] = useState<Priority>("MEDIUM");
+  const [editDueDate, setEditDueDate] = useState<Date | null>(null);
+  const [editAssigneeId, setEditAssigneeId] = useState("");
+  const [editEstimatedHours, setEditEstimatedHours] = useState(0);
+  const [editEstimatedMins, setEditEstimatedMins] = useState(0);
+  
+  // Data lists
+  // Data lists
+  const [updates, setUpdates] = useState<TaskUpdate[]>([]);
+  const [subtasks, setSubtasks] = useState<Task[]>([]);
+  const [employees, setEmployees] = useState<User[]>([]);
+  
+  // Inputs
+  const [newRemark, setNewRemark] = useState("");
+  const [newCommentText, setNewCommentText] = useState<Record<string, string>>({});
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+
+  // Update attachments states
+  const [updateSelectedFiles, setUpdateSelectedFiles] = useState<File[]>([]);
+  const [updateVoiceRecordings, setUpdateVoiceRecordings] = useState<{ name: string; blob: Blob }[]>([]);
+  const [showUpdateVoiceModal, setShowUpdateVoiceModal] = useState(false);
+  const updateFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpdateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setUpdateSelectedFiles([...updateSelectedFiles, ...Array.from(e.target.files)]);
+    }
+  };
+
+  const handleUpdateVoiceSave = (blob: Blob, name: string) => {
+    setUpdateVoiceRecordings([...updateVoiceRecordings, { blob, name }]);
+  };
+
+  // Sync state with selectedTask
+  useEffect(() => {
+    if (initialTask) {
+      setTask(initialTask);
+      setEditTitle(initialTask.title);
+      setEditDescription(initialTask.description || "");
+      setEditPriority(initialTask.priority);
+      setEditDueDate(initialTask.dueDate ? new Date(initialTask.dueDate) : null);
+      setEditAssigneeId(initialTask.assigneeId || "");
+      
+      const totalMinutes = initialTask.estimatedMinutes || 0;
+      setEditEstimatedHours(Math.floor(totalMinutes / 60));
+      setEditEstimatedMins(totalMinutes % 60);
+
+      // Load updates, timers, subtasks
+      fetchTaskRelations(initialTask.id);
+    } else {
+      setTask(null);
+    }
+  }, [initialTask]);
+
+  // Fetch employees list
+  useEffect(() => {
+    if (currentUser?.role === "ADMIN") {
+      fetch("/api/users")
+        .then((res) => res.json())
+        .then((payload) => {
+          if (payload.success) setEmployees(payload.data);
+        })
+        .catch(console.error);
+    }
+  }, [currentUser]);
+
+
+
+  const fetchTaskRelations = async (taskId: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload.success && payload.data) {
+          const detail = payload.data;
+          setUpdates(detail.updates || []);
+          setSubtasks(detail.subTasks || []);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCycleStatus = async () => {
+    if (!task) return;
+    const currentIndex = STATUSES.indexOf(task.status);
+    const nextStatus = STATUSES[(currentIndex + 1) % STATUSES.length];
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+        toast.success(`Status updated to ${nextStatus}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status.");
+    }
+  };
+
+  const handleChecklistToggle = async (index: number) => {
+    if (!task) return;
+    const checklist = Array.isArray(task.checklistItems) ? [...task.checklistItems] : [];
+    checklist[index].completed = !checklist[index].completed;
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checklistItems: checklist }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!task) return;
+    setLoading(true);
+    const totalMinutes = editEstimatedHours * 60 + editEstimatedMins;
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          priority: editPriority,
+          dueDate: editDueDate ? editDueDate.toISOString() : null,
+          assigneeId: editAssigneeId || null,
+          estimatedMinutes: totalMinutes,
+        }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+        setEditMode(false);
+        toast.success("Task updated successfully!");
+      } else {
+        toast.error(payload.error || "Failed to update task.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save changes.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!task || !newRemark.trim()) return;
+
+    try {
+      // 1. Prepare files list for UploadThing
+      const filesToUpload: File[] = [];
+      updateSelectedFiles.forEach((file) => {
+        filesToUpload.push(file);
+      });
+      updateVoiceRecordings.forEach((v) => {
+        const file = new File([v.blob], v.name, { type: v.blob.type });
+        filesToUpload.push(file);
+      });
+
+      let uploadedAttachments: any[] = [];
+      if (filesToUpload.length > 0) {
+        toast.info("Uploading attachments...");
+        const uploadRes = await uploadFiles("taskAttachment", {
+          files: filesToUpload,
+        });
+        uploadedAttachments = uploadRes.map((res) => {
+          const isAudio = res.name.endsWith(".webm") || res.name.startsWith("recording-");
+          return {
+            name: res.name,
+            size: res.size,
+            url: res.url,
+            type: isAudio ? "audio" : "file",
+          };
+        });
+      }
+
+      const res = await fetch(`/api/tasks/${task.id}/updates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          remark: newRemark.trim(),
+          attachments: uploadedAttachments,
+        }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setUpdates([payload.data, ...updates]);
+        setNewRemark("");
+        setUpdateSelectedFiles([]);
+        setUpdateVoiceRecordings([]);
+        toast.success("Update posted successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to post update.");
+    }
+  };
+
+  const handlePostComment = async (updateId: string) => {
+    const text = newCommentText[updateId];
+    if (!task || !text?.trim()) return;
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/updates/${updateId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.trim() }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setUpdates((prev) =>
+          prev.map((up) => {
+            if (up.id === updateId) {
+              return { ...up, comments: [...(up.comments || []), payload.data] };
+            }
+            return up;
+          })
+        );
+        setNewCommentText({ ...newCommentText, [updateId]: "" });
+        toast.success("Comment added.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddSubtask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!task || !newSubtaskTitle.trim()) return;
+
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newSubtaskTitle.trim(),
+          parentTaskId: task.id,
+          priority: task.priority,
+          assigneeId: task.assigneeId,
+        }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setSubtasks([...subtasks, payload.data]);
+        setNewSubtaskTitle("");
+        toast.success("Subtask added successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+
+  const handleDeleteTask = async () => {
+    if (!task) return;
+    if (confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
+      try {
+        const res = await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
+        if (res.ok) {
+          storeDeleteTask(task.id);
+          toast.success("Task deleted successfully.");
+          onClose();
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to delete task.");
+      }
+    }
+  };
+
+  const handleMarkCompleted = async () => {
+    if (!task) return;
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "DONE" }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+        toast.success("Task marked as completed!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to mark task as completed.");
+    }
+  };
+
+  const handleToggleSubtaskStatus = async (sub: Task) => {
+    const nextStatus = sub.status === "DONE" ? "TODO" : "DONE";
+    try {
+      const res = await fetch(`/api/tasks/${sub.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setSubtasks(subtasks.map((s) => (s.id === sub.id ? payload.data : s)));
+        toast.success(`Subtask status updated to ${nextStatus}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update subtask status.");
+    }
+  };
+
+  if (!task) return null;
+
+  const statusStyle = STATUS_COLORS[task.status] || STATUS_COLORS.TODO;
+  const priorityStyle = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM;
+
   return (
-    <div style={{ height: size, width: size, borderRadius: "50%", backgroundColor: color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: size * 0.38, fontWeight: 700, flexShrink: 0 }}>
-      {name.charAt(0).toUpperCase()}
-    </div>
+    <>
+      {/* Backdrop — z-panel - 1 = 59 */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-all duration-300"
+        style={{ zIndex: "calc(var(--z-panel) - 1)" }}
+      />
+
+      {/* Slide-over panel — z-panel = 60 */}
+      <div
+        className={cn(
+          "fixed right-0 bottom-0 bg-surface border-l border-border shadow-lg flex flex-col transition-all duration-200 ease-in-out top-0",
+          "w-[min(480px,100vw)]",
+          "max-md:top-auto max-md:left-0 max-md:right-0 max-md:w-full max-md:h-[85vh] max-md:border-t max-md:border-l-0 rounded-t-xl md:rounded-t-none",
+          "animate-in slide-in-from-right max-md:slide-in-from-bottom"
+        )}
+        style={{ zIndex: "var(--z-panel)" }}
+      >
+        {/* Header */}
+        <div className="p-4 px-5 border-b border-border flex items-start justify-between gap-4 shrink-0">
+          <div className="flex-1 min-w-0">
+            {/* Badges row */}
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <button
+                onClick={handleCycleStatus}
+                className="focus:outline-none select-none"
+                title="Click to cycle status"
+              >
+                <StatusBadge status={task.status} />
+              </button>
+              
+              <PriorityBadge priority={task.priority} />
+
+              {task.dueDate && (
+                <span className="flex items-center gap-1 text-text-tertiary" style={{ fontSize: "0.75rem" }}>
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(task.dueDate).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+
+            {/* Title / Edit Title */}
+            {editMode ? (
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[15px] font-medium focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+              />
+            ) : (
+              <h2 className="text-text-primary font-medium tracking-tight line-clamp-2" style={{ fontSize: "0.9375rem" }}>
+                {task.title}
+              </h2>
+            )}
+          </div>
+
+          {/* Close & Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            {currentUser?.role === "ADMIN" && (
+              <button
+                onClick={() => (editMode ? handleSaveChanges() : setEditMode(true))}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-text-secondary hover:bg-bg hover:text-text-primary transition-all focus:outline-none"
+                title={editMode ? "Save Changes" : "Edit Fields"}
+              >
+                {editMode ? <Check className="w-4 h-4 text-[#16A34A]" /> : <Edit className="w-4 h-4" />}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-text-secondary hover:bg-bg hover:text-text-primary transition-all focus:outline-none"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Selection */}
+        <div className="h-9 flex border-b border-border px-5 shrink-0 bg-bg/20">
+          {(["details", "updates", "subtasks"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                "h-full flex items-center font-normal px-4 text-text-secondary border-b-2 border-transparent transition-all cursor-pointer hover:text-text-primary uppercase tracking-[0.05em]",
+                activeTab === tab && "border-brand text-text-primary font-medium"
+              )}
+              style={{ fontSize: "0.75rem" }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Scrollable Contents */}
+        <div className="flex-1 overflow-y-auto p-4 px-5 space-y-4">
+          {/* 1. DETAILS TAB */}
+          {activeTab === "details" && (
+            <div className="space-y-1">
+              {/* Description */}
+              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Description</span>
+                {editMode ? (
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none resize-none"
+                  />
+                ) : (
+                  <p className="text-[13px] text-text-primary leading-relaxed">
+                    {task.description || "No description provided for this task."}
+                  </p>
+                )}
+              </div>
+
+              {/* Assignee & Due Date Edit Fields */}
+              {editMode ? (
+                <>
+                  <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Assignee</span>
+                    <select
+                      value={editAssigneeId}
+                      onChange={(e) => setEditAssigneeId(e.target.value)}
+                      className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
+                    >
+                      <option value="">Unassigned</option>
+                      {employees.map((e) => (
+                        <option key={e.id} value={e.id}>{e.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Due Date</span>
+                    <DateRangePicker value={editDueDate} onChange={setEditDueDate} showTime={true} />
+                  </div>
+                  <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Priority</span>
+                    <select
+                      value={editPriority}
+                      onChange={(e) => setEditPriority(e.target.value as Priority)}
+                      className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
+                    >
+                      <option value="LOW">Low</option>
+                      <option value="MEDIUM">Medium</option>
+                      <option value="HIGH">High</option>
+                      <option value="CRITICAL">Critical</option>
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="py-2.5 border-b border-border flex items-center justify-between">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Assignee</span>
+                    <div className="flex items-center gap-2">
+                      {task.assignee ? (
+                        <>
+                          <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-brand-light text-brand-text text-[9px] font-medium border border-border">
+                            {task.assignee.avatarUrl ? (
+                              <img src={task.assignee.avatarUrl} alt={task.assignee.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{task.assignee.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <span className="text-[13px] text-text-primary">{task.assignee.name}</span>
+                        </>
+                      ) : (
+                        <span className="text-[13px] text-text-tertiary">Unassigned</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="py-2.5 border-b border-border flex items-center justify-between">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Created By</span>
+                    <span className="text-[13px] text-text-primary font-medium">{task.creator?.name || "System"}</span>
+                  </div>
+                </>
+              )}
+
+              {/* Tags */}
+              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Tags</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {task.tags && task.tags.length > 0 ? (
+                    task.tags.map((tag) => (
+                      <span key={tag} className="px-2.5 py-0.5 rounded-full bg-bg border border-border text-[10px] text-text-secondary font-medium">
+                        {tag}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[13px] text-text-tertiary">No tags assigned</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Checklist Items */}
+              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Subtask Checklist</span>
+                {task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0 ? (
+                  <div className="space-y-2 mt-1">
+                    {task.checklistItems.map((item: any, idx: number) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleChecklistToggle(idx)}
+                        className="flex items-center gap-2.5 cursor-pointer hover:opacity-85 transition-opacity"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.completed}
+                          onChange={() => {}} // handled by click
+                          className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                        />
+                        <span className={cn("text-[13px] text-text-primary font-medium", item.completed && "line-through text-text-tertiary")}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-[13px] text-text-tertiary">No checklist items defined</span>
+                )}
+              </div>
+
+              {/* File Attachments */}
+              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
+                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Attached Materials</span>
+                {task.attachments && Array.isArray(task.attachments) && task.attachments.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2 mt-1">
+                    {task.attachments.map((file: any, i: number) => {
+                      const isAudio = file.type === "audio" || file.name.endsWith(".webm") || file.name.startsWith("recording-");
+                      return (
+                        <div key={i} className="flex flex-col gap-1.5 p-2 rounded bg-bg border border-border text-[13px] text-text-primary">
+                          <div className="flex items-center justify-between">
+                            <span className="truncate pr-4 font-medium">{file.name}</span>
+                            <div className="flex items-center gap-2">
+                              {file.size && <span className="text-[10px] text-text-tertiary">({(file.size / 1024).toFixed(1)} KB)</span>}
+                              {file.url && (
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#6366F1] dark:text-[#818CF8] hover:underline font-bold text-[11px]"
+                                >
+                                  Open
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                          {isAudio && file.url && (
+                            <audio controls src={file.url} className="w-full mt-1 h-8 rounded" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <span className="text-[13px] text-text-tertiary">No attachments provided</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 2. UPDATES & COMMENTS TAB */}
+          {activeTab === "updates" && (
+            <div className="space-y-4">
+              {/* Add Update Input */}
+              <form onSubmit={handlePostUpdate} className="space-y-2.5">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Post progress update or comment..."
+                    value={newRemark}
+                    onChange={(e) => setNewRemark(e.target.value)}
+                    className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[12px] active:scale-95 transition-all shrink-0 cursor-pointer"
+                  >
+                    Send
+                  </button>
+                </div>
+                
+                {/* File Attachment & Voice Note controls for Updates */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => updateFileInputRef.current?.click()}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded border border-border bg-transparent text-[11px] text-text-secondary hover:bg-bg hover:text-text-primary transition-colors cursor-pointer select-none font-medium"
+                  >
+                    <Paperclip className="w-3.5 h-3.5" />
+                    Attach File
+                  </button>
+                  <input
+                    ref={updateFileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleUpdateFileChange}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowUpdateVoiceModal(true)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded border border-[#FECACA] bg-transparent text-[11px] text-[#EF4444] hover:bg-[#FEF2F2] transition-colors cursor-pointer select-none font-medium"
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                    Record audio
+                  </button>
+                </div>
+
+                {/* Update Files Preview */}
+                {updateSelectedFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {updateSelectedFiles.map((f, i) => (
+                      <div key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-bg border border-border text-[10.5px]">
+                        <span className="truncate max-w-[100px] font-medium text-text-primary">{f.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setUpdateSelectedFiles(updateSelectedFiles.filter((_, idx) => idx !== i))}
+                          className="hover:opacity-75 text-text-tertiary hover:text-text-primary"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Update Voice Notes Preview */}
+                {updateVoiceRecordings.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {updateVoiceRecordings.map((v, i) => (
+                      <div key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FEF2F2] border border-[#FECACA] text-[#EF4444] text-[10.5px] font-medium dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                        <Mic className="w-3.5 h-3.5" />
+                        <span>Voice note {i + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => setUpdateVoiceRecordings(updateVoiceRecordings.filter((_, idx) => idx !== i))}
+                          className="hover:opacity-75"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </form>
+
+              {/* Updates Feed */}
+              <div className="space-y-3.5">
+                {updates.length === 0 ? (
+                  <div className="text-center py-8 text-text-tertiary text-[12px]">
+                    No status updates posted yet.
+                  </div>
+                ) : (
+                  updates.map((up) => (
+                    <div key={up.id} className="p-3.5 bg-bg/40 border border-border rounded-lg space-y-3">
+                      {/* Author header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <UserAvatar src={up.user?.avatarUrl} name={up.user?.name} size="sm" />
+                          <div>
+                            <p className="text-[12px] font-medium text-text-primary">{up.user?.name || "System"}</p>
+                            <p className="text-[10px] text-text-tertiary">{new Date(up.createdAt).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        {up.type !== "COMMENT" && (
+                          <span className="px-2 py-0.5 rounded bg-brand-light text-brand-text text-[9px] font-medium uppercase tracking-wider">
+                            {up.type.replace("_", " ")}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <p className="text-[12px] text-text-primary leading-relaxed font-medium pl-1">
+                        {up.content}
+                      </p>
+
+                      {/* Update Attachments */}
+                      {up.attachments && Array.isArray(up.attachments) && up.attachments.length > 0 && (
+                        <div className="grid grid-cols-1 gap-1.5 mt-1.5 pl-1">
+                          {up.attachments.map((file: any, fileIdx: number) => {
+                            const isAudio = file.type === "audio" || file.name.endsWith(".webm") || file.name.startsWith("recording-");
+                            return (
+                              <div key={fileIdx} className="flex flex-col gap-1 p-2 rounded bg-surface border border-border text-[11px] text-text-primary">
+                                <div className="flex items-center justify-between">
+                                  <span className="truncate pr-4 font-semibold">{file.name}</span>
+                                  {file.url && (
+                                    <a
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[#6366F1] dark:text-[#818CF8] hover:underline font-bold text-[10px]"
+                                    >
+                                      Open
+                                    </a>
+                                  )}
+                                </div>
+                                {isAudio && file.url && (
+                                  <audio controls src={file.url} className="w-full mt-1 h-7 rounded" />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Threaded Nested Comments */}
+                      <div className="pl-5 border-l border-border space-y-2">
+                        {up.comments && up.comments.map((c) => (
+                          <div key={c.id} className="p-2 bg-surface border border-border rounded space-y-1">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-[10px] font-medium text-text-primary">{c.user?.name || "System"}</p>
+                              <span className="text-[8px] text-text-tertiary">{new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                            </div>
+                            <p className="text-[11px] text-text-secondary">{c.body}</p>
+                          </div>
+                        ))}
+
+                        {/* Inline comment inputs */}
+                        <div className="flex gap-2 mt-2">
+                          <input
+                            type="text"
+                            placeholder="Reply to update..."
+                            value={newCommentText[up.id] || ""}
+                            onChange={(e) => setNewCommentText({ ...newCommentText, [up.id]: e.target.value })}
+                            onKeyDown={(e) => { if (e.key === "Enter") handlePostComment(up.id); }}
+                            className="block w-full px-3 py-1 border border-border-strong rounded bg-surface text-text-primary text-[11px] focus:outline-none focus:border-brand"
+                          />
+                          <button
+                            onClick={() => handlePostComment(up.id)}
+                            className="px-2.5 py-1 bg-bg hover:bg-bg/60 rounded text-text-secondary hover:text-text-primary text-[10px] font-medium"
+                          >
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 4. SUBTASKS TAB */}
+          {activeTab === "subtasks" && (
+            <div className="space-y-4">
+              {/* Add inline subtask */}
+              {currentUser?.role === "ADMIN" && (
+                <form onSubmit={handleAddSubtask} className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter subtask title..."
+                    value={newSubtaskTitle}
+                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                    className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[12px] active:scale-95 transition-all shrink-0 cursor-pointer"
+                  >
+                    Add
+                  </button>
+                </form>
+              )}
+
+              {/* Subtasks List */}
+              <div className="space-y-2">
+                <h3 className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Subtasks List</h3>
+                {subtasks.length === 0 ? (
+                  <div className="text-center py-4 text-text-tertiary text-[12px]">No subtasks created.</div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {subtasks.map((sub) => (
+                      <div key={sub.id} className="flex items-center justify-between p-2.5 bg-bg/30 border border-border rounded">
+                        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => handleToggleSubtaskStatus(sub)}>
+                          <input
+                            type="checkbox"
+                            checked={sub.status === "DONE"}
+                            onChange={() => {}} // handled by parent onClick
+                            className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                          />
+                          <span className={cn("text-[12px] font-medium text-text-primary truncate max-w-[220px]", sub.status === "DONE" && "line-through text-text-tertiary")}>
+                            {sub.title}
+                          </span>
+                        </div>
+                        <StatusBadge status={sub.status} showDot={false} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {currentUser?.role === "ADMIN" ? (
+          <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
+            <button
+              onClick={handleDeleteTask}
+              className="px-4 py-2 border border-[#FECACA] bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete Task
+            </button>
+          </div>
+        ) : (
+          task.status !== "DONE" && (
+            <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
+              <button
+                onClick={handleMarkCompleted}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Mark as Completed
+              </button>
+            </div>
+          )
+        )}
+      </div>
+
+      {showUpdateVoiceModal && (
+        <VoiceRecordingModal
+          onSave={handleUpdateVoiceSave}
+          onClose={() => setShowUpdateVoiceModal(false)}
+        />
+      )}
+    </>
   );
 }
 
-// ── Mini Voice Recorder ────────────────────────────────────────────────────────
-
-function InlineVoiceRecorder({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
-  const [state, setState]   = useState<"idle"|"recording"|"paused"|"done">("idle");
-  const [secs, setSecs]     = useState(0);
-  const timerRef            = useRef<ReturnType<typeof setInterval> | null>(null);
-  const mediaRef            = useRef<MediaRecorder | null>(null);
-  const chunksRef           = useRef<Blob[]>([]);
-
+// ── Voice Recording Modal ──────────────────────────────────────────────────────
+function VoiceRecordingModal({ onSave, onClose }: { onSave: (blob: Blob, name: string) => void; onClose: () => void }) {
+  const [state, setState] = useState<"idle" | "recording" | "paused" | "done">("idle");
+  const [seconds, setSeconds] = useState(0);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const blobRef = useRef<Blob | null>(null);
+  
   const pad = (n: number) => String(n).padStart(2, "0");
-  const startTimer = () => { timerRef.current = setInterval(() => setSecs(s => s + 1), 1000); };
+  const display = `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`;
+
+  const startTimer = () => { timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000); };
   const stopTimer  = () => { if (timerRef.current) clearInterval(timerRef.current); };
 
-  const start = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mr = new MediaRecorder(stream);
-    chunksRef.current = [];
-    mr.ondataavailable = e => chunksRef.current.push(e.data);
-    mr.onstop = () => setState("done");
-    mr.start(); mediaRef.current = mr;
-    setState("recording"); startTimer();
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => chunksRef.current.push(e.data);
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        blobRef.current = blob;
+        setAudioUrl(URL.createObjectURL(blob));
+        setState("done");
+      };
+      mr.start();
+      mediaRef.current = mr;
+      setState("recording");
+      startTimer();
+    } catch (err) {
+      console.error("Microphone access denied:", err);
+    }
   };
-  const pause  = () => { mediaRef.current?.pause();  stopTimer(); setState("paused"); };
-  const resume = () => { mediaRef.current?.resume(); startTimer(); setState("recording"); };
-  const stop   = () => { mediaRef.current?.stop(); mediaRef.current?.stream.getTracks().forEach(t => t.stop()); stopTimer(); };
+
+  const pauseRecording  = () => { mediaRef.current?.pause();  stopTimer();  setState("paused"); };
+  const resumeRecording = () => { mediaRef.current?.resume(); startTimer(); setState("recording"); };
+  const stopRecording   = () => { mediaRef.current?.stop(); mediaRef.current?.stream.getTracks().forEach((t) => t.stop()); stopTimer(); };
+  const discard         = () => { setAudioUrl(null); blobRef.current = null; setSeconds(0); setState("idle"); };
 
   useEffect(() => () => stopTimer(), []);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", backgroundColor: "#fef2f2", borderRadius: "8px", border: "1px solid #fecaca" }}>
-      <Mic style={{ height: "14px", width: "14px", color: "#ef4444", flexShrink: 0 }} />
-      <span style={{ fontSize: "13px", fontWeight: 600, color: "#ef4444", fontVariantNumeric: "tabular-nums", minWidth: "40px" }}>
-        {pad(Math.floor(secs / 60))}:{pad(secs % 60)}
-      </span>
-      <div style={{ display: "flex", gap: "6px", marginLeft: "auto" }}>
-        {state === "idle" && (
-          <button onClick={start} style={{ padding: "4px 10px", borderRadius: "6px", border: "none", backgroundColor: "#ef4444", color: "#fff", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>Start</button>
-        )}
-        {state === "recording" && (<>
-          <button onClick={pause} style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "12px", cursor: "pointer" }}><Pause style={{ height: "12px", width: "12px" }} /></button>
-          <button onClick={stop}  style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "#ef4444", color: "#fff", fontSize: "12px", cursor: "pointer" }}><StopCircle style={{ height: "12px", width: "12px" }} /></button>
-        </>)}
-        {state === "paused" && (<>
-          <button onClick={resume} style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "12px", cursor: "pointer" }}><Play style={{ height: "12px", width: "12px" }} /></button>
-          <button onClick={stop}   style={{ padding: "4px 8px", borderRadius: "6px", border: "none", backgroundColor: "#ef4444", color: "#fff", fontSize: "12px", cursor: "pointer" }}><StopCircle style={{ height: "12px", width: "12px" }} /></button>
-        </>)}
-        {state === "done" && (
-          <button onClick={onSave} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "6px", border: "none", backgroundColor: "#4f46e5", color: "#fff", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
-            <Check style={{ height: "11px", width: "11px" }} /> Save
-          </button>
-        )}
-        <button onClick={onCancel} style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "12px", cursor: "pointer", color: "#9ca3af" }}>
-          <X style={{ height: "12px", width: "12px" }} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Comment Popup ──────────────────────────────────────────────────────────────
-
-function CommentPopup({ onSubmit, onClose }: { onSubmit: (text: string) => void; onClose: () => void }) {
-  const [text, setText] = useState("");
-  return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 200 }} />
-      <div onClick={e => e.stopPropagation()} style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 210, backgroundColor: "#fff", borderRadius: "14px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)", width: "400px", maxWidth: "calc(100vw - 32px)", padding: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-          <span style={{ fontSize: "15px", fontWeight: 700, color: "#111827" }}>Add Comment</span>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}>
-            <X style={{ height: "16px", width: "16px" }} />
+      {/* Overlay — z-modal-backdrop = 70 */}
+      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center" style={{ zIndex: "calc(var(--z-modal-backdrop) + 10)" }} />
+      
+      {/* Modal Container — z-modal = 80 */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[360px] bg-surface border border-border rounded-xl shadow-lg p-6 animate-in zoom-in-95 duration-150" style={{ zIndex: "calc(var(--z-modal) + 10)" }}>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[13px] font-medium text-text-primary">Voice Recording</span>
+          <button onClick={onClose} className="p-1 hover:bg-bg rounded-md text-text-tertiary">
+            <X className="h-4 w-4" />
           </button>
         </div>
-        <textarea
-          value={text} onChange={e => setText(e.target.value)}
-          placeholder="Write your comment..."
-          rows={4}
-          style={{ width: "100%", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "10px 12px", fontSize: "13px", color: "#374151", outline: "none", resize: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: "1.5", backgroundColor: "#fafafa" }}
-          onFocus={e => { e.currentTarget.style.borderColor = "#4f46e5"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(79,70,229,0.08)"; }}
-          onBlur={e  => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.boxShadow = "none"; }}
-          autoFocus
-        />
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "14px" }}>
-          <button onClick={onClose} style={{ height: "34px", padding: "0 16px", borderRadius: "8px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "13px", fontWeight: 500, color: "#374151", cursor: "pointer" }}>Cancel</button>
-          <button onClick={() => { if (text.trim()) { onSubmit(text.trim()); onClose(); } }}
-            style={{ height: "34px", padding: "0 16px", borderRadius: "8px", border: "none", backgroundColor: "#4f46e5", fontSize: "13px", fontWeight: 500, color: "#fff", cursor: "pointer" }}>
-            Post Comment
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── Task Update Entry ──────────────────────────────────────────────────────────
-
-function UpdateEntry({ update, onAddComment }: { update: TaskUpdate; onAddComment: (updateId: string, text: string) => void }) {
-  const [showCommentPopup, setShowCommentPopup] = useState(false);
-
-  return (
-    <div style={{ borderLeft: "2px solid #e0e7ff", paddingLeft: "14px", marginBottom: "16px" }}>
-      {/* Update body */}
-      <div style={{ backgroundColor: "#fafafa", borderRadius: "10px", border: "1px solid #f0f0f0", padding: "12px 14px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-          <span style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 500 }}>{formatTime(update.createdAt)}</span>
-          <button
-            onClick={() => setShowCommentPopup(true)}
-            style={{ display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", fontSize: "11px", fontWeight: 500, padding: "2px 6px", borderRadius: "6px" }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
-          >
-            <MessageSquare style={{ height: "11px", width: "11px" }} /> Comment
-          </button>
-        </div>
-
-        <p style={{ fontSize: "13px", color: "#374151", margin: "0 0 8px", lineHeight: "1.5" }}>{update.remark}</p>
-
-        {/* Attachments row */}
-        {(update.files.length > 0 || update.images.length > 0 || update.hasVoice) && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {update.files.map((f, i) => (
-              <span key={i} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "6px", backgroundColor: "#f3f4f6", fontSize: "11px", color: "#6b7280" }}>
-                <Paperclip style={{ height: "10px", width: "10px" }} />{f}
-              </span>
-            ))}
-            {update.images.map((img, i) => (
-              <span key={i} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "6px", backgroundColor: "#f0fdf4", fontSize: "11px", color: "#22c55e" }}>
-                <ImageIcon style={{ height: "10px", width: "10px" }} />{img}
-              </span>
-            ))}
-            {update.hasVoice && (
-              <span style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "6px", backgroundColor: "#fef2f2", fontSize: "11px", color: "#ef4444" }}>
-                <Mic style={{ height: "10px", width: "10px" }} /> Voice note
-              </span>
-            )}
+        
+        <div className="text-center mb-6">
+          <div className={`text-3xl font-medium font-mono tracking-tight ${state === "recording" ? "text-[#EF4444] animate-pulse" : "text-text-primary"}`}>
+            {display}
           </div>
-        )}
-      </div>
-
-      {/* Comments under this update */}
-      {update.comments.length > 0 && (
-        <div style={{ paddingLeft: "12px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
-          {update.comments.map(c => (
-            <div key={c.id} style={{ backgroundColor: "#ffffff", border: "1px solid #f0f0f0", borderRadius: "8px", padding: "8px 12px" }}>
-              <p style={{ fontSize: "12px", color: "#374151", margin: "0 0 3px", lineHeight: "1.4" }}>{c.text}</p>
-              <span style={{ fontSize: "10px", color: "#d1d5db" }}>{formatTime(c.createdAt)}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showCommentPopup && (
-        <CommentPopup
-          onSubmit={text => onAddComment(update.id, text)}
-          onClose={() => setShowCommentPopup(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-// ── Main Panel ─────────────────────────────────────────────────────────────────
-
-export function TaskDetailPanel({
-  task,
-  onClose,
-  onReopen,
-  onDelete,
-  onFinish
-}: {
-  task: Task;
-  onClose: () => void;
-  onDelete: () => void;
-  onReopen?: () => void;
-  onFinish?: (id: string) => void;
-}) {
-  const { currentUser, fetchCurrentUser } = useTaskStore();
-  useEffect(() => {
-    if (!currentUser) {
-      fetchCurrentUser();
-    }
-  }, []);
-
-  const isEmployee = currentUser?.role === "EMPLOYEE";
-  const [updates, setUpdates]               = useState<TaskUpdate[]>([]);
-  const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [showCommentPopup, setShowCommentPopup] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showFinishedConfirm, setShowFinishedConfirm] = useState(false);
-  const [Finishing, setFinishing] = useState(false);
-
-  // Update form state
-  const [remark, setRemark]       = useState("");
-  const [updateFiles, setUpdateFiles] = useState<File[]>([]);
-  const [updateImages, setUpdateImages] = useState<File[]>([]);
-  const [showVoice, setShowVoice] = useState(false);
-  const [hasVoice, setHasVoice]   = useState(false);
-  const [showStatusPicker, setShowStatusPicker] = useState(false);
-  const fileRef  = useRef<HTMLInputElement>(null);
-  const imageRef = useRef<HTMLInputElement>(null);
-
-  const prio     = PRIORITY[task.priority] ?? PRIORITY.MEDIUM;
-  const tagParts = task.tag ? task.tag.split(" · ").filter(Boolean) : [];
-
-const submitUpdate = async () => {
-  if (!remark.trim()) return;
-  const res = await fetch(`/api/tasks/${task.id}/updates`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      remark: remark.trim(),
-      files: updateFiles.map(f => f.name),
-      images: updateImages.map(f => f.name),
-      hasVoice,
-    }),
-  });
-  const saved = await res.json();
-  setUpdates(prev => [saved, ...prev]);
-  setRemark(""); setUpdateFiles([]); setUpdateImages([]); setHasVoice(false);
-  setShowVoice(false); setShowUpdateForm(false);
-};
-  // updat the taskstatus to completed if the update remark contains "completed" or "finished"
-  useEffect(() => {
-  fetch(`/api/tasks/${task.id}/updates`)
-    .then(r => r.json())
-    .then(setUpdates)
-    .catch(console.error);
-}, [task.id]);
-
-const addCommentToUpdate = async (updateId: string, text: string) => {
-  const res = await fetch(`/api/tasks/${task.id}/updates/${updateId}/comments`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
-  });
-  const saved = await res.json();
-  setUpdates(prev => prev.map(u =>
-    u.id === updateId
-      ? { ...u, comments: [...u.comments, saved] }
-      : u
-  ));
-};
-  const handleDelete = async () => {
-  try {
-    await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
-    setShowDeleteConfirm(false);
-    onDelete();
-    onClose();
-    STATUS_LABEL: "COMPLETED";
-  } catch (err) {
-    console.error("Failed to delete task", err);
-  }
-};
-const handleFinish = async () => {
-  try {
-    setFinishing(true);
-    await fetch(`/api/tasks/${task.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "COMPLETED", progress: 100 }),
-    });
-    setShowFinishedConfirm(false);
-    onFinish && onFinish(task.id);
-    onClose();
-  } catch (err) {
-    console.error("Failed to mark task as finished", err);
-  } finally {
-    setFinishing(false);
-  }
-};
-  return (
-    <>
-      {/* Backdrop */}
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.2)", zIndex: 80 }} />
-
-      {/* Slide-in panel */}
-      <div
-        style={{
-          position: "fixed", top: 0, right: 0, bottom: 0,
-          width: "min(520px, 100vw)",
-          backgroundColor: "#ffffff",
-          boxShadow: "-8px 0 40px rgba(0,0,0,0.12)",
-          zIndex: 90,
-          display: "flex", flexDirection: "column",
-          animation: "slideIn 0.22s cubic-bezier(0.16,1,0.3,1)",
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <style>{`
-          @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to   { transform: translateX(0);    opacity: 1; }
-          }
-        `}</style>
-
-        {/* ── Header ── */}
-        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid #f3f4f6", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                <span style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace", fontWeight: 600 }}>
-                  #{task.id.slice(0, 8).toUpperCase()}
-                </span>
-                <span style={{ padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, backgroundColor: prio.bg, color: prio.color }}>
-                  {prio.label}
-                </span>
-              </div>
-              <h2 style={{ fontSize: "17px", fontWeight: 700, color: "#111827", margin: 0, lineHeight: "1.3" }}>
-                {task.title}
-              </h2>
-            </div>
-            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: "4px", display: "flex", flexShrink: 0 }}>
-              <X style={{ height: "18px", width: "18px" }} />
-            </button>
+          <div className="mt-2 text-[11px] font-medium text-text-tertiary">
+            {state === "idle" && "Ready to record"}
+            {state === "recording" && "● Recording..."}
+            {state === "paused" && "Paused"}
+            {state === "done" && "Recording saved"}
           </div>
         </div>
 
-        {/* ── Scrollable body ── */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
-
-          {/* Task details grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
-            {[
-              { label: "Status",     value: STATUS_LABEL[task.status] ?? task.status },
-              { label: "Due Date",   value: task.dueDate ? new Date(task.dueDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : "—" },
-              { label: "Assigned To", value: task.assignedTo?.name ?? "—" },
-              { label: "Assigned By", value: task.delegatedBy?.name ?? "—" },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ backgroundColor: "#f9fafb", borderRadius: "8px", padding: "10px 12px", border: "1px solid #f0f0f0" }}>
-                <p style={{ fontSize: "10px", fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 3px" }}>{label}</p>
-                <p style={{ fontSize: "13px", fontWeight: 600, color: "#111827", margin: 0 }}>{value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Description */}
-          {task.description && (
-            <div style={{ marginBottom: "20px" }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>Description</p>
-              <p style={{ fontSize: "13px", color: "#374151", lineHeight: "1.6", margin: 0 }}>{task.description}</p>
-            </div>
-          )}
-
-          {/* Tags */}
-          {tagParts.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "20px" }}>
-              {tagParts.map((t, i) => (
-                <span key={i} style={{ padding: "3px 10px", borderRadius: "6px", backgroundColor: "#eef2ff", color: "#4f46e5", fontSize: "12px", fontWeight: 500 }}>{t}</span>
-              ))}
-            </div>
-          )}
-
-          {/* Divider */}
-          <div style={{ height: "1px", backgroundColor: "#f3f4f6", marginBottom: "20px" }} />
-
-          {/* Task Updates feed */}
-          <div>
-            <p style={{ fontSize: "12px", fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 14px" }}>
-              Task Updates {updates.length > 0 && `(${updates.length})`}
-            </p>
-
-            {updates.length === 0 && (
-              <p style={{ fontSize: "13px", color: "#d1d5db", textAlign: "center", padding: "20px 0" }}>No updates yet</p>
-            )}
-
-            {updates.map(u => (
-              <UpdateEntry key={u.id} update={u} onAddComment={addCommentToUpdate} />
-            ))}
-          </div>
-
-          {/* Update form (shown when "Task Update" is clicked) */}
-          {showUpdateForm && (
-            <div style={{ backgroundColor: "#f9fafb", borderRadius: "12px", border: "1px solid #e5e7eb", padding: "16px", marginTop: "12px" }}>
-              <textarea
-                value={remark} onChange={e => setRemark(e.target.value)}
-                placeholder="Describe this update..."
-                rows={3}
-                style={{ width: "100%", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "10px 12px", fontSize: "13px", color: "#374151", outline: "none", resize: "none", boxSizing: "border-box", fontFamily: "inherit", lineHeight: "1.5", backgroundColor: "#ffffff" }}
-                onFocus={e => { e.currentTarget.style.borderColor = "#4f46e5"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(79,70,229,0.08)"; }}
-                onBlur={e  => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.boxShadow = "none"; }}
-                autoFocus
+        {/* Waves Animation */}
+        {(state === "recording" || state === "paused") && (
+          <div className="flex justify-center items-center gap-1 mb-6 h-8">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-0.5 rounded-full ${state === "recording" ? "bg-[#EF4444]" : "bg-border-strong"}`}
+                style={{
+                  height: `${6 + Math.abs(Math.sin(i * 0.5) * 16) + Math.cos(i * 0.8) * 8}px`,
+                  animation: state === "recording" ? `wave-anim ${1 + (i % 3) * 0.2}s ease-in-out infinite` : "none"
+                }}
               />
+            ))}
+          </div>
+        )}
 
-              {/* Voice recorder */}
-              {showVoice && (
-                <div style={{ marginTop: "8px" }}>
-                  <InlineVoiceRecorder onSave={() => { setHasVoice(true); setShowVoice(false); }} onCancel={() => setShowVoice(false)} />
-                </div>
-              )}
+        {state === "done" && audioUrl && (
+          <div className="mb-6">
+            <audio controls src={audioUrl} className="w-full rounded bg-bg" />
+          </div>
+        )}
 
-              {/* Attached files preview */}
-              {(updateFiles.length > 0 || updateImages.length > 0) && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px" }}>
-                  {updateFiles.map((f, i) => (
-                    <span key={i} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "6px", backgroundColor: "#f3f4f6", fontSize: "11px", color: "#6b7280" }}>
-                      <Paperclip style={{ height: "10px", width: "10px" }} />{f.name}
-                      <button onClick={() => setUpdateFiles(prev => prev.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, display: "flex" }}>
-                        <X style={{ height: "10px", width: "10px" }} />
-                      </button>
-                    </span>
-                  ))}
-                  {updateImages.map((f, i) => (
-                    <span key={i} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "6px", backgroundColor: "#f0fdf4", fontSize: "11px", color: "#22c55e" }}>
-                      <ImageIcon style={{ height: "10px", width: "10px" }} />{f.name}
-                      <button onClick={() => setUpdateImages(prev => prev.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, display: "flex" }}>
-                        <X style={{ height: "10px", width: "10px" }} />
-                      </button>
-                    </span>
-                  ))}
-                  {hasVoice && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "6px", backgroundColor: "#fef2f2", fontSize: "11px", color: "#ef4444" }}>
-                      <Mic style={{ height: "10px", width: "10px" }} /> Voice note
-                      <button onClick={() => setHasVoice(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 0, display: "flex" }}>
-                        <X style={{ height: "10px", width: "10px" }} />
-                      </button>
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Update form actions */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px" }}>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  {/* File */}
-                  <button onClick={() => fileRef.current?.click()} title="Attach file"
-                    style={{ height: "30px", width: "30px", borderRadius: "7px", border: "1px solid #e5e7eb", backgroundColor: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#9ca3af" }}>
-                    <Paperclip style={{ height: "13px", width: "13px" }} />
-                  </button>
-                  <input ref={fileRef} type="file" multiple style={{ display: "none" }} onChange={e => { if (e.target.files) setUpdateFiles(prev => [...prev, ...Array.from(e.target.files!)]); }} />
-
-                  {/* Voice */}
-                  <button onClick={() => setShowVoice(v => !v)} title="Voice note"
-                    style={{ height: "30px", width: "30px", borderRadius: "7px", border: `1px solid ${showVoice ? "#ef4444" : "#e5e7eb"}`, backgroundColor: showVoice ? "#fef2f2" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: showVoice ? "#ef4444" : "#9ca3af" }}>
-                    <Mic style={{ height: "13px", width: "13px" }} />
-                  </button>
-
-                  {/* Image */}
-                  <button onClick={() => imageRef.current?.click()} title="Attach image"
-                    style={{ height: "30px", width: "30px", borderRadius: "7px", border: "1px solid #e5e7eb", backgroundColor: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#9ca3af" }}>
-                    <ImageIcon style={{ height: "13px", width: "13px" }} />
-                  </button>
-                  <input ref={imageRef} type="file" multiple accept="image/*" style={{ display: "none" }} onChange={e => { if (e.target.files) setUpdateImages(prev => [...prev, ...Array.from(e.target.files!)]); }} />
-                </div>
-
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={() => { setShowUpdateForm(false); setRemark(""); setUpdateFiles([]); setUpdateImages([]); setHasVoice(false); }}
-                    style={{ height: "30px", padding: "0 12px", borderRadius: "7px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "12px", fontWeight: 500, color: "#374151", cursor: "pointer" }}>
-                    Cancel
-                  </button>
-                  <button onClick={submitUpdate}
-                    style={{ height: "30px", padding: "0 14px", borderRadius: "7px", border: "none", backgroundColor: "#4f46e5", fontSize: "12px", fontWeight: 600, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}>
-                    <Send style={{ height: "11px", width: "11px" }} /> Post Update
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div className="flex justify-center gap-3">
+          {state === "idle" && (
+            <Button onClick={startRecording} variant="danger" size="sm" icon={<Mic className="h-3.5 w-3.5" />}>
+              Start Recording
+            </Button>
+          )}
+          {state === "recording" && (
+            <>
+              <Button onClick={pauseRecording} variant="secondary" size="sm" icon={<Pause className="h-3.5 w-3.5" />}>
+                Pause
+              </Button>
+              <Button onClick={stopRecording} variant="danger" size="sm" icon={<StopCircle className="h-3.5 w-3.5" />}>
+                Stop
+              </Button>
+            </>
+          )}
+          {state === "paused" && (
+            <>
+              <Button onClick={resumeRecording} variant="secondary" size="sm" icon={<Play className="h-3.5 w-3.5" />}>
+                Resume
+              </Button>
+              <Button onClick={stopRecording} variant="danger" size="sm" icon={<StopCircle className="h-3.5 w-3.5" />}>
+                Stop
+              </Button>
+            </>
+          )}
+          {state === "done" && (
+            <>
+              <Button onClick={discard} variant="danger" size="sm" icon={<Trash2 className="h-3.5 w-3.5" />}>
+                Discard
+              </Button>
+              <Button onClick={() => { if (blobRef.current) { onSave(blobRef.current, `recording-${Date.now()}.webm`); onClose(); } }}
+                variant="primary" size="sm" icon={<Check className="h-3.5 w-3.5" />}>
+                Save Note
+              </Button>
+            </>
           )}
         </div>
-
-        {/* ── Footer ── */}
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #f3f4f6", flexShrink: 0, backgroundColor: "#fafafa" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-
-            {/* Reopen */}
-            <button onClick={onReopen}
-              style={{ display: "flex", alignItems: "center", gap: "5px", height: "34px", padding: "0 12px", borderRadius: "8px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "12px", fontWeight: 500, color: "#374151", cursor: "pointer" }}>
-              <RefreshCw style={{ height: "12px", width: "12px", color: "#4f46e5" }} /> Reopen
-            </button>
-
-            {/* Comment */}
-            <button onClick={() => setShowCommentPopup(true)}
-              style={{ display: "flex", alignItems: "center", gap: "5px", height: "34px", padding: "0 12px", borderRadius: "8px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "12px", fontWeight: 500, color: "#374151", cursor: "pointer" }}>
-              <MessageSquare style={{ height: "12px", width: "12px", color: "#6b7280" }} /> Comment
-            </button>
-
-            {/* Delete */}
-            {!isEmployee && (
-              <button onClick={() => setShowDeleteConfirm(true)}
-                style={{ display: "flex", alignItems: "center", gap: "5px", height: "34px", padding: "0 12px", borderRadius: "8px", border: "1px solid #fecaca", backgroundColor: "#fef2f2", fontSize: "12px", fontWeight: 500, color: "#ef4444", cursor: "pointer" }}>
-                  <Trash2 style={{ height: "12px", width: "12px" }} /> Delete
-              </button>
-            )}
-            
-            {/*Finished Task*/}
-            <button onClick={() => setShowFinishedConfirm(true)}
-              style={{ display: "flex", alignItems: "center", gap: "5px", height: "34px", padding: "0 12px", borderRadius: "8px", border: "1px solid #d1fae5", backgroundColor: "#ecfdf5", fontSize: "12px", fontWeight: 500, color: "#22c55e", cursor: "pointer" }}>
-                <Check style={{ height: "12px", width: "12px" }} /> Mark Completed
-            </button>
-
-            {/* Task Update — rightmost */}
-            <div style={{ marginLeft: "auto", position: "relative" }}>
-              <button onClick={() => setShowUpdateForm(v => !v)}
-                style={{ display: "flex", alignItems: "center", gap: "5px", height: "34px", padding: "0 14px", borderRadius: "8px", border: "none", backgroundColor: showUpdateForm ? "#4338ca" : "#4f46e5", fontSize: "12px", fontWeight: 600, color: "#fff", cursor: "pointer" }}>
-                Task Update <ChevronDown style={{ height: "12px", width: "12px" }} />
-              </button>
-            </div>
-
-          </div>
-        </div>
       </div>
-
-      {/* Comment popup (task-level) */}
-     {showCommentPopup && (
-  <CommentPopup
-    onSubmit={async (text) => {
-      const res = await fetch(`/api/tasks/${task.id}/updates`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ remark: text, files: [], images: [], hasVoice: false }),
-      });
-      const saved = await res.json();
-      setUpdates(prev => [saved, ...prev]);
-      setShowCommentPopup(false);
-    }}
-    onClose={() => setShowCommentPopup(false)}
-  />
-)}
-
-      {/* Delete confirm */}
-      {showDeleteConfirm && (
-        <>
-          <div onClick={() => setShowDeleteConfirm(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 200 }} />
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 210, backgroundColor: "#fff", borderRadius: "14px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)", width: "360px", padding: "28px", textAlign: "center" }}>
-            <div style={{ fontSize: "32px", marginBottom: "12px" }}>🗑️</div>
-            <p style={{ fontSize: "16px", fontWeight: 700, color: "#111827", margin: "0 0 6px" }}>Delete this task?</p>
-            <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0 0 20px" }}>This action cannot be undone.</p>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              <button onClick={() => setShowDeleteConfirm(false)} style={{ height: "36px", padding: "0 20px", borderRadius: "8px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "13px", fontWeight: 500, color: "#374151", cursor: "pointer" }}>Cancel</button>
-              <button onClick={handleDelete} style={{ height: "36px", padding: "0 20px", borderRadius: "8px", border: "none", backgroundColor: "#ef4444", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer" }}>Delete Task</button>
-            </div>
-          </div>
-        </>
-      )}
-      {/* finished task confirm */}
-        {showFinishedConfirm && (
-          <>
-            <div onClick={() => setShowFinishedConfirm(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 200 }} />
-            <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 210, backgroundColor: "#fff", borderRadius: "14px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)", width: "360px", padding: "28px", textAlign: "center" }}>
-              <div style={{ fontSize: "32px", marginBottom: "12px" }}>✅</div>
-              <p style={{ fontSize: "16px", fontWeight: 700, color: "#111827", margin: "0 0 6px" }}>Mark this task as finished?</p>
-              <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0 0 20px" }}>This action cannot be undone.</p>
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                <button onClick={() => setShowFinishedConfirm(false)} style={{ height: "36px", padding: "0 20px", borderRadius: "8px", border: "1px solid #e5e7eb", backgroundColor: "#fff", fontSize: "13px", fontWeight: 500, color: "#374151", cursor: "pointer" }}>Cancel</button>
-                <button onClick={handleFinish} disabled= {Finishing} style={{ height: "36px", padding: "0 20px", borderRadius: "8px", border: "none", backgroundColor: "#22c55e", fontSize: "13px", fontWeight: 600, color : "#fff", cursor: "pointer" }}>{Finishing ? "Saving..." : "Mark as Finished"}</button>
-              </div>
-            </div>
-          </>
-        )}
     </>
   );
 }
 
+export default TaskDetailPanel;

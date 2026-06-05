@@ -2,92 +2,50 @@
 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
-import { useTimeTheme } from "@/hooks/useTimeTheme";
-import { usePathname } from "next/navigation"; // 1. Import usePathname
+import { useThemeStore } from "@/store/useThemeStore";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const timeTheme = useTimeTheme();
-  const pathname = usePathname(); // 2. Get the current route path
+  const { sidebarCollapsed } = useThemeStore();
+  const pathname = usePathname();
 
-  // Check if we are on the profile page (or any sub-route of it)
   const isProfilePage = pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        overflow: "hidden",
-        backgroundColor: timeTheme.background,
-        color: timeTheme.textColor,
-        transition: "background-color 0.5s ease, color 0.5s ease",
-      }}
-    >
-      {/* Sidebar (Always visible) */}
-      <div style={{ flexShrink: 0, zIndex: 20 }}>
-        <Sidebar />
-      </div>
+    <div className="flex h-screen w-screen overflow-hidden bg-bg text-text-primary">
+      {/* Sidebar — fixed, uses z-sidebar (30) */}
+      <Sidebar />
 
-      {/* Main Content Area */}
+      {/* Main Content Area — shifts right to clear sidebar */}
       <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          minWidth: 0,
-          overflow: "hidden",
-        }}
+        className={cn(
+          "flex-1 min-w-0 flex flex-col overflow-hidden transition-[margin-left] duration-200 ease-in-out",
+          /* On mobile: no margin — sidebar overlays */
+          "ml-0",
+          /* Desktop: match sidebar width */
+          sidebarCollapsed ? "md:ml-[56px]" : "md:ml-[240px]"
+        )}
       >
-        {/* 3. Conditionally render the TopNav */}
-        {!isProfilePage && <TopNav />}
+        {/* TopNav — sticky, never scrolls away, z-topnav (40) */}
+        {!isProfilePage && (
+          <div className="sticky top-0 z-[40] shrink-0">
+            <TopNav />
+          </div>
+        )}
 
-        {/* Scrollable Content */}
-        <main
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "24px",
-            backgroundColor: timeTheme.background,
-            transition: "background-color 0.5s ease",
-            // Add custom scrollbar styling directly
-            scrollbarWidth: "thin",
-            scrollbarColor: `${
-              timeTheme.textColor === "#ffffff" ? "#475569" : "#cbd5e1"
-            } transparent`,
-          }}
-        >
-          {/* Main Container max-width */}
-          <div
-            style={{
-              maxWidth: "1600px",
-              margin: "0 auto",
-              height: "100%",
-            }}
-          >
+        {/* Scrollable Content — padding 24px desktop, 16px mobile */}
+        <main className="flex-1 overflow-y-auto bg-bg p-4 md:p-6">
+          {/* Max-width container */}
+          <div className="max-w-[1400px] mx-auto min-h-full">
             {children}
           </div>
         </main>
       </div>
-
-      {/* Global Scrollbar Styles for Webkit (Chrome/Safari/Edge) */}
-      <style>{`
-        main::-webkit-scrollbar {
-          width: 6px;
-        }
-        main::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        main::-webkit-scrollbar-thumb {
-          background-color: ${
-            timeTheme.textColor === "#ffffff" ? "#475569" : "#cbd5e1"
-          };
-          border-radius: 20px;
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,122 +1,152 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useTimeTheme } from "@/hooks/useTimeTheme";
-import { ChevronDown, LogOut } from "lucide-react"; 
+import { LogOut, User, Phone, Lock, Save, ArrowLeft, Clock, BarChart3, CheckSquare, Camera } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
+import { Task } from "@/types";
 
-const DEPARTMENTS = [
-  "Admin Department","Centre Head/ Management","Sales/counseling",
-  "Academic","Faculty","Backend","Account & Finance","HR & Placement","IT Support",
-];
-
-type User = {
-  id: string;
-  name?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  department?: string | null;
-  joinedAt?: Date | string | null;
-  avatarUrl?: string | null;
-  role?: string | null;
+type UserProfileProps = {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    department?: string | null;
+    joinedAt?: Date | string | null;
+    avatarUrl?: string | null;
+    role?: string | null;
+  };
 };
 
-// ── Shared sub-components ──────────────────────────────────────────────────
-
-function FieldLabel({ children, color }: { children: React.ReactNode; color: string }) {
-  return (
-    <label
-      style={{
-        display: "block",
-        fontSize: 12,
-        fontWeight: 600,
-        color: color, 
-        marginBottom: 8,
-      }}
-    >
-      {children}
-    </label>
-  );
-}
-
-const inputBase: React.CSSProperties = {
-  width: "100%",
-  height: 52, // Slightly taller for a wider layout
-  borderRadius: 8,
-  border: "1px solid #e5e7eb",
-  padding: "0 14px",
-  fontSize: 13,
-  fontWeight: 500,
-  color: "#111827",
-  outline: "none",
-  boxSizing: "border-box",
-  backgroundColor: "#fafafa",
-  fontFamily: "inherit",
-  transition: "all 0.2s ease"
-};
-
-function focusRing(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.currentTarget.style.borderColor = "#4f46e5";
-  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(79,70,229,0.08)";
-}
-
-function blurRing(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.currentTarget.style.borderColor = "#e5e7eb";
-  e.currentTarget.style.boxShadow = "none";
-}
-
-// ── Component ────────────────────────────────────────────────────────────────
-
-export default function ProfileForm({ user }: { user: User }) {
+export default function ProfileForm({ user }: UserProfileProps) {
   const router = useRouter();
   const timeTheme = useTimeTheme();
-  
-  const formattedDate = user.joinedAt 
-    ? new Date(user.joinedAt).toISOString().split('T')[0] 
-    : "";
+  const toast = useToast();
 
-  const [formData, setFormData] = useState({
-    name: user.name || "",
-    email: user.email || "",
-    phone: user.phone || "",
-    department: user.department || "",
-    joinedAt: formattedDate,
-  });
+  // Basic profile states
+  const [name, setName] = useState(user.name || "");
+  const [phone, setPhone] = useState(user.phone || "");
+  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || "");
+  const [submittingProfile, setSubmittingProfile] = useState(false);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Password reset states
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [submittingPassword, setSubmittingPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // Client stats calculations
+  const [userTasks, setUserTasks] = useState<Task[]>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
 
-  const handleSubmit = async () => {
-    if (!formData.name.trim() || !formData.email.trim()) {
-      setError("Name and email are required.");
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const res = await fetch("/api/tasks");
+        const payload = await res.json();
+        if (payload.success) {
+          setUserTasks(payload.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load profile task stats:", err);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+    loadTasks();
+  }, []);
+
+  // FileReader avatar preview handler
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Avatar size must be less than 2MB.");
       return;
     }
-    setError(null);
-    setSubmitting(true);
 
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      toast.error("Name is required.");
+      return;
+    }
+
+    setSubmittingProfile(true);
     try {
       const res = await fetch(`/api/users/${user.id}`, {
-        method: "PATCH", 
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          joinedAt: formData.joinedAt ? new Date(formData.joinedAt).toISOString() : undefined
+          name: name.trim(),
+          phone: phone.trim() || null,
+          avatarUrl: avatarUrl || null,
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to update profile");
-      
-      router.refresh();
-      alert("Profile updated successfully!");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      const payload = await res.json();
+      if (payload.success) {
+        toast.success("Profile updated successfully!");
+        router.refresh();
+      } else {
+        toast.error(payload.error || "Failed to update profile.");
+      }
+    } catch (err) {
+      toast.error("An error occurred during save.");
     } finally {
-      setSubmitting(false);
+      setSubmittingProfile(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill out all password fields.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+
+    setSubmittingPassword(true);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const payload = await res.json();
+      if (payload.success) {
+        toast.success("Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast.error(payload.error || "Password change failed.");
+      }
+    } catch (err) {
+      toast.error("An error occurred resetting password.");
+    } finally {
+      setSubmittingPassword(false);
     }
   };
 
@@ -125,254 +155,238 @@ export default function ProfileForm({ user }: { user: User }) {
       await fetch("/api/auth/logout", { method: "POST" });
       window.location.href = "/login";
     } catch (err) {
-      console.error("Logout failed:", err);
+      console.error(err);
     }
   };
 
+  // Stats Computations
+  const totalAssigned = userTasks.length;
+  const completedTasks = userTasks.filter((t) => t.status === "DONE");
+  const completedCount = completedTasks.length;
+
+  // Average Completion Time
+  let averageCompletionTimeText = "—";
+  if (completedCount > 0) {
+    const totalMinutes = completedTasks.reduce((acc, t) => {
+      if (t.actualMinutes) return acc + t.actualMinutes;
+      const start = new Date(t.createdAt).getTime();
+      const end = new Date(t.updatedAt).getTime();
+      return acc + Math.floor((end - start) / 60000);
+    }, 0);
+    const avgHrs = (totalMinutes / completedCount / 60).toFixed(1);
+    averageCompletionTimeText = `${avgHrs}h avg`;
+  }
+
+
+
   return (
-    <div
-      style={{
-        backgroundColor: timeTheme.cardBackground,
-        border: `1px solid ${timeTheme.cardBorder}`,
-        borderRadius: 14,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-        width: "100%", // Takes full width of the container
-        height: "100%", // Stretches to fill available height
-        padding: "32px 40px",
-        display: "flex",
-        flexDirection: "column",
-        transition: "background 0.5s ease, border-color 0.5s ease",
-      }}
-    >
-      {/* Header / Avatar Section */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 20,
-          marginBottom: 32,
-          paddingBottom: 24,
-          borderBottom: `1px solid ${timeTheme.dividerColor}`,
-        }}
-      >
-        <UserAvatar src={user.avatarUrl} name={user.name || "User"} size="lg" />
-        <div>
-          <h2 style={{ fontSize: 24, fontWeight: 700, color: timeTheme.textColor, margin: 0 }}>
-            {user.name || "Unnamed User"}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      {/* Column 1: Profile card & Stats (Left) */}
+      <div className="lg:col-span-1 space-y-6">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm flex flex-col items-center text-center">
+          {/* Avatar Section */}
+          <div className="relative group mb-4">
+            <UserAvatar src={avatarUrl} name={name || "User"} size="lg" />
+            <label className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 text-white rounded-full cursor-pointer hover:bg-indigo-700 transition-colors shadow-md">
+              <Camera className="w-3.5 h-3.5" />
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+            </label>
+          </div>
+
+          <h2 className="text-base font-extrabold text-slate-850 dark:text-slate-100 leading-tight">
+            {name || "Unnamed"}
           </h2>
-          <p style={{ fontSize: 14, fontWeight: 500, color: timeTheme.subTextColor, margin: "6px 0 0 0" }}>
-            {user.department ? `${user.department} • ` : ""}{user.role || "Employee"}
+          <p className="text-xs text-slate-450 dark:text-slate-500 font-semibold mt-1">
+            {user.role === "ADMIN" ? "Administrator" : (user.department || "Staff")}
           </p>
-        </div>
-      </div>
+          <span className="mt-3 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+            {user.role} Account
+          </span>
 
-      {/* Fields Container - Using Grid for wide layout */}
-      <div 
-        style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
-          gap: 24,
-          flex: 1 // Pushes footer to the bottom
-        }}
-      >
-        
-        {/* Name */}
-        <div>
-          <FieldLabel color={timeTheme.subTextColor}>Full Name *</FieldLabel>
-          <input
-            type="text"
-            name="name"
-            placeholder="John Doe"
-            value={formData.name}
-            onChange={handleChange}
-            onFocus={focusRing}
-            onBlur={blurRing}
-            style={inputBase}
-          />
-        </div>
+          <div className="w-full h-px bg-slate-100 dark:bg-slate-850 my-6" />
 
-        {/* Email */}
-        <div>
-          <FieldLabel color={timeTheme.subTextColor}>Email *</FieldLabel>
-          <input
-            type="email"
-            name="email"
-            placeholder="john@company.com"
-            value={formData.email}
-            onChange={handleChange}
-            onFocus={focusRing}
-            onBlur={blurRing}
-            style={inputBase}
-          />
-        </div>
-
-        {/* Phone */}
-        <div>
-          <FieldLabel color={timeTheme.subTextColor}>Phone Number</FieldLabel>
-          <input
-            type="tel"
-            name="phone"
-            placeholder="+91 98765 43210"
-            value={formData.phone}
-            onChange={handleChange}
-            onFocus={focusRing}
-            onBlur={blurRing}
-            style={inputBase}
-          />
-        </div>
-        
-        {/* Department */}
-        <div>
-          <FieldLabel color={timeTheme.subTextColor}>Department</FieldLabel>
-          <div style={{ position: "relative" }}>
-            <select
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              onFocus={focusRing}
-              onBlur={blurRing}
-              style={{
-                ...inputBase,
-                appearance: "none",
-                paddingRight: 36,
-                cursor: "pointer",
-                color: formData.department ? "#111827" : "#9ca3af",
-              }}
-            >
-              <option value="" disabled>Select…</option>
-              {DEPARTMENTS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              style={{
-                position: "absolute",
-                right: 14,
-                top: "50%",
-                transform: "translateY(-50%)",
-                height: 16,
-                width: 16,
-                color: "#9ca3af",
-                pointerEvents: "none",
-              }}
-            />
+          {/* Org details */}
+          <div className="w-full text-left space-y-3.5 text-xs">
+            <div className="flex justify-between">
+              <span className="text-slate-450 font-bold">Email Address</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{user.email}</span>
+            </div>
+            {user.joinedAt && (
+              <div className="flex justify-between">
+                <span className="text-slate-455 font-bold">Joined Organization</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  {new Date(user.joinedAt).toLocaleDateString([], { dateStyle: "medium" })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Joined date */}
-        <div>
-          <FieldLabel color={timeTheme.subTextColor}>Joined Date</FieldLabel>
-          <input
-            type="date"
-            name="joinedAt"
-            value={formData.joinedAt}
-            onChange={handleChange}
-            onFocus={focusRing}
-            onBlur={blurRing}
-            style={{
-              ...inputBase,
-              cursor: "pointer",
-              color: formData.joinedAt ? "#111827" : "#9ca3af",
-            }}
-          />
+        {/* Real-time stats section */}
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm">
+          <h3 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-4">
+            Performance Statistics
+          </h3>
+          
+          {statsLoading ? (
+            <div className="text-center py-6 text-slate-400 text-xs">Calculating statistics...</div>
+          ) : (
+            <div className="space-y-4">
+              {/* Stat card 1: Completion Ratio */}
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <CheckSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">Task Completion</p>
+                  <p className="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5">
+                    {completedCount} / {totalAssigned} completed ({totalAssigned > 0 ? Math.round((completedCount/totalAssigned)*100) : 0}%)
+                  </p>
+                </div>
+              </div>
+
+              {/* Stat card 2: Average time */}
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl">
+                <div className="p-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-xl">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider">Avg Completion Speed</p>
+                  <p className="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5">
+                    {averageCompletionTimeText}
+                  </p>
+                </div>
+              </div>
+
+
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div
-          style={{
-            marginTop: 20,
-            padding: "12px 16px",
-            backgroundColor: "#fef2f2",
-            border: "1px solid #fecaca",
-            borderRadius: 8,
-            fontSize: 13,
-            color: "#ef4444",
-          }}
-        >
-          {error}
+      {/* Column 2 & 3: Forms (Middle/Right) */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Profile Info Form */}
+        <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm">
+          <h3 className="text-xs font-bold text-slate-455 dark:text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-1.5">
+            <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            General Profile Information
+          </h3>
+
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-3 w-4 h-4 text-slate-455" />
+                  <input
+                    type="tel"
+                    placeholder="e.g. +1 555-0199"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-850">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/20 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl transition-all"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign Out
+              </button>
+
+              <button
+                type="submit"
+                disabled={submittingProfile}
+                className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md active:scale-95 transition-all disabled:opacity-50"
+              >
+                <Save className="w-3.5 h-3.5" />
+                Save Changes
+              </button>
+            </div>
+          </form>
         </div>
-      )}
 
-      {/* Footer / Actions */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between", // Pushes logout left, save/cancel right
-          alignItems: "center",
-          marginTop: 40,
-          paddingTop: 24,
-          borderTop: `1px solid ${timeTheme.dividerColor}`,
-        }}
-      >
-        {/* Logout Button (Left Side) */}
-        <button
-          onClick={handleLogout}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            height: 38,
-            padding: "0 16px",
-            borderRadius: 8,
-            border: "1px solid #fca5a5",
-            backgroundColor: "#fef2f2",
-            fontSize: 13,
-            fontWeight: 600,
-            color: "#ef4444",
-            cursor: "pointer",
-            transition: "all 0.2s"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#fee2e2";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#fef2f2";
-          }}
-        >
-          <LogOut style={{ width: 16, height: 16 }} />
-          Logout
-        </button>
+        {/* Change Password Form */}
+        <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm">
+          <h3 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-1.5">
+            <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            Security & Password Settings
+          </h3>
 
-        {/* Save / Cancel (Right Side) */}
-        <div style={{ display: "flex", gap: 12 }}>
-          <button
-            onClick={() => router.back()}
-            style={{
-              height: 38,
-              padding: "0 20px",
-              borderRadius: 8,
-              border: `1px solid ${timeTheme.inputBorder}`,
-              backgroundColor: timeTheme.inputBackground,
-              fontSize: 13,
-              fontWeight: 500,
-              color: timeTheme.subTextColor,
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            style={{
-              height: 38,
-              padding: "0 24px",
-              borderRadius: 8,
-              border: "none",
-              backgroundColor: submitting ? "#a5b4fc" : "#4f46e5", 
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#ffffff",
-              cursor: submitting ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s"
-            }}
-          >
-            {submitting ? "Saving…" : "Save Changes"}
-          </button>
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+                Current Password
+              </label>
+              <input
+                type="password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
+              <button
+                type="submit"
+                disabled={submittingPassword}
+                className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md active:scale-95 transition-all disabled:opacity-50"
+              >
+                Update Password
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

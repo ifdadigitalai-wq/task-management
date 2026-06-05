@@ -1,83 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { X, ChevronDown } from "lucide-react";
-import bcrypt from "bcryptjs";
-
-// ── Constants ────────────────────────────────────────────────────────────────
+import React, { useState } from "react";
+import { X, User, Mail, Phone, Briefcase, Lock, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { FormField } from "@/components/ui/FormField";
 
 const DEPARTMENTS = [
-  "Admin Department","Centre Head/ Management","Sales/counseling",
-  "Academic","Faculty","Backend","Account & Finance","HR & Placement","IT Support",
+  "Admin Department",
+  "Centre Head/ Management",
+  "Sales/counseling",
+  "Academic",
+  "Faculty",
+  "Backend",
+  "Account & Finance",
+  "HR & Placement",
+  "IT Support",
 ];
 
-// ── Shared sub-components ────────────────────────────────────────────────────
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label
-      style={{
-        display: "block",
-        fontSize: 12,
-        fontWeight: 600,
-        color: "#374151",
-        marginBottom: 6,
-      }}
-    >
-      {children}
-    </label>
-  );
-}
-
-const inputBase: React.CSSProperties = {
-  width: "100%",
-  height: 40,
-  borderRadius: 8,
-  border: "1px solid #e5e7eb",
-  padding: "0 14px",
-  fontSize: 13,
-  fontWeight: 500,
-  color: "#111827",
-  outline: "none",
-  boxSizing: "border-box",
-  backgroundColor: "#fafafa",
-  fontFamily: "inherit",
-};
-
-function focusRing(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.currentTarget.style.borderColor = "#4f46e5";
-  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(79,70,229,0.08)";
-}
-
-function blurRing(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.currentTarget.style.borderColor = "#e5e7eb";
-  e.currentTarget.style.boxShadow = "none";
-}
-
-// ── Component ────────────────────────────────────────────────────────────────
-
-interface Props {
+interface AddEmployeeModalProps {
   onClose: () => void;
   onCreated: () => void;
 }
 
-export default function AddEmployeeModal({ onClose, onCreated }: Props) {
+export default function AddEmployeeModal({ onClose, onCreated }: AddEmployeeModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [password, setPassword] = useState("");
   const [joinedAt, setJoinedAt] = useState("");
+  const [role, setRole] = useState<"EMPLOYEE" | "ADMIN">("EMPLOYEE");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async () => {
-    if (!name.trim() || !email.trim()) {
-      setError("Name and email are required.");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError("Name, email, and password are required.");
       return;
     }
+
     setError(null);
     setSubmitting(true);
+
     try {
       const res = await fetch("/api/users", {
         method: "POST",
@@ -87,18 +53,22 @@ export default function AddEmployeeModal({ onClose, onCreated }: Props) {
           email: email.trim(),
           phone: phone.trim() || undefined,
           department: department || undefined,
+          jobTitle: jobTitle.trim() || undefined,
+          password: password,
           joinedAt: joinedAt || undefined,
-          password: await bcrypt.hash(password, 12),
+          role,
         }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.error || "Failed to create employee.");
+
+      const payload = await res.json();
+      if (!payload.success) {
+        throw new Error(payload.error || "Failed to create employee.");
       }
+
       onCreated();
       onClose();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong.");
     } finally {
       setSubmitting(false);
     }
@@ -106,237 +76,177 @@ export default function AddEmployeeModal({ onClose, onCreated }: Props) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — z-modal-backdrop = 70 */}
       <div
         onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.25)",
-          zIndex: 60,
-        }}
+        className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center"
+        style={{ zIndex: "var(--z-modal-backdrop)" }}
       />
 
-      {/* Modal */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 70,
-          backgroundColor: "#ffffff",
-          borderRadius: 14,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-          width: 480,
-          maxWidth: "calc(100vw - 32px)",
-          padding: 28,
-        }}
-      >
+      {/* Modal Container — z-modal = 80 */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] bg-surface rounded-xl shadow-lg flex flex-col animate-in zoom-in-95 duration-150" style={{ zIndex: "var(--z-modal)" }}>
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 24,
-          }}
-        >
-          <span style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
-            Add new employee
-          </span>
+        <div className="p-4 px-6 border-b border-border flex items-start justify-between shrink-0 relative">
+          <div>
+            <h2 className="text-[15px] font-medium text-text-primary">Add New Employee</h2>
+            <p className="text-[12px] text-text-secondary mt-0.5">Create a new user account in the organization.</p>
+          </div>
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#9ca3af",
-              padding: 4,
-              borderRadius: 6,
-              display: "flex",
-            }}
+            type="button"
+            className="absolute top-4 right-4 w-6 h-6 rounded-full hover:bg-bg flex items-center justify-center text-text-tertiary hover:text-text-primary transition-colors focus-visible:outline-none"
           >
-            <X style={{ height: 17, width: 17 }} />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Fields */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
           {/* Name */}
-          <div>
-            <FieldLabel>Full Name *</FieldLabel>
-            <input
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onFocus={focusRing}
-              onBlur={blurRing}
-              style={inputBase}
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <FieldLabel>Email *</FieldLabel>
-            <input
-              type="email"
-              placeholder="john@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onFocus={focusRing}
-              onBlur={blurRing}
-              style={inputBase}
-            />
-          </div>
-
-          {/* Phone + Department row */}
-          <div style={{ display: "flex", gap: 12 }}>
-            <div style={{ flex: 1 }}>
-              <FieldLabel>Phone</FieldLabel>
+          <FormField label="Full Name *" required>
+            <div className="relative">
+              <User className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary" />
               <input
-                type="tel"
-                placeholder="+91 98765 43210"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onFocus={focusRing}
-                onBlur={blurRing}
-                style={inputBase}
+                type="text"
+                required
+                placeholder="e.g. John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full !pl-10 h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
               />
             </div>
-            <div style={{ flex: 1, position: "relative" }}>
-              <FieldLabel>Department</FieldLabel>
-              <div style={{ position: "relative" }}>
+          </FormField>
+
+          {/* Email */}
+          <FormField label="Email Address *" required>
+            <div className="relative">
+              <Mail className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary" />
+              <input
+                type="email"
+                required
+                placeholder="e.g. john@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full !pl-10 h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+              />
+            </div>
+          </FormField>
+
+          {/* Phone & Department */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Phone Number">
+              <div className="relative">
+                <Phone className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary" />
+                <input
+                  type="tel"
+                  placeholder="e.g. +1 555-0199"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full !pl-10 h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+                />
+              </div>
+            </FormField>
+
+            <FormField label="Department">
+              <div className="relative">
+                <Briefcase className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary pointer-events-none" />
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  onFocus={(e) => focusRing(e)}
-                  onBlur={(e) => blurRing(e)}
-                  style={{
-                    ...inputBase,
-                    appearance: "none",
-                    paddingRight: 36,
-                    cursor: "pointer",
-                    color: department ? "#111827" : "#9ca3af",
-                  }}
+                  className="w-full !pl-10 h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10"
                 >
-                  <option value="" disabled>
-                    Select…
-                  </option>
+                  <option value="">Select Department...</option>
                   {DEPARTMENTS.map((d) => (
                     <option key={d} value={d}>
                       {d}
                     </option>
                   ))}
                 </select>
-                <ChevronDown
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    height: 14,
-                    width: 14,
-                    color: "#9ca3af",
-                    pointerEvents: "none",
-                  }}
+              </div>
+            </FormField>
+          </div>
+
+          {/* Job Title & Joined Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Job Title">
+              <input
+                type="text"
+                placeholder="e.g. UI/UX Designer"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                className="w-full h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+              />
+            </FormField>
+
+            <FormField label="Joined Date">
+              <div className="relative">
+                <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary pointer-events-none" />
+                <input
+                  type="date"
+                  value={joinedAt}
+                  onChange={(e) => setJoinedAt(e.target.value)}
+                  className="w-full !pl-10 h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10"
                 />
               </div>
+            </FormField>
+          </div>
+
+          {/* Password & Role */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Password *" required>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary" />
+                <input
+                  type="password"
+                  required
+                  placeholder="Min 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full !pl-10 h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+                />
+              </div>
+            </FormField>
+
+            <FormField label="Access Level">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as any)}
+                className="w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10"
+              >
+                <option value="EMPLOYEE">Employee (Restricted)</option>
+                <option value="ADMIN">Admin (Full Control)</option>
+              </select>
+            </FormField>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-2.5 bg-[#FEF2F2] border border-[#FECACA] text-priority-critical-text rounded text-[11px] font-medium flex items-center gap-1.5 dark:bg-red-955/20 dark:border-red-900/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-priority-critical-text" />
+              {error}
             </div>
-          </div>
-          {/* Password */}
-          <div>
-            <FieldLabel>Password *</FieldLabel>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={focusRing}
-              onBlur={blurRing}
-              style={inputBase}
-            />
-          </div>
-
-          {/* Joined date */}
-          <div>
-            <FieldLabel>Joined Date</FieldLabel>
-            <input
-              type="date"
-              value={joinedAt}
-              onChange={(e) => setJoinedAt(e.target.value)}
-              onFocus={focusRing}
-              onBlur={blurRing}
-              style={{
-                ...inputBase,
-                cursor: "pointer",
-                color: joinedAt ? "#111827" : "#9ca3af",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div
-            style={{
-              marginTop: 16,
-              padding: "10px 14px",
-              backgroundColor: "#fef2f2",
-              border: "1px solid #fecaca",
-              borderRadius: 8,
-              fontSize: 13,
-              color: "#ef4444",
-            }}
-          >
-            {error}
-          </div>
-        )}
+          )}
+        </form>
 
         {/* Footer */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 10,
-            marginTop: 24,
-          }}
-        >
-          <button
+        <div className="p-4 px-6 border-t border-border flex items-center justify-end gap-3 shrink-0 bg-bg/15">
+          <Button
+            type="button"
             onClick={onClose}
-            style={{
-              height: 36,
-              padding: "0 18px",
-              borderRadius: 8,
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#374151",
-              cursor: "pointer",
-            }}
+            variant="secondary"
+            className="h-[34px] px-4"
           >
             Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
+          </Button>
+          <Button
+            type="submit"
             disabled={submitting}
-            style={{
-              height: 36,
-              padding: "0 18px",
-              borderRadius: 8,
-              border: "none",
-              backgroundColor: submitting ? "#a5b4fc" : "#4f46e5",
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#ffffff",
-              cursor: submitting ? "not-allowed" : "pointer",
-            }}
+            onClick={handleSubmit}
+            variant="primary"
+            className="h-[34px] px-4"
           >
-            {submitting ? "Adding…" : "Add employee"}
-          </button>
+            {submitting ? "Adding..." : "Add Employee"}
+          </Button>
         </div>
       </div>
     </>
