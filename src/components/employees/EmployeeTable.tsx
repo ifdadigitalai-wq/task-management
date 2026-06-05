@@ -19,6 +19,7 @@ export default function EmployeeTable({ employees, onEdit, onDelete }: EmployeeT
   
   // States
   const [searchTerm, setSearchTerm] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "department" | "joined" | "tasks">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedEmployeeTasks, setSelectedEmployeeTasks] = useState<User | null>(null);
@@ -44,6 +45,8 @@ export default function EmployeeTable({ employees, onEdit, onDelete }: EmployeeT
 
   // Filter & Search
   const filtered = employees.filter((emp) => {
+    if (!showInactive && !emp.isActive) return false;
+
     const q = searchTerm.toLowerCase();
     return (
       emp.name.toLowerCase().includes(q) ||
@@ -90,15 +93,26 @@ export default function EmployeeTable({ employees, onEdit, onDelete }: EmployeeT
     <div className="space-y-4">
       {/* Search & Sort Options Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-surface border border-border rounded-lg">
-        <div className="relative w-full sm:max-w-[220px]">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search employees..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full !pl-10 h-8 text-[12px] font-medium placeholder:text-text-tertiary focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none bg-bg"
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
+          <div className="relative w-full sm:max-w-[220px]">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full !pl-10 h-8 text-[12px] font-medium placeholder:text-text-tertiary focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none bg-bg"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-[12px] text-text-secondary cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+            />
+            Show deactivated team members
+          </label>
         </div>
 
         <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-text-secondary">

@@ -91,7 +91,7 @@ export default function EmployeesPage() {
 
   const fetchEmployees = useCallback(async () => {
     try {
-      const res = await fetch("/api/users");
+      const res = await fetch("/api/users", { cache: "no-store" });
       const payload = await res.json();
       if (payload.success) {
         setEmployees(payload.data || []);

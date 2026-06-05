@@ -70,7 +70,10 @@ export async function POST(
     const { id } = await params;
     const body = await req.json();
 
-    if (!body.remark) {
+    const remark = body.remark?.trim();
+    const hasAttachments = Array.isArray(body.attachments) && body.attachments.length > 0;
+
+    if (!remark && !hasAttachments) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: "Remark/content is required." },
         { status: 400 }
@@ -95,7 +98,7 @@ export async function POST(
         data: {
           taskId: id,
           userId: session.id,
-          content: body.remark,
+          content: remark || ((Array.isArray(body.attachments) && body.attachments.some((a: any) => a.type === "audio")) ? "Posted voice recording" : "Uploaded attachments"),
           type: (body.type as UpdateType) ?? "COMMENT",
           attachments: body.attachments ?? undefined, // Store attachments
         },

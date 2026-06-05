@@ -102,7 +102,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
   // Fetch employees list
   useEffect(() => {
     if (currentUser?.role === "ADMIN") {
-      fetch("/api/users")
+      fetch("/api/users", { cache: "no-store" })
         .then((res) => res.json())
         .then((payload) => {
           if (payload.success) setEmployees(payload.data);
@@ -210,7 +210,10 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
 
   const handlePostUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!task || !newRemark.trim()) return;
+    if (!task) return;
+
+    const hasAttachments = updateSelectedFiles.length > 0 || updateVoiceRecordings.length > 0;
+    if (!newRemark.trim() && !hasAttachments) return;
 
     try {
       // 1. Prepare files list for UploadThing
@@ -256,9 +259,9 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
         setUpdateVoiceRecordings([]);
         toast.success("Update posted successfully!");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to post update.");
+      toast.error(`Failed to post update: ${err.message || String(err)}`);
     }
   };
 
@@ -506,7 +509,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                       className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
                     >
                       <option value="">Unassigned</option>
-                      {employees.map((e) => (
+                      {employees.filter((e) => e.isActive).map((e) => (
                         <option key={e.id} value={e.id}>{e.name}</option>
                       ))}
                     </select>

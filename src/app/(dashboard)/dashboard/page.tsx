@@ -97,6 +97,40 @@ export default function DashboardPage() {
   const overdueTasks   = stats?.overdue     || 0;
   const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
+  const formatActivityAction = (act: any) => {
+    const action = act.action;
+    
+    if (action === "CREATE_TASK") {
+      const assigneeName = act.meta?.assignee;
+      if (assigneeName) {
+        return `assigned task to ${assigneeName}`;
+      }
+      return "created a task";
+    }
+    
+    if (action === "UPDATE_TASK") {
+      const status = act.meta?.status;
+      if (status) {
+        return `updated status of task to ${status.replace("_", " ").toLowerCase()}`;
+      }
+      return "updated task details";
+    }
+
+    if (action === "DELETE_TASK") {
+      return "deleted a task";
+    }
+
+    if (action === "ADD_TASK_UPDATE") {
+      return "posted a progress update";
+    }
+
+    if (action === "ADD_COMMENT") {
+      return "commented on a task";
+    }
+
+    return action.replace(/_/g, " ").toLowerCase();
+  };
+
   return (
     <div className="space-y-6 select-none">
 
@@ -344,12 +378,12 @@ export default function DashboardPage() {
                           style={{
                             backgroundColor:
                               task.priority === "CRITICAL"
-                                ? "#F87171"
-                                : task.priority === "HIGH"
-                                ? "#FB923C"
-                                : task.priority === "MEDIUM"
-                                ? "#60A5FA"
-                                : "#94A3B8",
+                                  ? "#F87171"
+                                  : task.priority === "HIGH"
+                                  ? "#FB923C"
+                                  : task.priority === "MEDIUM"
+                                  ? "#60A5FA"
+                                  : "#94A3B8",
                           }}
                         />
                         <span
@@ -451,7 +485,7 @@ export default function DashboardPage() {
                       <span className="font-medium text-text-primary">
                         {act.user?.name || "System"}
                       </span>{" "}
-                      {act.action.replace(/_/g, " ").toLowerCase()}
+                      {formatActivityAction(act)}
                       {act.task && (
                         <span
                           className="font-medium text-brand-text block sm:inline sm:ml-1 cursor-pointer hover:underline"

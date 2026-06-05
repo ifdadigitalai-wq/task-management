@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { ApiResponse } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -98,12 +100,35 @@ export async function DELETE(
     const { id } = await params;
 
     const result = await prisma.$transaction(async (tx) => {
-      // Soft delete: set isActive to false
+      // 1. Soft delete: set isActive to false
       const user = await tx.user.update({
         where: { id },
         data: { isActive: false },
       });
 
+      // 2. Unassign active tasks (non-completed and non-cancelled)
+      await tx.task.updateMany({
+        where: {
+          assigneeId: id,
+          NOT: {
+            status: { in: ["DONE", "CANCELLED"] },
+          },
+        },
+        data: { assigneeId: null },
+      });
+
+      // 3. Stop any active timers
+      await tx.taskTimer.updateMany({
+        where: {
+          userId: id,
+          stoppedAt: null,
+        },
+        data: {
+          stoppedAt: new Date(),
+        },
+      });
+
+      // 4. Log the activity
       await tx.activity.create({
         data: {
           userId: session.id,

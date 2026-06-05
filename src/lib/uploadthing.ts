@@ -9,6 +9,7 @@ export const ourFileRouter = {
     pdf: { maxFileSize: "16MB", maxFileCount: 10 },
     text: { maxFileSize: "16MB", maxFileCount: 10 },
     audio: { maxFileSize: "16MB", maxFileCount: 10 },
+    video: { maxFileSize: "16MB", maxFileCount: 10 },
     blob: { maxFileSize: "16MB", maxFileCount: 10 },
   })
     .onUploadComplete(async ({ file }) => {

@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { ApiResponse } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await getSession();

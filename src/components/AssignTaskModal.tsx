@@ -179,7 +179,7 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
 
   // Fetch users and templates on mount
   useEffect(() => {
-    fetch("/api/users")
+    fetch("/api/users", { cache: "no-store" })
       .then((res) => res.json())
       .then((payload) => {
         if (payload.success) setEmployees(payload.data);
@@ -308,9 +308,9 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
       } else {
         toast.error(payload.error || "Failed to create task.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to save task.");
+      toast.error(`Failed to save task: ${err.message || String(err)}`);
     } finally {
       setSubmitting(false);
     }
@@ -419,7 +419,7 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
                 className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10"
               >
                 <option value="">Unassigned (Assign to Self)</option>
-                {employees.map((e) => (
+                {employees.filter((e) => e.isActive).map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.name} ({e.department || "No department"})
                   </option>
