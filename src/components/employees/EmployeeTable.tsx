@@ -45,7 +45,13 @@ export default function EmployeeTable({ employees, onEdit, onDelete }: EmployeeT
 
   // Filter & Search
   const filtered = employees.filter((emp) => {
-    if (!showInactive && !emp.isActive) return false;
+    if (showInactive) {
+      // "Show deactivated members" is checked → show ONLY inactive
+      if (emp.isActive) return false;
+    } else {
+      // Default → show only active members
+      if (!emp.isActive) return false;
+    }
 
     const q = searchTerm.toLowerCase();
     return (

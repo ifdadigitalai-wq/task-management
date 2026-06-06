@@ -556,9 +556,9 @@ export default function DayTrackerPage() {
                   const cfg = EVENT_TYPE_CONFIG[ev.type];
                   const timeLabel = formatTime(ev.time);
                   return (
-                    <button
+                    <div
                       key={ev.id}
-                      className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                      className="relative w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
                       onClick={() => {
                         setTypeDropOpen(false);
                         setPopup({
@@ -576,14 +576,38 @@ export default function DayTrackerPage() {
                     >
                       <div className="flex items-start justify-between gap-1.5 mb-1">
                         <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex-1">{ev.title}</p>
-                        <TypeBadge type={ev.type} />
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!confirm(`Delete "${ev.title}"?`)) return;
+                              try {
+                                const res = await fetch(`/api/calendar-events/${ev.id}`, { method: "DELETE" });
+                                const payload = await res.json();
+                                if (payload.success) {
+                                  toast.success("Event deleted.");
+                                  setMyEvents((prev) => prev.filter((e) => e.id !== ev.id));
+                                } else {
+                                  toast.error(payload.error || "Failed to delete.");
+                                }
+                              } catch {
+                                toast.error("Something went wrong.");
+                              }
+                            }}
+                            className="w-5 h-5 rounded flex items-center justify-center text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all"
+                            title="Delete event"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                          <TypeBadge type={ev.type} />
+                        </div>
                       </div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">
                         {formatDateRange(ev.fromDate, ev.toDate)}
                         {timeLabel && <span className="ml-1.5 text-indigo-500 font-semibold">⏰ {timeLabel}</span>}
                       </p>
                       <div className="mt-1.5 h-0.5 rounded-full" style={{ backgroundColor: `${cfg.border}30` }} />
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -873,16 +897,26 @@ export default function DayTrackerPage() {
         .tailadmin-calendar .fc-theme-standard th {
           border-color: ${timeTheme.cardBorder} !important;
         }
+        .dark .tailadmin-calendar .fc-theme-standard td,
+        .dark .tailadmin-calendar .fc-theme-standard th {
+          border-color: rgba(255, 255, 255, 0.08) !important;
+        }
         .tailadmin-calendar .fc-col-header-cell {
           background-color: ${timeTheme.inputBackground};
           padding: 10px 0 !important;
           border-top: none !important; border-left: none !important; border-right: none !important;
+        }
+        .dark .tailadmin-calendar .fc-col-header-cell {
+          background-color: rgba(30, 41, 59, 0.5) !important;
         }
         .tailadmin-calendar .fc-col-header-cell-cushion {
           color: ${timeTheme.textColor}99 !important;
           font-weight: 800 !important; font-size: 10px !important;
           text-transform: uppercase !important; letter-spacing: 0.08em !important;
           text-decoration: none !important;
+        }
+        .dark .tailadmin-calendar .fc-col-header-cell-cushion {
+          color: rgba(241, 245, 249, 0.8) !important;
         }
         .tailadmin-calendar .fc-daygrid-day {
           transition: background-color 0.12s ease; cursor: pointer;
@@ -897,8 +931,14 @@ export default function DayTrackerPage() {
           font-size: 12px !important; font-weight: 700 !important;
           color: ${timeTheme.textColor}55 !important; text-decoration: none !important;
         }
+        .dark .tailadmin-calendar .fc-daygrid-day-number {
+          color: rgba(241, 245, 249, 0.5) !important;
+        }
         .tailadmin-calendar .fc-day-today {
           background-color: ${timeTheme.accentColor}0d !important;
+        }
+        .dark .tailadmin-calendar .fc-day-today {
+          background-color: rgba(99, 102, 241, 0.15) !important;
         }
         .tailadmin-calendar .fc-day-today .fc-daygrid-day-number {
           background: ${timeTheme.accentColor}; color: #fff !important;
@@ -920,9 +960,17 @@ export default function DayTrackerPage() {
           border-radius: 12px !important; border: 1px solid ${timeTheme.cardBorder} !important;
           box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important; overflow: hidden !important;
         }
+        .dark .tailadmin-calendar .fc-popover {
+          border-color: rgba(255, 255, 255, 0.08) !important;
+          background: #0f172a !important;
+        }
         .tailadmin-calendar .fc-popover-header {
           background: ${timeTheme.inputBackground} !important;
           font-size: 11px !important; font-weight: 800 !important; padding: 8px 12px !important;
+        }
+        .dark .tailadmin-calendar .fc-popover-header {
+          background: #1e293b !important;
+          color: #f1f5f9 !important;
         }
       `}</style>
     </div>

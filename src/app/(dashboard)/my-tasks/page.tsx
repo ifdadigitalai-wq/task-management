@@ -1,18 +1,31 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTaskStore } from "@/store/useTaskStore";
 import TaskList from "@/components/tasks/TaskList";
 import FilterBar from "@/components/layout/FilterBar";
 import { ListTodo } from "lucide-react";
 
-export default function MyTasksPage() {
-  const { tasks, fetchTasks, currentUser, fetchCurrentUser } = useTaskStore();
+function MyTasksContent() {
+  const { tasks, fetchTasks, currentUser, fetchCurrentUser, setSelectedTask } = useTaskStore();
+  const searchParams = useSearchParams();
+  const taskIdFromUrl = searchParams.get("taskId");
 
   useEffect(() => {
     fetchTasks();
     if (!currentUser) fetchCurrentUser();
   }, []);
+
+  // Auto-open task detail panel when navigated via notification link
+  useEffect(() => {
+    if (taskIdFromUrl && tasks.length > 0) {
+      const targetTask = tasks.find((t) => t.id === taskIdFromUrl);
+      if (targetTask) {
+        setSelectedTask(targetTask);
+      }
+    }
+  }, [taskIdFromUrl, tasks]);
 
   const myTasks = tasks.filter((t) => t.assigneeId === currentUser?.id);
   const activeMyTasks = myTasks.filter((t) => t.status !== "DONE" && t.status !== "CANCELLED");
@@ -44,5 +57,18 @@ export default function MyTasksPage() {
       <FilterBar />
       <TaskList tasks={myTasks} />
     </div>
+  );
+}
+
+export default function MyTasksPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-20 text-slate-400 text-xs">
+        <div className="w-6 h-6 border-2 border-indigo-50 border-t-indigo-600 rounded-full animate-spin mb-2" />
+        Loading your tasks...
+      </div>
+    }>
+      <MyTasksContent />
+    </Suspense>
   );
 }

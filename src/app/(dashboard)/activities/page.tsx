@@ -197,9 +197,59 @@ export default function ActivitiesPage() {
 
                   {/* Metadata display */}
                   {act.meta && Object.keys(act.meta).length > 0 && (
-                    <pre className="text-[10px] bg-slate-50/70 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 text-slate-500 overflow-x-auto max-w-xl font-mono">
-                      {JSON.stringify(act.meta, null, 2)}
-                    </pre>
+                    <div className="mt-1.5 bg-slate-50/70 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-850 overflow-hidden max-w-xl">
+                      <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        {Object.entries(act.meta).map(([key, value]) => {
+                          const label = key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/_/g, " ")
+                            .replace(/^\w/, (c: string) => c.toUpperCase())
+                            .trim();
+
+                          let renderedValue: React.ReactNode;
+                          if (Array.isArray(value)) {
+                            renderedValue = (
+                              <div className="flex flex-wrap gap-1">
+                                {(value as string[]).map((item, i) => (
+                                  <span
+                                    key={i}
+                                    className="inline-block px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-semibold"
+                                  >
+                                    {String(item)}
+                                  </span>
+                                ))}
+                              </div>
+                            );
+                          } else if (value !== null && typeof value === "object") {
+                            renderedValue = (
+                              <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                                {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
+                                  <span key={k} className="text-[10px] text-slate-500 dark:text-slate-400">
+                                    <span className="font-semibold text-slate-600 dark:text-slate-350">{k}:</span>{" "}
+                                    {String(v)}
+                                  </span>
+                                ))}
+                              </div>
+                            );
+                          } else {
+                            renderedValue = (
+                              <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                                {String(value ?? "—")}
+                              </span>
+                            );
+                          }
+
+                          return (
+                            <div key={key} className="flex items-start gap-3 px-3 py-2">
+                              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide min-w-[80px] shrink-0 pt-0.5">
+                                {label}
+                              </span>
+                              <div className="flex-1 min-w-0">{renderedValue}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

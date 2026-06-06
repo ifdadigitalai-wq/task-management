@@ -121,6 +121,13 @@ export async function PATCH(
     }
 
     const body = await req.json();
+
+    if (session.role === "EMPLOYEE" && body.status === "DONE" && !existingTask.parentTaskId) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: "Forbidden. Only administrators can mark parent tasks as completed." },
+        { status: 403 }
+      );
+    }
     const updateData: any = {};
 
     if (body.title !== undefined) updateData.title = body.title;
@@ -145,6 +152,12 @@ export async function PATCH(
           creator: { select: { id: true, name: true } },
         },
       });
+
+      // Helper: determine the correct notification link based on recipient role
+      const getTaskLink = async (recipientId: string, taskId: string) => {
+        const recipient = await tx.user.findUnique({ where: { id: recipientId }, select: { role: true } });
+        return recipient?.role === "ADMIN" ? `/all-tasks?taskId=${taskId}` : `/my-tasks?taskId=${taskId}`;
+      };
 
       // Log Activity
       await tx.activity.create({
@@ -179,7 +192,7 @@ export async function PATCH(
                   userId: task.creatorId,
                   type: "SUBTASK_COMPLETED",
                   message: `${session.name} completed the subtask: "${task.title}"`,
-                  link: `/my-tasks?taskId=${task.id}`,
+                  link: await getTaskLink(task.creatorId, task.id),
                 },
               });
             }
@@ -191,7 +204,7 @@ export async function PATCH(
                   userId: parentAssigneeId,
                   type: "SUBTASK_COMPLETED",
                   message: `${session.name} completed the subtask "${task.title}" on your task`,
-                  link: `/my-tasks?taskId=${task.parentTaskId}`,
+                  link: await getTaskLink(parentAssigneeId, task.parentTaskId!),
                 },
               });
             }
@@ -203,7 +216,7 @@ export async function PATCH(
                   userId: recipientId,
                   type: "TASK_COMPLETED",
                   message: `${session.name} completed the task: "${task.title}"`,
-                  link: `/my-tasks?taskId=${task.id}`,
+                  link: await getTaskLink(recipientId, task.id),
                 },
               });
             }
@@ -215,8 +228,8 @@ export async function PATCH(
               data: {
                 userId: recipientId,
                 type: "STATUS_CHANGED",
-                message: `${session.name} updated the status of "${task.title}" to ${task.status}`,
-                link: `/my-tasks?taskId=${task.id}`,
+                message: `${session.name} updated the task status for "${task.title}"`,
+                link: await getTaskLink(recipientId, task.id),
               },
             });
           }
@@ -230,7 +243,7 @@ export async function PATCH(
             userId: body.assigneeId,
             type: "TASK_ASSIGNED",
             message: `${session.name} assigned you the task: "${task.title}"`,
-            link: `/my-tasks?taskId=${task.id}`,
+            link: await getTaskLink(body.assigneeId, task.id),
           },
         });
       }
@@ -247,7 +260,7 @@ export async function PATCH(
               userId: recipientId,
               type: "TASK_UPDATED",
               message: `${session.name} updated the details of task: "${task.title}"`,
-              link: `/my-tasks?taskId=${task.id}`,
+              link: await getTaskLink(recipientId, task.id),
             },
           });
         }

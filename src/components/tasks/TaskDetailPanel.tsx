@@ -99,6 +99,13 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     }
   }, [initialTask]);
 
+  // Poll task relations every 10 seconds for real-time updates/comments/subtasks
+  useEffect(() => {
+    if (!initialTask?.id) return;
+    const interval = setInterval(() => fetchTaskRelations(initialTask.id), 10000);
+    return () => clearInterval(interval);
+  }, [initialTask?.id]);
+
   // Fetch employees list
   useEffect(() => {
     if (currentUser?.role === "ADMIN") {
@@ -338,23 +345,25 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const handleMarkCompleted = async () => {
+  const handleUpdateStatus = async (newStatus: TaskStatus) => {
     if (!task) return;
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "DONE" }),
+        body: JSON.stringify({ status: newStatus }),
       });
       const payload = await res.json();
       if (payload.success) {
         setTask(payload.data);
         storeUpdateTask(payload.data);
-        toast.success("Task marked as completed!");
+        toast.success(`Task status updated to ${newStatus === "IN_PROGRESS" ? "In Progress" : newStatus === "IN_REVIEW" ? "In Review" : newStatus}`);
+      } else {
+        toast.error(payload.error || "Failed to update status.");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to mark task as completed.");
+      toast.error("Failed to update task status.");
     }
   };
 
@@ -406,13 +415,17 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
           <div className="flex-1 min-w-0">
             {/* Badges row */}
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <button
-                onClick={handleCycleStatus}
-                className="focus:outline-none select-none"
-                title="Click to cycle status"
-              >
+              {currentUser?.role === "ADMIN" ? (
+                <button
+                  onClick={handleCycleStatus}
+                  className="focus:outline-none select-none cursor-pointer"
+                  title="Click to cycle status"
+                >
+                  <StatusBadge status={task.status} />
+                </button>
+              ) : (
                 <StatusBadge status={task.status} />
-              </button>
+              )}
               
               <PriorityBadge priority={task.priority} />
 
@@ -576,33 +589,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
 
-              {/* Checklist Items */}
-              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Subtask Checklist</span>
-                {task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0 ? (
-                  <div className="space-y-2 mt-1">
-                    {task.checklistItems.map((item: any, idx: number) => (
-                      <div
-                        key={idx}
-                        onClick={() => handleChecklistToggle(idx)}
-                        className="flex items-center gap-2.5 cursor-pointer hover:opacity-85 transition-opacity"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={item.completed}
-                          onChange={() => {}} // handled by click
-                          className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                        />
-                        <span className={cn("text-[13px] text-text-primary font-medium", item.completed && "line-through text-text-tertiary")}>
-                          {item.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-[13px] text-text-tertiary">No checklist items defined</span>
-                )}
-              </div>
+
 
               {/* File Attachments */}
               <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
@@ -848,6 +835,32 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                 </form>
               )}
 
+              {/* Checklist Items (moved from Details tab) */}
+              {task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Checklist</h3>
+                  <div className="space-y-1.5">
+                    {task.checklistItems.map((item: any, idx: number) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleChecklistToggle(idx)}
+                        className="flex items-center gap-2.5 p-2.5 bg-bg/30 border border-border rounded cursor-pointer hover:opacity-85 transition-opacity"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.completed}
+                          onChange={() => {}} // handled by parent onClick
+                          className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                        />
+                        <span className={cn("text-[12px] font-medium text-text-primary truncate", item.completed && "line-through text-text-tertiary")}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Subtasks List */}
               <div className="space-y-2">
                 <h3 className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Subtasks List</h3>
@@ -890,17 +903,45 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         ) : (
-          task.status !== "DONE" && (
-            <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
-              <button
-                onClick={handleMarkCompleted}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
-              >
-                <Check className="w-3.5 h-3.5" />
-                Mark as Completed
-              </button>
-            </div>
-          )
+          // Employee view footer buttons
+          <>
+            {task.status === "TODO" && (
+              <div className="p-4 border-t border-border shrink-0 flex items-center justify-end gap-2.5 bg-bg/25">
+                <button
+                  onClick={() => handleUpdateStatus("IN_PROGRESS")}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  In Progress
+                </button>
+                <button
+                  onClick={() => handleUpdateStatus("IN_REVIEW")}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Mark as Completed
+                </button>
+              </div>
+            )}
+            {task.status === "IN_PROGRESS" && (
+              <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
+                <button
+                  onClick={() => handleUpdateStatus("IN_REVIEW")}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Mark as Completed
+                </button>
+              </div>
+            )}
+            {task.status === "IN_REVIEW" && (
+              <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
+                <span className="text-[12px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/20 px-3 py-1.5 rounded-full border border-purple-200 dark:border-purple-900/50">
+                  Awaiting Admin Review
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
 

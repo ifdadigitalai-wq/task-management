@@ -135,6 +135,11 @@ export default function TaskList({ tasks: initialTasks }: { tasks?: Task[] }) {
 
     if (targetTask.status === status) return;
 
+    if (status === "DONE" && currentUser?.role !== "ADMIN") {
+      toast.error("Only administrators can mark tasks as completed.");
+      return;
+    }
+
     // Optimistic UI update
     const previousTask = { ...targetTask };
     const updated = { ...targetTask, status };

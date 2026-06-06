@@ -188,6 +188,12 @@ export async function POST(req: Request) {
         },
       });
 
+      // Helper: determine the correct notification link based on recipient role
+      const getTaskLink = async (recipientId: string, taskId: string) => {
+        const recipient = await tx.user.findUnique({ where: { id: recipientId }, select: { role: true } });
+        return recipient?.role === "ADMIN" ? `/all-tasks?taskId=${taskId}` : `/my-tasks?taskId=${taskId}`;
+      };
+
       // Log Activity
       await tx.activity.create({
         data: {
@@ -211,7 +217,7 @@ export async function POST(req: Request) {
             message: isSubtask
               ? `${creatorName} assigned you a new subtask: "${task.title}"`
               : `${creatorName} assigned you a new task: "${task.title}"`,
-            link: `/my-tasks?taskId=${task.id}`,
+            link: await getTaskLink(task.assigneeId, task.id),
           },
         });
       }
@@ -229,7 +235,7 @@ export async function POST(req: Request) {
               userId: parentTask.assigneeId,
               type: "SUBTASK_ADDED",
               message: `${creatorName} added a new subtask "${task.title}" to your task: "${parentTask.title}"`,
-              link: `/my-tasks?taskId=${task.parentTaskId}`,
+              link: await getTaskLink(parentTask.assigneeId, task.parentTaskId),
             },
           });
         }

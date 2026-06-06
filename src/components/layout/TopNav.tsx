@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/Button";
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, fetchCurrentUser, setFilters, filters } = useTaskStore();
+  const { currentUser, fetchCurrentUser, setFilters, filters, fetchTasks } = useTaskStore();
   const { toggleSidebar } = useThemeStore();
 
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -68,7 +68,11 @@ export function TopNav() {
     }
     fetchNotifications();
 
-    const interval = setInterval(fetchNotifications, 60000);
+    // Poll notifications and tasks every 10 seconds for near-real-time sync
+    const interval = setInterval(() => {
+      fetchNotifications();
+      fetchTasks();
+    }, 10000);
 
     const handleOpenAssignModal = () => {
       if (currentUser?.role === "ADMIN") {

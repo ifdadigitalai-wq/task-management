@@ -9,6 +9,7 @@ import {
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import PerformanceAnalytics from "@/components/dashboard/PerformanceAnalytics";
 
 interface StatsData {
   total: number;
@@ -138,7 +139,7 @@ export default function DashboardPage() {
       <div
         className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 rounded-xl border border-border"
         style={{
-          padding: "24px 28px",
+          padding: "16px 20px",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
           backgroundColor: "var(--color-surface)",
         }}
@@ -147,12 +148,12 @@ export default function DashboardPage() {
           {/* Problem 9: h1 — 22px / 700 */}
           <h1
             className="text-text-primary"
-            style={{ fontSize: "1.375rem", fontWeight: 700, marginBottom: "4px" }}
+            style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "2px" }}
           >
             Hello, {currentUser.name.split(" ")[0]}!
           </h1>
           {/* Problem 9: subtitle — 15px / 400 */}
-          <p style={{ fontSize: "0.9375rem", color: "rgba(156, 163, 175, 0.9)", fontWeight: 400 }}>
+          <p style={{ fontSize: "0.8125rem", color: "rgba(156, 163, 175, 0.9)", fontWeight: 400 }}>
             Here is the live workload statistics and activity updates for today.
           </p>
         </div>
@@ -164,10 +165,10 @@ export default function DashboardPage() {
             background: "#4F46E5",
             color: "#FFFFFF",
             border: "none",
-            padding: "10px 20px",
-            fontSize: "0.9375rem",
+            padding: "8px 16px",
+            fontSize: "0.8125rem",
             fontWeight: 500,
-            borderRadius: "8px",
+            borderRadius: "6px",
             boxShadow: "0 4px 12px rgba(79, 70, 229, 0.4)",
           }}
           onMouseEnter={(e) => {
@@ -242,12 +243,12 @@ export default function DashboardPage() {
         {/* Status Breakdown — PROBLEM 4 card title fix */}
         <div
           className="rounded-xl border border-border"
-          style={{ padding: "20px 24px", backgroundColor: "var(--color-surface)" }}
+          style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
           {/* Problem 4: card title — 16px/600, no uppercase */}
           <h3
             className="text-text-primary"
-            style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em", marginBottom: "20px" }}
+            style={{ fontSize: "0.875rem", fontWeight: 650, letterSpacing: "-0.01em", marginBottom: "12px" }}
           >
             Task Status Breakdown
           </h3>
@@ -258,14 +259,14 @@ export default function DashboardPage() {
         {/* Team Workload — PROBLEM 4 & 5 */}
         <div
           className="lg:col-span-2 rounded-xl border border-border flex flex-col justify-between"
-          style={{ padding: "20px 24px", backgroundColor: "var(--color-surface)" }}
+          style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
           <div>
             {/* Problem 4: card title */}
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-3">
               <h3
                 className="text-text-primary"
-                style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}
+                style={{ fontSize: "0.875rem", fontWeight: 650, letterSpacing: "-0.01em" }}
               >
                 {isAdmin ? "Team Workload & Utilization" : "My Upcoming Actions"}
               </h3>
@@ -294,7 +295,7 @@ export default function DashboardPage() {
                         key={emp.id}
                         className="flex flex-col gap-2"
                         style={{
-                          padding: "14px 20px",
+                          padding: "10px 12px",
                           borderBottom: "1px solid rgba(255,255,255,0.06)",
                         }}
                       >
@@ -443,13 +444,13 @@ export default function DashboardPage() {
         {/* Recent Activities */}
         <div
           className="lg:col-span-2 rounded-xl border border-border"
-          style={{ padding: "20px 24px", backgroundColor: "var(--color-surface)" }}
+          style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
           {/* Problem 4: card title */}
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-3.5">
             <h3
               className="text-text-primary"
-              style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}
+              style={{ fontSize: "0.875rem", fontWeight: 650, letterSpacing: "-0.01em" }}
             >
               Recent Organizational Activities
             </h3>
@@ -522,14 +523,14 @@ export default function DashboardPage() {
         {/* Notifications */}
         <div
           className="rounded-xl border border-border flex flex-col justify-between"
-          style={{ padding: "20px 24px", backgroundColor: "var(--color-surface)" }}
+          style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
           <div>
             {/* Problem 4: card title */}
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-3.5">
               <h3
                 className="text-text-primary"
-                style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}
+                style={{ fontSize: "0.875rem", fontWeight: 650, letterSpacing: "-0.01em" }}
               >
                 My Unread Notifications
               </h3>
@@ -598,10 +599,11 @@ export default function DashboardPage() {
             className="text-text-tertiary border-t border-border pt-3 mt-4 text-center"
             style={{ fontSize: "0.75rem" }}
           >
-            System polls notifications every 60s.
+            System polls notifications every 15s.
           </p>
         </div>
       </div>
+      {isAdmin && <PerformanceAnalytics />}
     </div>
   );
 }
@@ -620,10 +622,10 @@ function KpiCard({
 }) {
   return (
     <div
-      className="rounded-xl border border-border flex flex-col gap-2"
+      className="rounded-xl border border-border flex flex-col gap-1"
       style={{
-        padding: "20px 24px",
-        minHeight: "110px",
+        padding: "12px 16px",
+        minHeight: "90px",
         backgroundColor: "var(--color-surface)",
       }}
     >
@@ -633,7 +635,7 @@ function KpiCard({
         <p
           className="font-medium uppercase"
           style={{
-            fontSize: "0.75rem",
+            fontSize: "0.6875rem",
             letterSpacing: "0.07em",
             color: "rgba(156, 163, 175, 1)",
           }}
@@ -642,45 +644,43 @@ function KpiCard({
         </p>
         {/* Problem 3: icon box — 44×44, border-radius 10px */}
         <div
-          className="flex items-center justify-center rounded-xl shrink-0"
+          className="flex items-center justify-center rounded-lg shrink-0"
           style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "10px",
-            background: `${iconColor}26`,   /* ~15% opacity */
+            width: "32px",
+            height: "32px",
+            borderRadius: "8px",
+            background: `${iconColor}22`,
             color: iconColor,
           }}
         >
-          {React.cloneElement(icon as React.ReactElement<any>, { className: "w-[22px] h-[22px]" })}
+          {React.cloneElement(icon as React.ReactElement<any>, { className: "w-4.5 h-4.5" })}
         </div>
       </div>
 
       {/* Value — Problem 3: 36px/700 */}
       <p
         className="text-text-primary leading-none"
-        style={{ fontSize: "2.25rem", fontWeight: 700, letterSpacing: "-0.03em" }}
+        style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em" }}
       >
         {value}
       </p>
 
       {/* Delta chip + comparison */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 mt-1">
         {/* Problem 3: delta chip */}
         <span
-          className="rounded-full font-semibold"
+          className="rounded-full font-semibold text-[10px] px-1.5 py-0.5"
           style={{
-            fontSize: "0.8125rem",
-            padding: "2px 8px",
             background: deltaPositive
-              ? "rgba(16, 185, 129, 0.15)"
-              : "rgba(239, 68, 68, 0.15)",
+              ? "rgba(16, 185, 129, 0.12)"
+              : "rgba(239, 68, 68, 0.12)",
             color: deltaPositive ? "#34D399" : "#F87171",
           }}
         >
           {delta}
         </span>
         {/* Problem 3: comparison text */}
-        <span style={{ fontSize: "0.8125rem", color: "rgba(156, 163, 175, 0.9)" }}>
+        <span style={{ fontSize: "0.6875rem", color: "rgba(156, 163, 175, 0.9)" }}>
           {comparison}
         </span>
       </div>
@@ -745,45 +745,42 @@ function DonutChart({ data }: { data: { label: string; count: number; color: str
           })}
         </svg>
 
-        {/* Center text — Problem 6: 32px / 12px */}
+        {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             className="text-text-primary leading-none"
-            style={{ fontSize: "2rem", fontWeight: 700 }}   /* 32px/700 */
+            style={{ fontSize: "1.5rem", fontWeight: 700 }}
           >
             {total}
           </span>
           <span
-            className="uppercase tracking-[0.08em] font-medium mt-1"
-            style={{ fontSize: "0.75rem", color: "rgba(156,163,175,0.9)" }}
+            className="uppercase tracking-[0.08em] font-medium mt-0.5"
+            style={{ fontSize: "0.625rem", color: "rgba(156,163,175,0.9)" }}
           >
             Tasks
           </span>
         </div>
       </div>
 
-      {/* Legend Grid — Problem 6: 14px dots 8px */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 w-full px-2">
+      {/* Legend Grid */}
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 w-full px-2">
         {data.map((item, idx) => {
           if (item.count === 0) return null;
           return (
-            <div key={idx} className="flex items-center gap-2 min-w-0">
-              {/* Problem 6: dot size 8px */}
+            <div key={idx} className="flex items-center gap-1.5 min-w-0">
               <span
                 className="rounded-full flex-shrink-0"
-                style={{ width: "8px", height: "8px", backgroundColor: item.color }}
+                style={{ width: "6px", height: "6px", backgroundColor: item.color }}
               />
-              {/* Problem 6: legend font 14px */}
               <span
                 className="text-text-secondary truncate"
-                style={{ fontSize: "0.875rem", fontWeight: 400 }}
+                style={{ fontSize: "0.75rem", fontWeight: 400 }}
               >
                 {item.label}
               </span>
-              {/* Problem 6: value 600 weight */}
               <span
                 className="ml-auto font-semibold text-text-primary font-mono"
-                style={{ fontSize: "0.875rem" }}
+                style={{ fontSize: "0.75rem" }}
               >
                 {item.count}
               </span>

@@ -123,12 +123,14 @@ export async function POST(
       // 3. Create Notification for the other party (creator or assignee)
       const recipientId = session.id === task.assigneeId ? task.creatorId : task.assigneeId;
       if (recipientId) {
+        const recipient = await tx.user.findUnique({ where: { id: recipientId }, select: { role: true } });
+        const taskLink = recipient?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
         await tx.notification.create({
           data: {
             userId: recipientId,
             type: "TASK_UPDATED",
             message: `${session.name} added an update on task: "${task.title}"`,
-            link: `/my-tasks?taskId=${task.id}`,
+            link: taskLink,
           },
         });
       }

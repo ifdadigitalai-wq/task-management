@@ -36,6 +36,10 @@ export default function NotificationsPage() {
       fetchCurrentUser();
     }
     fetchNotifications();
+
+    // Poll every 10 seconds for real-time updates
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleNotificationClick = async (notif: Notification) => {
