@@ -5,6 +5,7 @@ import { TopNav } from "@/components/layout/TopNav";
 import { useThemeStore } from "@/store/useThemeStore";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 export default function DashboardLayout({
   children,
@@ -13,7 +14,13 @@ export default function DashboardLayout({
 }) {
   const { sidebarCollapsed } = useThemeStore();
   const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
 
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const collapsed = mounted ? sidebarCollapsed : false;
   const isProfilePage = pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
@@ -28,7 +35,7 @@ export default function DashboardLayout({
           /* On mobile: no margin — sidebar overlays */
           "ml-0",
           /* Desktop: match sidebar width */
-          sidebarCollapsed ? "md:ml-[56px]" : "md:ml-[240px]"
+          collapsed ? "md:ml-[56px]" : "md:ml-[240px]"
         )}
       >
         {/* TopNav — sticky, never scrolls away, z-topnav (40) */}

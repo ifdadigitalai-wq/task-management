@@ -49,12 +49,19 @@ export function Sidebar() {
   const router = useRouter();
   const { currentUser, fetchCurrentUser, tasks } = useTaskStore();
   const { sidebarCollapsed, toggleSidebar } = useThemeStore();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!currentUser) {
       fetchCurrentUser();
     }
   }, [currentUser]);
+
+  const collapsed = mounted ? sidebarCollapsed : false;
 
   const isEmployee = currentUser?.role === "EMPLOYEE";
 
@@ -96,7 +103,7 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile Drawer Backdrop — sits below sidebar (z-20), above content */}
-      {!sidebarCollapsed && (
+      {!collapsed && (
         <div
           onClick={toggleSidebar}
           className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-20 md:hidden"
@@ -110,7 +117,7 @@ export function Sidebar() {
           /* z-sidebar = 30 */
           "z-[30]",
           /* Width: 240px expanded, 56px collapsed */
-          sidebarCollapsed
+          collapsed
             ? "w-[56px] max-md:-translate-x-full"
             : "w-[240px] translate-x-0"
         )}
@@ -126,7 +133,7 @@ export function Sidebar() {
           >
             IF
           </div>
-          {!sidebarCollapsed && (
+          {!collapsed && (
             <span
               className="font-semibold text-text-primary tracking-tight truncate"
               style={{ fontSize: "0.84375rem" }}
@@ -141,7 +148,7 @@ export function Sidebar() {
           {filteredSections.map((section) => (
             <div key={section.label}>
               {/* Section label */}
-              {!sidebarCollapsed ? (
+              {!collapsed ? (
                 <p
                   className="text-text-tertiary uppercase tracking-[0.1em] font-semibold"
                   style={{
@@ -194,10 +201,10 @@ export function Sidebar() {
                           flexShrink: 0,
                         }}
                       />
-                      {!sidebarCollapsed && (
+                      {!collapsed && (
                         <span className="truncate flex-1">{item.name}</span>
                       )}
-                      {hasBadge && !sidebarCollapsed && (
+                      {hasBadge && !collapsed && (
                         <span
                           className="text-white rounded-full shrink-0 font-medium"
                           style={{
@@ -224,7 +231,7 @@ export function Sidebar() {
             className="icon-only w-8 h-8 rounded-full border border-border-strong hover:bg-white/5 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:outline-none"
             style={{ minHeight: "unset", minWidth: "unset" }}
           >
-            {sidebarCollapsed ? (
+            {collapsed ? (
               <ChevronRight className="w-3.5 h-3.5" />
             ) : (
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -249,7 +256,7 @@ export function Sidebar() {
                   size="sm"
                 />
               </Link>
-              {!sidebarCollapsed && (
+              {!collapsed && (
                 <div className="min-w-0 flex-1">
                   <p
                     className="text-text-primary truncate font-medium"
@@ -273,7 +280,7 @@ export function Sidebar() {
                   </span>
                 </div>
               )}
-              {!sidebarCollapsed && (
+              {!collapsed && (
                 <button
                   onClick={handleLogout}
                   title="Log Out"

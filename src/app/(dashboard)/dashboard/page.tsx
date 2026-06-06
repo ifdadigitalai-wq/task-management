@@ -24,28 +24,28 @@ interface StatsData {
 export default function DashboardPage() {
   const { currentUser, fetchCurrentUser, setSelectedTask } = useTaskStore();
 
-  const [stats, setStats]               = useState<StatsData | null>(null);
-  const [activities, setActivities]     = useState<any[]>([]);
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [activities, setActivities] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
-  const [loading, setLoading]           = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     try {
-      const statsRes    = await fetch("/api/tasks/stats");
+      const statsRes = await fetch("/api/tasks/stats");
       const statsPayload = await statsRes.json();
       if (statsPayload.success) setStats(statsPayload.data);
 
-      const actRes    = await fetch("/api/activities");
+      const actRes = await fetch("/api/activities");
       const actPayload = await actRes.json();
       if (actPayload.success) setActivities((actPayload.data || []).slice(0, 10));
 
-      const notifRes    = await fetch("/api/notifications");
+      const notifRes = await fetch("/api/notifications");
       const notifPayload = await notifRes.json();
       if (notifPayload.success)
         setNotifications((notifPayload.data?.notifications || []).slice(0, 5));
 
-      const tasksRes    = await fetch("/api/tasks");
+      const tasksRes = await fetch("/api/tasks");
       const tasksPayload = await tasksRes.json();
       if (tasksPayload.success) {
         const activeTasks = (tasksPayload.data || []).filter(
@@ -86,21 +86,21 @@ export default function DashboardPage() {
 
   // Donut chart segments
   const statusSegments = [
-    { label: "To Do",       count: stats?.byStatus.TODO       || 0, color: "#94A3B8" },
+    { label: "To Do", count: stats?.byStatus.TODO || 0, color: "#94A3B8" },
     { label: "In Progress", count: stats?.byStatus.IN_PROGRESS || 0, color: "#60A5FA" },
-    { label: "In Review",   count: stats?.byStatus.IN_REVIEW  || 0, color: "#A78BFA" },
-    { label: "Completed",   count: stats?.byStatus.DONE       || 0, color: "#34D399" },
-    { label: "Cancelled",   count: stats?.byStatus.CANCELLED  || 0, color: "#F87171" },
+    { label: "In Review", count: stats?.byStatus.IN_REVIEW || 0, color: "#A78BFA" },
+    { label: "Completed", count: stats?.byStatus.DONE || 0, color: "#34D399" },
+    { label: "Cancelled", count: stats?.byStatus.CANCELLED || 0, color: "#F87171" },
   ];
 
-  const totalTasks     = stats?.total       || 0;
+  const totalTasks = stats?.total || 0;
   const completedTasks = stats?.byStatus.DONE || 0;
-  const overdueTasks   = stats?.overdue     || 0;
+  const overdueTasks = stats?.overdue || 0;
   const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   const formatActivityAction = (act: any) => {
     const action = act.action;
-    
+
     if (action === "CREATE_TASK") {
       const assigneeName = act.meta?.assignee;
       if (assigneeName) {
@@ -108,7 +108,7 @@ export default function DashboardPage() {
       }
       return "created a task";
     }
-    
+
     if (action === "UPDATE_TASK") {
       const status = act.meta?.status;
       if (status) {
@@ -379,12 +379,12 @@ export default function DashboardPage() {
                           style={{
                             backgroundColor:
                               task.priority === "CRITICAL"
-                                  ? "#F87171"
-                                  : task.priority === "HIGH"
+                                ? "#F87171"
+                                : task.priority === "HIGH"
                                   ? "#FB923C"
                                   : task.priority === "MEDIUM"
-                                  ? "#60A5FA"
-                                  : "#94A3B8",
+                                    ? "#60A5FA"
+                                    : "#94A3B8",
                           }}
                         />
                         <span
@@ -705,7 +705,7 @@ function DonutChart({ data }: { data: { label: string; count: number; color: str
   }
 
   let accumulatedPercent = 0;
-  const radius      = 38;
+  const radius = 38;
   const strokeWidth = 9;
   const circumference = 2 * Math.PI * radius;
 
@@ -723,7 +723,7 @@ function DonutChart({ data }: { data: { label: string; count: number; color: str
           />
           {data.map((item, idx) => {
             if (item.count === 0) return null;
-            const percent      = item.count / total;
+            const percent = item.count / total;
             const strokeLength = circumference * percent;
             const strokeOffset = circumference - circumference * accumulatedPercent;
             accumulatedPercent += percent;
