@@ -225,15 +225,17 @@ export default function DashboardPage() {
           iconColor={overdueTasks > 0 ? "#F87171" : "#6366F1"}
         />
         {/* KPI 4: Completion Rate */}
-        <KpiCard
-          label={isAdmin ? "Completion Rate" : "Logged Hours"}
-          value={isAdmin ? `${completionRate}%` : `${(completedTasks * 1.5).toFixed(1)}h`}
-          delta="+4%"
-          deltaPositive
-          comparison="vs last month"
-          icon={<BarChart3 />}
-          iconColor="#60A5FA"
-        />
+        {isAdmin && (
+          <KpiCard
+            label="Completion Rate"
+            value={`${completionRate}%`}
+            delta="+4%"
+            deltaPositive
+            comparison="vs last month"
+            icon={<BarChart3 />}
+            iconColor="#60A5FA"
+          />
+        )}
       </div>
 
       {/* ── PROBLEM 4 & 5: Charts & Workload ── */}

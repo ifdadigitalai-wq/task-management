@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type HML = { H: number; M: number; L: number };
-type FilterMode = "employee" | "department" | "priority";
+type FilterMode = "employee" | "priority";
 type ViewMode = "table" | "chart";
 
 interface EmployeeStat {
@@ -274,28 +274,7 @@ function ChartPanel({ data, filter }: { data: StatsData; filter: FilterMode }) {
     );
   }
 
-  if (filter === "department") {
-    const depts = data.departments;
-    const maxScore = Math.max(...depts.map((d) => d.score), 1);
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-850/80 rounded-lg p-3.5 shadow-xs">
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Score by department</p>
-          <BarChartInline rows={depts.map((d, i) => ({
-            label: d.name, value: d.score, max: maxScore,
-            color: COLORS[i % COLORS.length], sub: `${d.score}pts`,
-          }))} />
-        </div>
-        <div className="bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-850/80 rounded-lg p-3.5 shadow-xs">
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Completion % by dept</p>
-          <BarChartInline rows={depts.map((d) => {
-            const p = scorePct(d.score, d.maxScore);
-            return { label: d.name, value: p, max: 100, color: p >= 75 ? "#10b981" : p >= 40 ? "#f59e0b" : "#ef4444" };
-          })} />
-        </div>
-      </div>
-    );
-  }
+
 
   const pri = data.priorities;
   const rows = [
@@ -371,48 +350,7 @@ function EmployeeTable({ employees }: { employees: EmployeeStat[] }) {
   );
 }
 
-// ── Table: Department ─────────────────────────────────────────────────────────
 
-function DeptTable({ departments }: { departments: DeptStat[] }) {
-  if (!departments.length) return <EmptyState />;
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse min-w-[620px]">
-        <thead>
-          <tr className="border-b border-slate-100 dark:border-slate-850/80">
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-left w-12">#</th>
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-left">Department</th>
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-center w-20">Total</th>
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-center w-36">Due (H·M·L)</th>
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-center w-36">Done (H·M·L)</th>
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-center w-20">Max</th>
-            <th className="px-3 py-2 text-[10px] uppercase font-bold tracking-wider bg-slate-50/75 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 text-left min-w-[140px]">Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {departments.map((dept, i) => (
-            <tr key={dept.name} className="border-b border-slate-50 dark:border-slate-850/40 hover:bg-slate-50/40 dark:hover:bg-slate-850/20 odd:bg-slate-50/10 dark:odd:bg-slate-900/5">
-              <td className="px-3 py-2 text-xs font-mono text-slate-450 dark:text-slate-550">{i + 1}</td>
-              <td className="px-3 py-2 text-xs font-semibold text-slate-850 dark:text-slate-200">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-150/40 dark:border-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                    <Icon.Building />
-                  </div>
-                  <span className="truncate">{dept.name}</span>
-                </div>
-              </td>
-              <td className="px-3 py-2 text-xs text-center font-bold text-slate-800 dark:text-slate-200">{dept.total}</td>
-              <td className="px-3 py-2 text-xs text-center"><HMLChips obj={dept.due} variant="due" /></td>
-              <td className="px-3 py-2 text-xs text-center"><HMLChips obj={dept.completed} variant="done" /></td>
-              <td className="px-3 py-2 text-xs text-center font-semibold text-slate-500 dark:text-slate-450">{dept.maxScore}</td>
-              <td className="px-3 py-2 text-xs"><ScoreBar score={dept.score} max={dept.maxScore} /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 // ── Table: Priority ───────────────────────────────────────────────────────────
 
@@ -566,7 +504,6 @@ export default function PerformanceAnalytics() {
           onChange={setFilter}
           options={[
             { key: "employee"   as FilterMode, label: "Employee",   icon: <Icon.User /> },
-            { key: "department" as FilterMode, label: "Department", icon: <Icon.Building /> },
             { key: "priority"   as FilterMode, label: "Priority",   icon: <Icon.Flag /> },
           ]}
         />
@@ -595,8 +532,6 @@ export default function PerformanceAnalytics() {
           </div>
         ) : filter === "employee" ? (
           <EmployeeTable employees={data.employees} />
-        ) : filter === "department" ? (
-          <DeptTable departments={data.departments} />
         ) : (
           <PriorityTable priorities={data.priorities} />
         )}

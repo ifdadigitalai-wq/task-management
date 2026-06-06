@@ -415,17 +415,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
           <div className="flex-1 min-w-0">
             {/* Badges row */}
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              {currentUser?.role === "ADMIN" ? (
-                <button
-                  onClick={handleCycleStatus}
-                  className="focus:outline-none select-none cursor-pointer"
-                  title="Click to cycle status"
-                >
-                  <StatusBadge status={task.status} />
-                </button>
-              ) : (
-                <StatusBadge status={task.status} />
-              )}
+              <StatusBadge status={task.status} />
               
               <PriorityBadge priority={task.priority} />
 

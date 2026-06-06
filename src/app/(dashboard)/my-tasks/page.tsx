@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTaskStore } from "@/store/useTaskStore";
 import TaskList from "@/components/tasks/TaskList";
@@ -11,6 +11,7 @@ function MyTasksContent() {
   const { tasks, fetchTasks, currentUser, fetchCurrentUser, setSelectedTask } = useTaskStore();
   const searchParams = useSearchParams();
   const taskIdFromUrl = searchParams.get("taskId");
+  const autoOpenedRef = useRef<string | null>(null);
 
   useEffect(() => {
     fetchTasks();
@@ -19,13 +20,14 @@ function MyTasksContent() {
 
   // Auto-open task detail panel when navigated via notification link
   useEffect(() => {
-    if (taskIdFromUrl && tasks.length > 0) {
+    if (taskIdFromUrl && tasks.length > 0 && autoOpenedRef.current !== taskIdFromUrl) {
       const targetTask = tasks.find((t) => t.id === taskIdFromUrl);
       if (targetTask) {
         setSelectedTask(targetTask);
+        autoOpenedRef.current = taskIdFromUrl;
       }
     }
-  }, [taskIdFromUrl, tasks]);
+  }, [taskIdFromUrl, tasks, setSelectedTask]);
 
   const myTasks = tasks.filter((t) => t.assigneeId === currentUser?.id);
   const activeMyTasks = myTasks.filter((t) => t.status !== "DONE" && t.status !== "CANCELLED");

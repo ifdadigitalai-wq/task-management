@@ -49,8 +49,10 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task }: TaskCardProps) {
-  const { setSelectedTask } = useTaskStore();
+  const { setSelectedTask, currentUser } = useTaskStore();
   const [isDragging, setIsDragging] = useState(false);
+
+  const isDraggable = currentUser?.role === "ADMIN";
 
   const isOverdue =
     task.dueDate &&
@@ -83,9 +85,9 @@ export default function TaskCard({ task }: TaskCardProps) {
 
   return (
     <div
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      draggable={isDraggable}
+      onDragStart={isDraggable ? handleDragStart : undefined}
+      onDragEnd={isDraggable ? handleDragEnd : undefined}
       onClick={() => setSelectedTask(task)}
       className={cn(
         "bg-surface border border-border p-2 mb-0 hover:border-border-strong hover:shadow-sm transition-all duration-150 cursor-pointer select-none rounded-r-lg rounded-l-none border-l-[3px]",

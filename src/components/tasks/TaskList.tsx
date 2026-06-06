@@ -117,15 +117,18 @@ export default function TaskList({ tasks: initialTasks }: { tasks?: Task[] }) {
   });
 
   const handleDragOver = (e: React.DragEvent, status: TaskStatus) => {
+    if (currentUser?.role !== "ADMIN") return;
     e.preventDefault();
     setDragOverStatus(status);
   };
 
   const handleDragLeave = () => {
+    if (currentUser?.role !== "ADMIN") return;
     setDragOverStatus(null);
   };
 
   const handleDrop = async (e: React.DragEvent, status: TaskStatus) => {
+    if (currentUser?.role !== "ADMIN") return;
     e.preventDefault();
     setDragOverStatus(null);
     const taskId = e.dataTransfer.getData("text/plain");
