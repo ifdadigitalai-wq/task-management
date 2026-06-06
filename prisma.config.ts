@@ -3,8 +3,9 @@ import { defineConfig } from "prisma/config";
 import * as dotenv from "dotenv";
 
 let dbUrl = process.env.DATABASE_URL || "";
-if (dbUrl && !dbUrl.includes("pgbouncer=true")) {
-  dbUrl = dbUrl.includes("?") ? `${dbUrl}&pgbouncer=true` : `${dbUrl}?pgbouncer=true`;
+if (dbUrl) {
+  // Replace '-pooler' to use Neon's direct connection for migrations, which supports advisory locks
+  dbUrl = dbUrl.replace("-pooler", "");
 }
 
 export default defineConfig({
