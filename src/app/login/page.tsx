@@ -45,7 +45,7 @@ export default function LoginPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .login-root *, .login-root *::before, .login-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         .login-root {
           display: flex;

@@ -494,8 +494,10 @@ export default function PerformanceAnalytics() {
     setLoading(true);
     fetch("/api/tasks/stats", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d: StatsData) => { 
-        setData(d); 
+      .then((d) => { 
+        if (d.success) {
+          setData(d.data);
+        }
         setLastUpdated(new Date()); 
       })
       .catch(console.error)
