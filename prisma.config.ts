@@ -4,8 +4,8 @@ import * as dotenv from "dotenv";
 
 let dbUrl = process.env.DATABASE_URL || "";
 if (dbUrl) {
-  // Replace '-pooler' to use Neon's direct connection for migrations, which supports advisory locks
   dbUrl = dbUrl.replace("-pooler", "");
+  process.env.DATABASE_URL = dbUrl;
 }
 
 export default defineConfig({
