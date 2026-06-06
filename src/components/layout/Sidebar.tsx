@@ -131,7 +131,7 @@ export function Sidebar() {
               fontSize: "13px",
             }}
           >
-            IF
+            IFDA
           </div>
           {!collapsed && (
             <span
