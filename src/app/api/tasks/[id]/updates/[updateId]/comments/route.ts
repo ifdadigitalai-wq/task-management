@@ -48,7 +48,7 @@ export async function POST(
 
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create the comment
-      const comment = await tx.taskComment.create({
+      const comment = await tx.taskUpdateComment.create({
         data: {
           taskUpdateId: updateId,
           body: text,

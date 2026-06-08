@@ -8,7 +8,27 @@ datasource db {
 
 enum Role {
   ADMIN
+  MANAGER
+  TEAM_LEADER
   EMPLOYEE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  RESIGNED
+  ON_LEAVE
+}
+
+enum Frequency {
+  ONE_TIME
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  CUSTOM
 }
 
 enum EventType {
@@ -45,7 +65,11 @@ model User {
   email             String         @unique
   passwordHash      String
   role              Role           @default(EMPLOYEE)
+  status            UserStatus     @default(ACTIVE)
   department        String?
+  departmentId      String?
+  departmentObj     Department?    @relation(fields: [departmentId], references: [id])
+  team              String?
   jobTitle          String?
   avatarUrl         String?
   phone             String?
@@ -60,6 +84,7 @@ model User {
   createdTasks      Task[]         @relation("CreatedBy")
   updates           TaskUpdate[]
   comments          TaskComment[]
+  updateComments    TaskUpdateComment[]
   timers            TaskTimer[]
   notifications     Notification[]
   activities        Activity[]
@@ -86,13 +111,22 @@ model Task {
   parentTask       Task?          @relation("SubTasks", fields: [parentTaskId], references: [id])
   subTasks         Task[]         @relation("SubTasks")
   tags             String[]
-  attachments      Json?          // Array of attachment metadata: { name: string, size?: number, url?: string }
   recurrence       Json?          // Recurrence rule: { rule: "NONE" | "DAILY" | "WEEKLY" | "MONTHLY", interval?: number, nextDue?: DateTime }
   checklistItems   Json?          // Array of checklist items: { text: string, completed: boolean }[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
+  // New fields
+  department       String         @default("General")
+  frequency        Frequency      @default(ONE_TIME)
+  customFrequency  String?
+  progress         Int            @default(0)
+  isSubtask        Boolean        @default(false)
+
   // Relations
+  attachments      TaskAttachment[]
+  comments         TaskComment[]
+  reminderSettings TaskReminder?
   updates          TaskUpdate[]
   timers           TaskTimer[]
   activities       Activity[]
@@ -101,6 +135,64 @@ model Task {
   @@index([status])
   @@index([dueDate])
   @@index([creatorId])
+}
+
+model TaskAttachment {
+  id         String   @id @default(cuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  url        String
+  filename   String
+  uploadedBy String
+  uploadedAt DateTime @default(now())
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model TaskReminder {
+  id                String   @id @default(cuid())
+  taskId            String   @unique
+  task              Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  beforeDueDate     Boolean
+  onDueDate         Boolean
+  recurring         Boolean
+  emailNotification Boolean
+  inAppNotification Boolean
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String?
+  performedBy String
+  details     Json
+  createdAt   DateTime @default(now())
+}
+
+model TaskTransfer {
+  id            String   @id @default(cuid())
+  taskId        String
+  fromUserId    String
+  toUserId      String
+  transferredBy String
+  transferredAt DateTime @default(now())
+  reason        String
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  members     User[]
 }
 
 model TaskUpdate {
@@ -115,10 +207,10 @@ model TaskUpdate {
   createdAt   DateTime      @default(now())
 
   // Relations
-  comments  TaskComment[]
+  comments    TaskUpdateComment[]
 }
 
-model TaskComment {
+model TaskUpdateComment {
   id           String     @id @default(cuid())
   taskUpdateId String
   taskUpdate   TaskUpdate @relation(fields: [taskUpdateId], references: [id], onDelete: Cascade)
@@ -198,3 +290,4 @@ model Activity {
   taskId     String?
   task       Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
 }
+

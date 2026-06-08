@@ -49,21 +49,12 @@
       "norm_label": "prisma.config.ts"
     },
     {
-      "label": "tailwind.config.ts",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\tailwind.config.ts",
-      "source_location": "L1",
-      "id": "d_task_manager_tailwind_config_ts",
-      "community": 45,
-      "norm_label": "tailwind.config.ts"
-    },
-    {
       "label": "seed.ts",
       "file_type": "code",
       "source_file": "D:\\task_manager\\prisma\\seed.ts",
       "source_location": "L1",
       "id": "d_task_manager_prisma_seed_ts",
-      "community": 21,
+      "community": 24,
       "norm_label": "seed.ts"
     },
     {
@@ -72,7 +63,7 @@
       "source_file": "D:\\task_manager\\prisma\\seed.ts",
       "source_location": "L9",
       "id": "seed_main",
-      "community": 21,
+      "community": 24,
       "norm_label": "main()"
     },
     {
@@ -81,7 +72,7 @@
       "source_file": "D:\\task_manager\\src\\proxy.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_proxy_ts",
-      "community": 9,
+      "community": 7,
       "norm_label": "proxy.ts"
     },
     {
@@ -90,7 +81,7 @@
       "source_file": "D:\\task_manager\\src\\proxy.ts",
       "source_location": "L8",
       "id": "proxy_proxy",
-      "community": 9,
+      "community": 7,
       "norm_label": "proxy()"
     },
     {
@@ -99,7 +90,7 @@
       "source_file": "D:\\task_manager\\src\\app\\layout.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_layout_tsx",
-      "community": 22,
+      "community": 25,
       "norm_label": "layout.tsx"
     },
     {
@@ -108,7 +99,7 @@
       "source_file": "D:\\task_manager\\src\\app\\layout.tsx",
       "source_location": "L4",
       "id": "layout_rootlayout",
-      "community": 22,
+      "community": 25,
       "norm_label": "rootlayout()"
     },
     {
@@ -117,7 +108,7 @@
       "source_file": "D:\\task_manager\\src\\app\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_page_tsx",
-      "community": 23,
+      "community": 26,
       "norm_label": "page.tsx"
     },
     {
@@ -126,7 +117,7 @@
       "source_file": "D:\\task_manager\\src\\app\\page.tsx",
       "source_location": "L3",
       "id": "page_home",
-      "community": 23,
+      "community": 26,
       "norm_label": "home()"
     },
     {
@@ -135,7 +126,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\layout.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_layout_tsx",
-      "community": 24,
+      "community": 27,
       "norm_label": "layout.tsx"
     },
     {
@@ -144,7 +135,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\layout.tsx",
       "source_location": "L3",
       "id": "layout_dashboardroutelayout",
-      "community": 24,
+      "community": 27,
       "norm_label": "dashboardroutelayout()"
     },
     {
@@ -153,7 +144,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\activities\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_activities_page_tsx",
-      "community": 17,
+      "community": 18,
       "norm_label": "page.tsx"
     },
     {
@@ -162,7 +153,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\activities\\page.tsx",
       "source_location": "L22",
       "id": "page_fetchactivities",
-      "community": 17,
+      "community": 18,
       "norm_label": "fetchactivities()"
     },
     {
@@ -171,7 +162,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\activities\\page.tsx",
       "source_location": "L58",
       "id": "page_getactionbadgestyle",
-      "community": 17,
+      "community": 18,
       "norm_label": "getactionbadgestyle()"
     },
     {
@@ -180,16 +171,25 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\all-tasks\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_all_tasks_page_tsx",
-      "community": 25,
+      "community": 20,
       "norm_label": "page.tsx"
+    },
+    {
+      "label": "AllTasksContent()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\all-tasks\\page.tsx",
+      "source_location": "L10",
+      "id": "page_alltaskscontent",
+      "community": 20,
+      "norm_label": "alltaskscontent()"
     },
     {
       "label": "AllTasksPage()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\all-tasks\\page.tsx",
-      "source_location": "L9",
+      "source_location": "L62",
       "id": "page_alltaskspage",
-      "community": 25,
+      "community": 20,
       "norm_label": "alltaskspage()"
     },
     {
@@ -198,17 +198,26 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\dashboard\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_dashboard_page_tsx",
-      "community": 26,
+      "community": 19,
       "norm_label": "page.tsx"
     },
     {
       "label": "fetchDashboardData()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\dashboard\\page.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "id": "page_fetchdashboarddata",
-      "community": 26,
+      "community": 19,
       "norm_label": "fetchdashboarddata()"
+    },
+    {
+      "label": "formatActivityAction()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\dashboard\\page.tsx",
+      "source_location": "L101",
+      "id": "page_formatactivityaction",
+      "community": 19,
+      "norm_label": "formatactivityaction()"
     },
     {
       "label": "page.tsx",
@@ -216,7 +225,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\delegatedBy\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_delegatedby_page_tsx",
-      "community": 27,
+      "community": 28,
       "norm_label": "page.tsx"
     },
     {
@@ -225,7 +234,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\delegatedBy\\page.tsx",
       "source_location": "L9",
       "id": "page_delegatedbypage",
-      "community": 27,
+      "community": 28,
       "norm_label": "delegatedbypage()"
     },
     {
@@ -234,7 +243,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\employees\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_employees_page_tsx",
-      "community": 28,
+      "community": 29,
       "norm_label": "page.tsx"
     },
     {
@@ -243,7 +252,7 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\employees\\page.tsx",
       "source_location": "L24",
       "id": "page_handledelete",
-      "community": 28,
+      "community": 29,
       "norm_label": "handledelete()"
     },
     {
@@ -252,80 +261,71 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "community": 4,
+      "community": 6,
       "norm_label": "page.tsx"
     },
     {
-      "label": "fetchHolidays()",
+      "label": "toInputDate()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L75",
-      "id": "page_fetchholidays",
-      "community": 4,
-      "norm_label": "fetchholidays()"
+      "source_location": "L74",
+      "id": "page_toinputdate",
+      "community": 6,
+      "norm_label": "toinputdate()"
     },
     {
-      "label": "handlePrev()",
+      "label": "formatDate()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L101",
-      "id": "page_handleprev",
-      "community": 4,
-      "norm_label": "handleprev()"
+      "source_location": "L78",
+      "id": "page_formatdate",
+      "community": 6,
+      "norm_label": "formatdate()"
     },
     {
-      "label": "handleNext()",
+      "label": "formatDateShort()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L109",
-      "id": "page_handlenext",
-      "community": 4,
-      "norm_label": "handlenext()"
+      "source_location": "L82",
+      "id": "page_formatdateshort",
+      "community": 6,
+      "norm_label": "formatdateshort()"
     },
     {
-      "label": "handleToday()",
+      "label": "formatDateRange()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L117",
-      "id": "page_handletoday",
-      "community": 4,
-      "norm_label": "handletoday()"
+      "source_location": "L86",
+      "id": "page_formatdaterange",
+      "community": 6,
+      "norm_label": "formatdaterange()"
     },
     {
-      "label": "handleDateSelect()",
+      "label": "formatTime()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L125",
-      "id": "page_handledateselect",
-      "community": 4,
-      "norm_label": "handledateselect()"
+      "source_location": "L94",
+      "id": "page_formattime",
+      "community": 6,
+      "norm_label": "formattime()"
     },
     {
-      "label": "handleEventClick()",
+      "label": "buildActivitySentence()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L135",
-      "id": "page_handleeventclick",
-      "community": 4,
-      "norm_label": "handleeventclick()"
+      "source_location": "L103",
+      "id": "page_buildactivitysentence",
+      "community": 6,
+      "norm_label": "buildactivitysentence()"
     },
     {
-      "label": "handleAddHoliday()",
+      "label": "TypeBadge()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L143",
-      "id": "page_handleaddholiday",
-      "community": 4,
-      "norm_label": "handleaddholiday()"
-    },
-    {
-      "label": "handleDeleteHoliday()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L174",
-      "id": "page_handledeleteholiday",
-      "community": 4,
-      "norm_label": "handledeleteholiday()"
+      "source_location": "L126",
+      "id": "page_typebadge",
+      "community": 6,
+      "norm_label": "typebadge()"
     },
     {
       "label": "page.tsx",
@@ -333,16 +333,25 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\my-tasks\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_my_tasks_page_tsx",
-      "community": 29,
+      "community": 0,
       "norm_label": "page.tsx"
+    },
+    {
+      "label": "MyTasksContent()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\my-tasks\\page.tsx",
+      "source_location": "L10",
+      "id": "page_mytaskscontent",
+      "community": 0,
+      "norm_label": "mytaskscontent()"
     },
     {
       "label": "MyTasksPage()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\my-tasks\\page.tsx",
-      "source_location": "L9",
+      "source_location": "L65",
       "id": "page_mytaskspage",
-      "community": 29,
+      "community": 0,
       "norm_label": "mytaskspage()"
     },
     {
@@ -367,7 +376,7 @@
       "label": "handleNotificationClick()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\notifications\\page.tsx",
-      "source_location": "L41",
+      "source_location": "L45",
       "id": "page_handlenotificationclick",
       "community": 13,
       "norm_label": "handlenotificationclick()"
@@ -376,7 +385,7 @@
       "label": "handleMarkAllAsRead()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\notifications\\page.tsx",
-      "source_location": "L57",
+      "source_location": "L61",
       "id": "page_handlemarkallasread",
       "community": 13,
       "norm_label": "handlemarkallasread()"
@@ -403,7 +412,7 @@
       "label": "getPriorityBadge()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-directory\\page.tsx",
-      "source_location": "L91",
+      "source_location": "L71",
       "id": "page_getprioritybadge",
       "community": 14,
       "norm_label": "getprioritybadge()"
@@ -412,7 +421,7 @@
       "label": "getStatusBadge()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-directory\\page.tsx",
-      "source_location": "L105",
+      "source_location": "L85",
       "id": "page_getstatusbadge",
       "community": 14,
       "norm_label": "getstatusbadge()"
@@ -423,61 +432,88 @@
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
-      "community": 6,
+      "community": 2,
       "norm_label": "page.tsx"
+    },
+    {
+      "label": "resetForm()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L27",
+      "id": "page_resetform",
+      "community": 2,
+      "norm_label": "resetform()"
+    },
+    {
+      "label": "handleStartEdit()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L35",
+      "id": "page_handlestartedit",
+      "community": 2,
+      "norm_label": "handlestartedit()"
     },
     {
       "label": "fetchTemplates()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L26",
+      "source_location": "L44",
       "id": "page_fetchtemplates",
-      "community": 6,
+      "community": 2,
       "norm_label": "fetchtemplates()"
     },
     {
       "label": "handleAddChecklistItem()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L45",
+      "source_location": "L63",
       "id": "page_handleaddchecklistitem",
-      "community": 6,
+      "community": 2,
       "norm_label": "handleaddchecklistitem()"
     },
     {
       "label": "handleRemoveChecklistItem()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L52",
+      "source_location": "L70",
       "id": "page_handleremovechecklistitem",
-      "community": 6,
+      "community": 2,
       "norm_label": "handleremovechecklistitem()"
     },
     {
       "label": "handleCreateTemplate()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L56",
+      "source_location": "L74",
       "id": "page_handlecreatetemplate",
-      "community": 6,
+      "community": 2,
       "norm_label": "handlecreatetemplate()"
+    },
+    {
+      "label": "handleUpdateTemplate()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L111",
+      "id": "page_handleupdatetemplate",
+      "community": 2,
+      "norm_label": "handleupdatetemplate()"
     },
     {
       "label": "handleDeleteTemplate()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L93",
+      "source_location": "L145",
       "id": "page_handledeletetemplate",
-      "community": 6,
+      "community": 2,
       "norm_label": "handledeletetemplate()"
     },
     {
       "label": "getPriorityColor()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L112",
+      "source_location": "L164",
       "id": "page_getprioritycolor",
-      "community": 6,
+      "community": 2,
       "norm_label": "getprioritycolor()"
     },
     {
@@ -486,16 +522,16 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\activities\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_activities_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
       "label": "GET()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\route.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "id": "route_get",
-      "community": 1,
+      "community": 0,
       "norm_label": "get()"
     },
     {
@@ -504,16 +540,16 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\auth\\login\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_auth_login_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
       "label": "POST()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\route.ts",
-      "source_location": "L45",
+      "source_location": "L47",
       "id": "route_post",
-      "community": 1,
+      "community": 0,
       "norm_label": "post()"
     },
     {
@@ -522,7 +558,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\auth\\logout\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_auth_logout_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -531,8 +567,44 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\auth\\me\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_auth_me_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\api\\calendar-events\\route.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_app_api_calendar_events_route_ts",
+      "community": 0,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\api\\calendar-events\\[id]\\route.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_app_api_calendar_events_id_route_ts",
+      "community": 3,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "PATCH()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
+      "source_location": "L9",
+      "id": "route_patch",
+      "community": 3,
+      "norm_label": "patch()"
+    },
+    {
+      "label": "DELETE()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
+      "source_location": "L87",
+      "id": "route_delete",
+      "community": 3,
+      "norm_label": "delete()"
     },
     {
       "label": "route.ts",
@@ -540,7 +612,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_holidays_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -549,26 +621,17 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\[id]\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_holidays_id_route_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
-      "label": "PATCH()",
+      "label": "route.ts",
       "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
-      "source_location": "L7",
-      "id": "route_patch",
-      "community": 2,
-      "norm_label": "patch()"
-    },
-    {
-      "label": "DELETE()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
-      "source_location": "L85",
-      "id": "route_delete",
-      "community": 2,
-      "norm_label": "delete()"
+      "source_file": "D:\\task_manager\\src\\app\\api\\integration\\whatsapp\\route.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_app_api_integration_whatsapp_route_ts",
+      "community": 0,
+      "norm_label": "route.ts"
     },
     {
       "label": "route.ts",
@@ -576,7 +639,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\notifications\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_notifications_route_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -585,7 +648,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\notifications\\[id]\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_notifications_id_route_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -594,7 +657,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\task-templates\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_task_templates_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -603,7 +666,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\task-templates\\[id]\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_task_templates_id_route_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -612,7 +675,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_tasks_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -621,7 +684,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\stats\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_tasks_stats_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -630,7 +693,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\stats\\route.ts",
       "source_location": "L16",
       "id": "route_emptyhml",
-      "community": 1,
+      "community": 0,
       "norm_label": "emptyhml()"
     },
     {
@@ -639,7 +702,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\[id]\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_tasks_id_route_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -648,7 +711,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\[id]\\timers\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_tasks_id_timers_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -657,7 +720,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\[id]\\updates\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_tasks_id_updates_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -666,7 +729,16 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\[id]\\updates\\[updateId]\\comments\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_tasks_id_updates_updateid_comments_route_ts",
-      "community": 1,
+      "community": 0,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\app\\api\\uploadthing\\route.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_app_api_uploadthing_route_ts",
+      "community": 45,
       "norm_label": "route.ts"
     },
     {
@@ -675,7 +747,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_users_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -684,7 +756,7 @@
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_app_api_users_id_route_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -711,7 +783,7 @@
       "source_file": "D:\\task_manager\\src\\app\\profile\\page.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_app_profile_page_tsx",
-      "community": 2,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -720,7 +792,7 @@
       "source_file": "D:\\task_manager\\src\\app\\profile\\page.tsx",
       "source_location": "L10",
       "id": "page_profilepage",
-      "community": 2,
+      "community": 0,
       "norm_label": "profilepage()"
     },
     {
@@ -729,152 +801,80 @@
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "community": 0,
+      "community": 4,
       "norm_label": "assigntaskmodal.tsx"
     },
     {
       "label": "pad()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "id": "assigntaskmodal_pad",
-      "community": 0,
+      "community": 4,
       "norm_label": "pad()"
     },
     {
       "label": "startTimer()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "id": "assigntaskmodal_starttimer",
-      "community": 0,
+      "community": 4,
       "norm_label": "starttimer()"
     },
     {
       "label": "stopTimer()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "id": "assigntaskmodal_stoptimer",
-      "community": 0,
+      "community": 4,
       "norm_label": "stoptimer()"
     },
     {
       "label": "startRecording()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "id": "assigntaskmodal_startrecording",
-      "community": 0,
+      "community": 4,
       "norm_label": "startrecording()"
     },
     {
       "label": "pauseRecording()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "id": "assigntaskmodal_pauserecording",
-      "community": 0,
+      "community": 4,
       "norm_label": "pauserecording()"
     },
     {
       "label": "resumeRecording()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "id": "assigntaskmodal_resumerecording",
-      "community": 0,
+      "community": 4,
       "norm_label": "resumerecording()"
     },
     {
       "label": "stopRecording()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "id": "assigntaskmodal_stoprecording",
-      "community": 0,
+      "community": 4,
       "norm_label": "stoprecording()"
     },
     {
       "label": "discard()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "id": "assigntaskmodal_discard",
-      "community": 0,
+      "community": 4,
       "norm_label": "discard()"
-    },
-    {
-      "label": "handleTemplateChange()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L194",
-      "id": "assigntaskmodal_handletemplatechange",
-      "community": 0,
-      "norm_label": "handletemplatechange()"
-    },
-    {
-      "label": "handleAddTag()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L210",
-      "id": "assigntaskmodal_handleaddtag",
-      "community": 0,
-      "norm_label": "handleaddtag()"
-    },
-    {
-      "label": "handleRemoveTag()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L217",
-      "id": "assigntaskmodal_handleremovetag",
-      "community": 0,
-      "norm_label": "handleremovetag()"
-    },
-    {
-      "label": "handleAddChecklistItem()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L221",
-      "id": "assigntaskmodal_handleaddchecklistitem",
-      "community": 0,
-      "norm_label": "handleaddchecklistitem()"
-    },
-    {
-      "label": "handleRemoveChecklistItem()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L228",
-      "id": "assigntaskmodal_handleremovechecklistitem",
-      "community": 0,
-      "norm_label": "handleremovechecklistitem()"
-    },
-    {
-      "label": "handleFileChange()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L232",
-      "id": "assigntaskmodal_handlefilechange",
-      "community": 0,
-      "norm_label": "handlefilechange()"
-    },
-    {
-      "label": "handleVoiceSave()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L242",
-      "id": "assigntaskmodal_handlevoicesave",
-      "community": 0,
-      "norm_label": "handlevoicesave()"
-    },
-    {
-      "label": "handleSubmit()",
-      "file_type": "code",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L246",
-      "id": "assigntaskmodal_handlesubmit",
-      "community": 0,
-      "norm_label": "handlesubmit()"
     },
     {
       "label": "PerformanceAnalytics.tsx",
@@ -882,8 +882,35 @@
       "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
-      "community": 46,
+      "community": 15,
       "norm_label": "performanceanalytics.tsx"
+    },
+    {
+      "label": "initials()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L97",
+      "id": "performanceanalytics_initials",
+      "community": 15,
+      "norm_label": "initials()"
+    },
+    {
+      "label": "scorePct()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L101",
+      "id": "performanceanalytics_scorepct",
+      "community": 15,
+      "norm_label": "scorepct()"
+    },
+    {
+      "label": "ScoreBar()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L107",
+      "id": "performanceanalytics_scorebar",
+      "community": 15,
+      "norm_label": "scorebar()"
     },
     {
       "label": "AddEmployeeModal.tsx",
@@ -909,7 +936,7 @@
       "source_file": "D:\\task_manager\\src\\components\\employees\\EditEmployeeModal.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_employees_editemployeemodal_tsx",
-      "community": 18,
+      "community": 21,
       "norm_label": "editemployeemodal.tsx"
     },
     {
@@ -918,7 +945,7 @@
       "source_file": "D:\\task_manager\\src\\components\\employees\\EditEmployeeModal.tsx",
       "source_location": "L21",
       "id": "editemployeemodal_todateinput",
-      "community": 18,
+      "community": 21,
       "norm_label": "todateinput()"
     },
     {
@@ -927,7 +954,7 @@
       "source_file": "D:\\task_manager\\src\\components\\employees\\EditEmployeeModal.tsx",
       "source_location": "L47",
       "id": "editemployeemodal_handlesubmit",
-      "community": 18,
+      "community": 21,
       "norm_label": "handlesubmit()"
     },
     {
@@ -943,7 +970,7 @@
       "label": "getEmployeeTasks()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "id": "employeetable_getemployeetasks",
       "community": 11,
       "norm_label": "getemployeetasks()"
@@ -952,7 +979,7 @@
       "label": "getActiveCount()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "id": "employeetable_getactivecount",
       "community": 11,
       "norm_label": "getactivecount()"
@@ -961,7 +988,7 @@
       "label": "handleSort()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "id": "employeetable_handlesort",
       "community": 11,
       "norm_label": "handlesort()"
@@ -970,7 +997,7 @@
       "label": "formatDate()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L80",
+      "source_location": "L89",
       "id": "employeetable_formatdate",
       "community": 11,
       "norm_label": "formatdate()"
@@ -981,7 +1008,7 @@
       "source_file": "D:\\task_manager\\src\\components\\layout\\DashboardLayout.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_layout_dashboardlayout_tsx",
-      "community": 47,
+      "community": 46,
       "norm_label": "dashboardlayout.tsx"
     },
     {
@@ -990,61 +1017,61 @@
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_layout_filterbar_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "filterbar.tsx"
     },
     {
       "label": "handleStatusChange()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L27",
+      "source_location": "L29",
       "id": "filterbar_handlestatuschange",
-      "community": 7,
+      "community": 8,
       "norm_label": "handlestatuschange()"
     },
     {
       "label": "handlePriorityChange()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L31",
+      "source_location": "L33",
       "id": "filterbar_handleprioritychange",
-      "community": 7,
+      "community": 8,
       "norm_label": "handleprioritychange()"
     },
     {
       "label": "handleAssigneeChange()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "id": "filterbar_handleassigneechange",
-      "community": 7,
+      "community": 8,
       "norm_label": "handleassigneechange()"
     },
     {
       "label": "handleDateRangeChange()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L39",
+      "source_location": "L41",
       "id": "filterbar_handledaterangechange",
-      "community": 7,
+      "community": 8,
       "norm_label": "handledaterangechange()"
     },
     {
       "label": "handleSortChange()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "filterbar_handlesortchange",
-      "community": 7,
+      "community": 8,
       "norm_label": "handlesortchange()"
     },
     {
       "label": "clearChip()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L71",
+      "source_location": "L73",
       "id": "filterbar_clearchip",
-      "community": 7,
+      "community": 8,
       "norm_label": "clearchip()"
     },
     {
@@ -1060,7 +1087,7 @@
       "label": "handleLogout()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\Sidebar.tsx",
-      "source_location": "L74",
+      "source_location": "L87",
       "id": "sidebar_handlelogout",
       "community": 32,
       "norm_label": "handlelogout()"
@@ -1071,7 +1098,7 @@
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_layout_topnav_tsx",
-      "community": 8,
+      "community": 9,
       "norm_label": "topnav.tsx"
     },
     {
@@ -1080,7 +1107,7 @@
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
       "source_location": "L30",
       "id": "topnav_getpagetitle",
-      "community": 8,
+      "community": 9,
       "norm_label": "getpagetitle()"
     },
     {
@@ -1089,43 +1116,43 @@
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
       "source_location": "L46",
       "id": "topnav_fetchnotifications",
-      "community": 8,
+      "community": 9,
       "norm_label": "fetchnotifications()"
     },
     {
       "label": "handleOpenAssignModal()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L73",
+      "source_location": "L77",
       "id": "topnav_handleopenassignmodal",
-      "community": 8,
+      "community": 9,
       "norm_label": "handleopenassignmodal()"
     },
     {
       "label": "handleMarkRead()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L86",
+      "source_location": "L90",
       "id": "topnav_handlemarkread",
-      "community": 8,
+      "community": 9,
       "norm_label": "handlemarkread()"
     },
     {
       "label": "handleMarkAllRead()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L92",
+      "source_location": "L96",
       "id": "topnav_handlemarkallread",
-      "community": 8,
+      "community": 9,
       "norm_label": "handlemarkallread()"
     },
     {
       "label": "handleLogout()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L96",
+      "source_location": "L100",
       "id": "topnav_handlelogout",
-      "community": 8,
+      "community": 9,
       "norm_label": "handlelogout()"
     },
     {
@@ -1188,7 +1215,7 @@
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskCard.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_tasks_taskcard_tsx",
-      "community": 15,
+      "community": 16,
       "norm_label": "taskcard.tsx"
     },
     {
@@ -1197,25 +1224,25 @@
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskCard.tsx",
       "source_location": "L10",
       "id": "taskcard_timeago",
-      "community": 15,
+      "community": 16,
       "norm_label": "timeago()"
     },
     {
       "label": "handleDragStart()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskCard.tsx",
-      "source_location": "L61",
+      "source_location": "L63",
       "id": "taskcard_handledragstart",
-      "community": 15,
+      "community": 16,
       "norm_label": "handledragstart()"
     },
     {
       "label": "handleDragEnd()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskCard.tsx",
-      "source_location": "L67",
+      "source_location": "L69",
       "id": "taskcard_handledragend",
-      "community": 15,
+      "community": 16,
       "norm_label": "handledragend()"
     },
     {
@@ -1224,98 +1251,188 @@
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "taskdetailpanel.tsx"
+    },
+    {
+      "label": "handleUpdateFileChange()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L71",
+      "id": "taskdetailpanel_handleupdatefilechange",
+      "community": 1,
+      "norm_label": "handleupdatefilechange()"
+    },
+    {
+      "label": "handleUpdateVoiceSave()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L77",
+      "id": "taskdetailpanel_handleupdatevoicesave",
+      "community": 1,
+      "norm_label": "handleupdatevoicesave()"
     },
     {
       "label": "fetchTaskRelations()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L98",
+      "source_location": "L123",
       "id": "taskdetailpanel_fetchtaskrelations",
-      "community": 3,
+      "community": 1,
       "norm_label": "fetchtaskrelations()"
     },
     {
       "label": "handleCycleStatus()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L114",
+      "source_location": "L139",
       "id": "taskdetailpanel_handlecyclestatus",
-      "community": 3,
+      "community": 1,
       "norm_label": "handlecyclestatus()"
     },
     {
       "label": "handleChecklistToggle()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L137",
+      "source_location": "L162",
       "id": "taskdetailpanel_handlechecklisttoggle",
-      "community": 3,
+      "community": 1,
       "norm_label": "handlechecklisttoggle()"
     },
     {
       "label": "handleSaveChanges()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L158",
+      "source_location": "L183",
       "id": "taskdetailpanel_handlesavechanges",
-      "community": 3,
+      "community": 1,
       "norm_label": "handlesavechanges()"
     },
     {
       "label": "handlePostUpdate()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L193",
+      "source_location": "L218",
       "id": "taskdetailpanel_handlepostupdate",
-      "community": 3,
+      "community": 1,
       "norm_label": "handlepostupdate()"
     },
     {
       "label": "handlePostComment()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L215",
+      "source_location": "L275",
       "id": "taskdetailpanel_handlepostcomment",
-      "community": 3,
+      "community": 1,
       "norm_label": "handlepostcomment()"
     },
     {
       "label": "handleAddSubtask()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L243",
+      "source_location": "L303",
       "id": "taskdetailpanel_handleaddsubtask",
-      "community": 3,
+      "community": 1,
       "norm_label": "handleaddsubtask()"
     },
     {
       "label": "handleDeleteTask()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L271",
+      "source_location": "L331",
       "id": "taskdetailpanel_handledeletetask",
-      "community": 3,
+      "community": 1,
       "norm_label": "handledeletetask()"
     },
     {
-      "label": "handleMarkCompleted()",
+      "label": "handleUpdateStatus()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L288",
-      "id": "taskdetailpanel_handlemarkcompleted",
-      "community": 3,
-      "norm_label": "handlemarkcompleted()"
+      "source_location": "L348",
+      "id": "taskdetailpanel_handleupdatestatus",
+      "community": 1,
+      "norm_label": "handleupdatestatus()"
     },
     {
       "label": "handleToggleSubtaskStatus()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L308",
+      "source_location": "L370",
       "id": "taskdetailpanel_handletogglesubtaskstatus",
-      "community": 3,
+      "community": 1,
       "norm_label": "handletogglesubtaskstatus()"
+    },
+    {
+      "label": "pad()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L958",
+      "id": "taskdetailpanel_pad",
+      "community": 1,
+      "norm_label": "pad()"
+    },
+    {
+      "label": "startTimer()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L961",
+      "id": "taskdetailpanel_starttimer",
+      "community": 1,
+      "norm_label": "starttimer()"
+    },
+    {
+      "label": "stopTimer()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L962",
+      "id": "taskdetailpanel_stoptimer",
+      "community": 1,
+      "norm_label": "stoptimer()"
+    },
+    {
+      "label": "startRecording()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L964",
+      "id": "taskdetailpanel_startrecording",
+      "community": 1,
+      "norm_label": "startrecording()"
+    },
+    {
+      "label": "pauseRecording()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L985",
+      "id": "taskdetailpanel_pauserecording",
+      "community": 1,
+      "norm_label": "pauserecording()"
+    },
+    {
+      "label": "resumeRecording()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L986",
+      "id": "taskdetailpanel_resumerecording",
+      "community": 1,
+      "norm_label": "resumerecording()"
+    },
+    {
+      "label": "stopRecording()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L987",
+      "id": "taskdetailpanel_stoprecording",
+      "community": 1,
+      "norm_label": "stoprecording()"
+    },
+    {
+      "label": "discard()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L988",
+      "id": "taskdetailpanel_discard",
+      "community": 1,
+      "norm_label": "discard()"
     },
     {
       "label": "TaskList.tsx",
@@ -1323,34 +1440,34 @@
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_tasks_tasklist_tsx",
-      "community": 16,
+      "community": 17,
       "norm_label": "tasklist.tsx"
     },
     {
       "label": "handleDragOver()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
-      "source_location": "L91",
+      "source_location": "L119",
       "id": "tasklist_handledragover",
-      "community": 16,
+      "community": 17,
       "norm_label": "handledragover()"
     },
     {
       "label": "handleDragLeave()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
-      "source_location": "L96",
+      "source_location": "L125",
       "id": "tasklist_handledragleave",
-      "community": 16,
+      "community": 17,
       "norm_label": "handledragleave()"
     },
     {
       "label": "handleDrop()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
-      "source_location": "L100",
+      "source_location": "L130",
       "id": "tasklist_handledrop",
-      "community": 16,
+      "community": 17,
       "norm_label": "handledrop()"
     },
     {
@@ -1359,7 +1476,7 @@
       "source_file": "D:\\task_manager\\src\\components\\ui\\Badge.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_ui_badge_tsx",
-      "community": 48,
+      "community": 47,
       "norm_label": "badge.tsx"
     },
     {
@@ -1368,7 +1485,7 @@
       "source_file": "D:\\task_manager\\src\\components\\ui\\Button.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_ui_button_tsx",
-      "community": 49,
+      "community": 48,
       "norm_label": "button.tsx"
     },
     {
@@ -1458,7 +1575,7 @@
       "source_file": "D:\\task_manager\\src\\components\\ui\\FormField.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_ui_formfield_tsx",
-      "community": 50,
+      "community": 49,
       "norm_label": "formfield.tsx"
     },
     {
@@ -1474,7 +1591,7 @@
       "label": "handleOutsideClick()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L24",
+      "source_location": "L26",
       "id": "notificationbell_handleoutsideclick",
       "community": 12,
       "norm_label": "handleoutsideclick()"
@@ -1483,7 +1600,7 @@
       "label": "handleNotificationClick()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "id": "notificationbell_handlenotificationclick",
       "community": 12,
       "norm_label": "handlenotificationclick()"
@@ -1492,7 +1609,7 @@
       "label": "handleMarkAllReadClick()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L53",
+      "source_location": "L56",
       "id": "notificationbell_handlemarkallreadclick",
       "community": 12,
       "norm_label": "handlemarkallreadclick()"
@@ -1501,7 +1618,7 @@
       "label": "getCategoryDetails()",
       "file_type": "code",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L67",
+      "source_location": "L70",
       "id": "notificationbell_getcategorydetails",
       "community": 12,
       "norm_label": "getcategorydetails()"
@@ -1512,7 +1629,7 @@
       "source_file": "D:\\task_manager\\src\\components\\ui\\SearchBar.tsx",
       "source_location": "L1",
       "id": "d_task_manager_src_components_ui_searchbar_tsx",
-      "community": 19,
+      "community": 22,
       "norm_label": "searchbar.tsx"
     },
     {
@@ -1521,7 +1638,7 @@
       "source_file": "D:\\task_manager\\src\\components\\ui\\SearchBar.tsx",
       "source_location": "L29",
       "id": "searchbar_handlechange",
-      "community": 19,
+      "community": 22,
       "norm_label": "handlechange()"
     },
     {
@@ -1530,7 +1647,7 @@
       "source_file": "D:\\task_manager\\src\\components\\ui\\SearchBar.tsx",
       "source_location": "L42",
       "id": "searchbar_handleclear",
-      "community": 19,
+      "community": 22,
       "norm_label": "handleclear()"
     },
     {
@@ -1611,7 +1728,7 @@
       "source_file": "D:\\task_manager\\src\\hooks\\useToast.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_hooks_usetoast_ts",
-      "community": 20,
+      "community": 23,
       "norm_label": "usetoast.ts"
     },
     {
@@ -1620,7 +1737,7 @@
       "source_file": "D:\\task_manager\\src\\hooks\\useToast.ts",
       "source_location": "L16",
       "id": "usetoast_notify",
-      "community": 20,
+      "community": 23,
       "norm_label": "notify()"
     },
     {
@@ -1629,7 +1746,7 @@
       "source_file": "D:\\task_manager\\src\\hooks\\useToast.ts",
       "source_location": "L59",
       "id": "usetoast_usetoast",
-      "community": 20,
+      "community": 23,
       "norm_label": "usetoast()"
     },
     {
@@ -1638,7 +1755,7 @@
       "source_file": "D:\\task_manager\\src\\lib\\auth.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_lib_auth_ts",
-      "community": 9,
+      "community": 7,
       "norm_label": "auth.ts"
     },
     {
@@ -1647,7 +1764,7 @@
       "source_file": "D:\\task_manager\\src\\lib\\auth.ts",
       "source_location": "L14",
       "id": "auth_signtoken",
-      "community": 9,
+      "community": 7,
       "norm_label": "signtoken()"
     },
     {
@@ -1656,8 +1773,26 @@
       "source_file": "D:\\task_manager\\src\\lib\\auth.ts",
       "source_location": "L22",
       "id": "auth_verifytoken",
-      "community": 9,
+      "community": 7,
       "norm_label": "verifytoken()"
+    },
+    {
+      "label": "email.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\lib\\email.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_lib_email_ts",
+      "community": 0,
+      "norm_label": "email.ts"
+    },
+    {
+      "label": "sendEmailTaskReminder()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\lib\\email.ts",
+      "source_location": "L16",
+      "id": "email_sendemailtaskreminder",
+      "community": 0,
+      "norm_label": "sendemailtaskreminder()"
     },
     {
       "label": "prisma.ts",
@@ -1683,7 +1818,7 @@
       "source_file": "D:\\task_manager\\src\\lib\\rbac.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_lib_rbac_ts",
-      "community": 9,
+      "community": 7,
       "norm_label": "rbac.ts"
     },
     {
@@ -1692,7 +1827,7 @@
       "source_file": "D:\\task_manager\\src\\lib\\rbac.ts",
       "source_location": "L28",
       "id": "rbac_canaccess",
-      "community": 9,
+      "community": 7,
       "norm_label": "canaccess()"
     },
     {
@@ -1701,7 +1836,7 @@
       "source_file": "D:\\task_manager\\src\\lib\\session.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_lib_session_ts",
-      "community": 2,
+      "community": 0,
       "norm_label": "session.ts"
     },
     {
@@ -1710,8 +1845,26 @@
       "source_file": "D:\\task_manager\\src\\lib\\session.ts",
       "source_location": "L7",
       "id": "session_getsession",
-      "community": 2,
+      "community": 0,
       "norm_label": "getsession()"
+    },
+    {
+      "label": "uploadthing-client.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\lib\\uploadthing-client.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_lib_uploadthing_client_ts",
+      "community": 50,
+      "norm_label": "uploadthing-client.ts"
+    },
+    {
+      "label": "uploadthing.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\lib\\uploadthing.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_lib_uploadthing_ts",
+      "community": 51,
+      "norm_label": "uploadthing.ts"
     },
     {
       "label": "utils.ts",
@@ -1730,6 +1883,24 @@
       "id": "utils_cn",
       "community": 38,
       "norm_label": "cn()"
+    },
+    {
+      "label": "whatsapp.ts",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\lib\\whatsapp.ts",
+      "source_location": "L1",
+      "id": "d_task_manager_src_lib_whatsapp_ts",
+      "community": 0,
+      "norm_label": "whatsapp.ts"
+    },
+    {
+      "label": "sendWhatsAppTaskReminder()",
+      "file_type": "code",
+      "source_file": "D:\\task_manager\\src\\lib\\whatsapp.ts",
+      "source_location": "L16",
+      "id": "whatsapp_sendwhatsapptaskreminder",
+      "community": 0,
+      "norm_label": "sendwhatsapptaskreminder()"
     },
     {
       "label": "useTaskStore.ts",
@@ -1755,7 +1926,7 @@
       "source_file": "D:\\task_manager\\src\\store\\useThemeStore.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_store_usethemestore_ts",
-      "community": 51,
+      "community": 52,
       "norm_label": "usethemestore.ts"
     },
     {
@@ -1764,7 +1935,7 @@
       "source_file": "D:\\task_manager\\src\\types\\index.ts",
       "source_location": "L1",
       "id": "d_task_manager_src_types_index_ts",
-      "community": 52,
+      "community": 53,
       "norm_label": "index.ts"
     }
   ],
@@ -1893,7 +2064,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\all-tasks\\page.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_dashboard_all_tasks_page_tsx",
+      "_tgt": "page_alltaskscontent",
+      "source": "d_task_manager_src_app_dashboard_all_tasks_page_tsx",
+      "target": "page_alltaskscontent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\all-tasks\\page.tsx",
+      "source_location": "L62",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_all_tasks_page_tsx",
       "_tgt": "page_alltaskspage",
@@ -1902,15 +2085,39 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\all-tasks\\page.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "page_alltaskscontent",
+      "_tgt": "route_get",
+      "source": "page_alltaskscontent",
+      "target": "route_get"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\dashboard\\page.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_dashboard_page_tsx",
       "_tgt": "page_fetchdashboarddata",
       "source": "d_task_manager_src_app_dashboard_dashboard_page_tsx",
       "target": "page_fetchdashboarddata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\dashboard\\page.tsx",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_dashboard_dashboard_page_tsx",
+      "_tgt": "page_formatactivityaction",
+      "source": "d_task_manager_src_app_dashboard_dashboard_page_tsx",
+      "target": "page_formatactivityaction",
       "confidence_score": 1.0
     },
     {
@@ -1941,109 +2148,181 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L75",
+      "source_location": "L74",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_fetchholidays",
+      "_tgt": "page_toinputdate",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_fetchholidays",
+      "target": "page_toinputdate",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L101",
+      "source_location": "L78",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handleprev",
+      "_tgt": "page_formatdate",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handleprev",
+      "target": "page_formatdate",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L109",
+      "source_location": "L82",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handlenext",
+      "_tgt": "page_formatdateshort",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handlenext",
+      "target": "page_formatdateshort",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L117",
+      "source_location": "L86",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handletoday",
+      "_tgt": "page_formatdaterange",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handletoday",
+      "target": "page_formatdaterange",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L125",
+      "source_location": "L94",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handledateselect",
+      "_tgt": "page_formattime",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handledateselect",
+      "target": "page_formattime",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L135",
+      "source_location": "L103",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handleeventclick",
+      "_tgt": "page_buildactivitysentence",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handleeventclick",
+      "target": "page_buildactivitysentence",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L143",
+      "source_location": "L126",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handleaddholiday",
+      "_tgt": "page_typebadge",
       "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handleaddholiday",
+      "target": "page_typebadge",
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
-      "source_location": "L174",
+      "source_location": "L89",
       "weight": 1.0,
-      "_src": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "_tgt": "page_handledeleteholiday",
-      "source": "d_task_manager_src_app_dashboard_holidays_page_tsx",
-      "target": "page_handledeleteholiday",
+      "_src": "page_formatdaterange",
+      "_tgt": "page_formatdate",
+      "source": "page_formatdate",
+      "target": "page_formatdaterange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "page_formatdaterange",
+      "_tgt": "page_formatdateshort",
+      "source": "page_formatdateshort",
+      "target": "page_formatdaterange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
+      "source_location": "L110",
+      "weight": 1.0,
+      "_src": "page_buildactivitysentence",
+      "_tgt": "page_formatdateshort",
+      "source": "page_formatdateshort",
+      "target": "page_buildactivitysentence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_src": "page_buildactivitysentence",
+      "_tgt": "page_formatdaterange",
+      "source": "page_formatdaterange",
+      "target": "page_buildactivitysentence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\holidays\\page.tsx",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_src": "page_buildactivitysentence",
+      "_tgt": "page_formattime",
+      "source": "page_formattime",
+      "target": "page_buildactivitysentence",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\my-tasks\\page.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_dashboard_my_tasks_page_tsx",
+      "_tgt": "page_mytaskscontent",
+      "source": "d_task_manager_src_app_dashboard_my_tasks_page_tsx",
+      "target": "page_mytaskscontent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\my-tasks\\page.tsx",
+      "source_location": "L65",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_my_tasks_page_tsx",
       "_tgt": "page_mytaskspage",
       "source": "d_task_manager_src_app_dashboard_my_tasks_page_tsx",
       "target": "page_mytaskspage",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\my-tasks\\page.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "page_mytaskscontent",
+      "_tgt": "route_get",
+      "source": "page_mytaskscontent",
+      "target": "route_get"
     },
     {
       "relation": "contains",
@@ -2061,7 +2340,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\notifications\\page.tsx",
-      "source_location": "L41",
+      "source_location": "L45",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_notifications_page_tsx",
       "_tgt": "page_handlenotificationclick",
@@ -2073,7 +2352,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\notifications\\page.tsx",
-      "source_location": "L57",
+      "source_location": "L61",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_notifications_page_tsx",
       "_tgt": "page_handlemarkallasread",
@@ -2085,7 +2364,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\notifications\\page.tsx",
-      "source_location": "L65",
+      "source_location": "L69",
       "weight": 1.0,
       "_src": "page_handlemarkallasread",
       "_tgt": "page_fetchnotifications",
@@ -2109,7 +2388,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-directory\\page.tsx",
-      "source_location": "L91",
+      "source_location": "L71",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_directory_page_tsx",
       "_tgt": "page_getprioritybadge",
@@ -2121,7 +2400,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-directory\\page.tsx",
-      "source_location": "L105",
+      "source_location": "L85",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_directory_page_tsx",
       "_tgt": "page_getstatusbadge",
@@ -2133,7 +2412,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
+      "_tgt": "page_resetform",
+      "source": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
+      "target": "page_resetform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
+      "_tgt": "page_handlestartedit",
+      "source": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
+      "target": "page_handlestartedit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L44",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "_tgt": "page_fetchtemplates",
@@ -2145,7 +2448,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L45",
+      "source_location": "L63",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "_tgt": "page_handleaddchecklistitem",
@@ -2157,7 +2460,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L52",
+      "source_location": "L70",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "_tgt": "page_handleremovechecklistitem",
@@ -2169,7 +2472,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L56",
+      "source_location": "L74",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "_tgt": "page_handlecreatetemplate",
@@ -2181,7 +2484,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L93",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
+      "_tgt": "page_handleupdatetemplate",
+      "source": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
+      "target": "page_handleupdatetemplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L145",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "_tgt": "page_handledeletetemplate",
@@ -2193,12 +2508,24 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
-      "source_location": "L112",
+      "source_location": "L164",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "_tgt": "page_getprioritycolor",
       "source": "d_task_manager_src_app_dashboard_task_templates_page_tsx",
       "target": "page_getprioritycolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\(dashboard)\\task-templates\\page.tsx",
+      "source_location": "L136",
+      "weight": 1.0,
+      "_src": "page_handleupdatetemplate",
+      "_tgt": "page_resetform",
+      "source": "page_resetform",
+      "target": "page_handleupdatetemplate",
       "confidence_score": 1.0
     },
     {
@@ -2228,6 +2555,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\calendar-events\\route.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_calendar_events_route_ts",
+      "_tgt": "route_get",
+      "source": "route_get",
+      "target": "d_task_manager_src_app_api_calendar_events_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\route.ts",
       "source_location": "L6",
       "weight": 1.0,
@@ -2235,6 +2574,18 @@
       "_tgt": "route_get",
       "source": "route_get",
       "target": "d_task_manager_src_app_api_holidays_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\integration\\whatsapp\\route.ts",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_integration_whatsapp_route_ts",
+      "_tgt": "route_get",
+      "source": "route_get",
+      "target": "d_task_manager_src_app_api_integration_whatsapp_route_ts",
       "confidence_score": 1.0
     },
     {
@@ -2265,7 +2616,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\route.ts",
-      "source_location": "L6",
+      "source_location": "L8",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_tasks_route_ts",
       "_tgt": "route_get",
@@ -2337,7 +2688,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\route.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_users_route_ts",
       "_tgt": "route_get",
@@ -2396,6 +2747,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\calendar-events\\route.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_calendar_events_route_ts",
+      "_tgt": "route_post",
+      "source": "route_post",
+      "target": "d_task_manager_src_app_api_calendar_events_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\route.ts",
       "source_location": "L33",
       "weight": 1.0,
@@ -2403,6 +2766,18 @@
       "_tgt": "route_post",
       "source": "route_post",
       "target": "d_task_manager_src_app_api_holidays_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\integration\\whatsapp\\route.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_integration_whatsapp_route_ts",
+      "_tgt": "route_post",
+      "source": "route_post",
+      "target": "d_task_manager_src_app_api_integration_whatsapp_route_ts",
       "confidence_score": 1.0
     },
     {
@@ -2421,7 +2796,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\route.ts",
-      "source_location": "L139",
+      "source_location": "L141",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_tasks_route_ts",
       "_tgt": "route_post",
@@ -2469,7 +2844,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\route.ts",
-      "source_location": "L45",
+      "source_location": "L47",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_users_route_ts",
       "_tgt": "route_post",
@@ -2502,6 +2877,54 @@
       "target": "session_getsession"
     },
     {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\route.ts",
+      "source_location": "L256",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "whatsapp_sendwhatsapptaskreminder",
+      "source": "route_post",
+      "target": "whatsapp_sendwhatsapptaskreminder"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\route.ts",
+      "source_location": "L272",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "email_sendemailtaskreminder",
+      "source": "route_post",
+      "target": "email_sendemailtaskreminder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\calendar-events\\[id]\\route.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_calendar_events_id_route_ts",
+      "_tgt": "route_patch",
+      "source": "d_task_manager_src_app_api_calendar_events_id_route_ts",
+      "target": "route_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\calendar-events\\[id]\\route.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_calendar_events_id_route_ts",
+      "_tgt": "route_delete",
+      "source": "d_task_manager_src_app_api_calendar_events_id_route_ts",
+      "target": "route_delete",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\[id]\\route.ts",
@@ -2509,20 +2932,8 @@
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_holidays_id_route_ts",
       "_tgt": "route_patch",
-      "source": "d_task_manager_src_app_api_holidays_id_route_ts",
-      "target": "route_patch",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\[id]\\route.ts",
-      "source_location": "L58",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_app_api_holidays_id_route_ts",
-      "_tgt": "route_delete",
-      "source": "d_task_manager_src_app_api_holidays_id_route_ts",
-      "target": "route_delete",
+      "source": "route_patch",
+      "target": "d_task_manager_src_app_api_holidays_id_route_ts",
       "confidence_score": 1.0
     },
     {
@@ -2577,7 +2988,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_users_id_route_ts",
       "_tgt": "route_patch",
@@ -2600,6 +3011,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\app\\api\\holidays\\[id]\\route.ts",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_app_api_holidays_id_route_ts",
+      "_tgt": "route_delete",
+      "source": "route_delete",
+      "target": "d_task_manager_src_app_api_holidays_id_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\task-templates\\[id]\\route.ts",
       "source_location": "L59",
       "weight": 1.0,
@@ -2613,7 +3036,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\tasks\\[id]\\route.ts",
-      "source_location": "L271",
+      "source_location": "L285",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_tasks_id_route_ts",
       "_tgt": "route_delete",
@@ -2625,7 +3048,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\app\\api\\users\\[id]\\route.ts",
-      "source_location": "L85",
+      "source_location": "L87",
       "weight": 1.0,
       "_src": "d_task_manager_src_app_api_users_id_route_ts",
       "_tgt": "route_delete",
@@ -2697,7 +3120,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_pad",
@@ -2709,7 +3132,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_starttimer",
@@ -2721,7 +3144,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_stoptimer",
@@ -2733,7 +3156,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_startrecording",
@@ -2745,7 +3168,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_pauserecording",
@@ -2757,7 +3180,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_resumerecording",
@@ -2769,7 +3192,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_stoprecording",
@@ -2781,7 +3204,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
       "_tgt": "assigntaskmodal_discard",
@@ -2790,106 +3213,10 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L194",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handletemplatechange",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handletemplatechange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L210",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handleaddtag",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handleaddtag",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L217",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handleremovetag",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handleremovetag",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L221",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handleaddchecklistitem",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handleaddchecklistitem",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L228",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handleremovechecklistitem",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handleremovechecklistitem",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L232",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handlefilechange",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handlefilechange",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L242",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handlevoicesave",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handlevoicesave",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L246",
-      "weight": 1.0,
-      "_src": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "_tgt": "assigntaskmodal_handlesubmit",
-      "source": "d_task_manager_src_components_assigntaskmodal_tsx",
-      "target": "assigntaskmodal_handlesubmit",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "_src": "assigntaskmodal_startrecording",
       "_tgt": "assigntaskmodal_starttimer",
@@ -2901,7 +3228,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_src": "assigntaskmodal_resumerecording",
       "_tgt": "assigntaskmodal_starttimer",
@@ -2913,7 +3240,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0,
       "_src": "assigntaskmodal_pauserecording",
       "_tgt": "assigntaskmodal_stoptimer",
@@ -2925,12 +3252,60 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\AssignTaskModal.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_src": "assigntaskmodal_stoprecording",
       "_tgt": "assigntaskmodal_stoptimer",
       "source": "assigntaskmodal_stoptimer",
       "target": "assigntaskmodal_stoprecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
+      "_tgt": "performanceanalytics_initials",
+      "source": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
+      "target": "performanceanalytics_initials",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
+      "_tgt": "performanceanalytics_scorepct",
+      "source": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
+      "target": "performanceanalytics_scorepct",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L107",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
+      "_tgt": "performanceanalytics_scorebar",
+      "source": "d_task_manager_src_components_dashboard_performanceanalytics_tsx",
+      "target": "performanceanalytics_scorebar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\dashboard\\PerformanceAnalytics.tsx",
+      "source_location": "L108",
+      "weight": 1.0,
+      "_src": "performanceanalytics_scorebar",
+      "_tgt": "performanceanalytics_scorepct",
+      "source": "performanceanalytics_scorepct",
+      "target": "performanceanalytics_scorebar",
       "confidence_score": 1.0
     },
     {
@@ -2973,7 +3348,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_employees_employeetable_tsx",
       "_tgt": "employeetable_getemployeetasks",
@@ -2985,7 +3360,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_employees_employeetable_tsx",
       "_tgt": "employeetable_getactivecount",
@@ -2997,7 +3372,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_employees_employeetable_tsx",
       "_tgt": "employeetable_handlesort",
@@ -3009,7 +3384,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\employees\\EmployeeTable.tsx",
-      "source_location": "L80",
+      "source_location": "L89",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_employees_employeetable_tsx",
       "_tgt": "employeetable_formatdate",
@@ -3021,7 +3396,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L27",
+      "source_location": "L29",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_filterbar_tsx",
       "_tgt": "filterbar_handlestatuschange",
@@ -3033,7 +3408,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L31",
+      "source_location": "L33",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_filterbar_tsx",
       "_tgt": "filterbar_handleprioritychange",
@@ -3045,7 +3420,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_filterbar_tsx",
       "_tgt": "filterbar_handleassigneechange",
@@ -3057,7 +3432,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_filterbar_tsx",
       "_tgt": "filterbar_handledaterangechange",
@@ -3069,7 +3444,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L43",
+      "source_location": "L45",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_filterbar_tsx",
       "_tgt": "filterbar_handlesortchange",
@@ -3081,7 +3456,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\FilterBar.tsx",
-      "source_location": "L71",
+      "source_location": "L73",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_filterbar_tsx",
       "_tgt": "filterbar_clearchip",
@@ -3093,7 +3468,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\Sidebar.tsx",
-      "source_location": "L74",
+      "source_location": "L87",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_sidebar_tsx",
       "_tgt": "sidebar_handlelogout",
@@ -3129,7 +3504,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L73",
+      "source_location": "L77",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_topnav_tsx",
       "_tgt": "topnav_handleopenassignmodal",
@@ -3141,7 +3516,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L86",
+      "source_location": "L90",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_topnav_tsx",
       "_tgt": "topnav_handlemarkread",
@@ -3153,7 +3528,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L92",
+      "source_location": "L96",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_topnav_tsx",
       "_tgt": "topnav_handlemarkallread",
@@ -3165,7 +3540,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\layout\\TopNav.tsx",
-      "source_location": "L96",
+      "source_location": "L100",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_layout_topnav_tsx",
       "_tgt": "topnav_handlelogout",
@@ -3249,7 +3624,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskCard.tsx",
-      "source_location": "L61",
+      "source_location": "L63",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskcard_tsx",
       "_tgt": "taskcard_handledragstart",
@@ -3261,7 +3636,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskCard.tsx",
-      "source_location": "L67",
+      "source_location": "L69",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskcard_tsx",
       "_tgt": "taskcard_handledragend",
@@ -3273,7 +3648,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L98",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_handleupdatefilechange",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_handleupdatefilechange",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_handleupdatevoicesave",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_handleupdatevoicesave",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L123",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_fetchtaskrelations",
@@ -3285,7 +3684,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L114",
+      "source_location": "L139",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handlecyclestatus",
@@ -3297,7 +3696,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L137",
+      "source_location": "L162",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handlechecklisttoggle",
@@ -3309,7 +3708,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L158",
+      "source_location": "L183",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handlesavechanges",
@@ -3321,7 +3720,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L193",
+      "source_location": "L218",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handlepostupdate",
@@ -3333,7 +3732,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L215",
+      "source_location": "L275",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handlepostcomment",
@@ -3345,7 +3744,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L243",
+      "source_location": "L303",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handleaddsubtask",
@@ -3357,7 +3756,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L271",
+      "source_location": "L331",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handledeletetask",
@@ -3369,19 +3768,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L288",
+      "source_location": "L348",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
-      "_tgt": "taskdetailpanel_handlemarkcompleted",
+      "_tgt": "taskdetailpanel_handleupdatestatus",
       "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
-      "target": "taskdetailpanel_handlemarkcompleted",
+      "target": "taskdetailpanel_handleupdatestatus",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
-      "source_location": "L308",
+      "source_location": "L370",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
       "_tgt": "taskdetailpanel_handletogglesubtaskstatus",
@@ -3392,8 +3791,152 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L958",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_pad",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_pad",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L961",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_starttimer",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_starttimer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L962",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_stoptimer",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_stoptimer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L964",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_startrecording",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_startrecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L985",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_pauserecording",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_pauserecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L986",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_resumerecording",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_resumerecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L987",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_stoprecording",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_stoprecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L988",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "_tgt": "taskdetailpanel_discard",
+      "source": "d_task_manager_src_components_tasks_taskdetailpanel_tsx",
+      "target": "taskdetailpanel_discard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L979",
+      "weight": 1.0,
+      "_src": "taskdetailpanel_startrecording",
+      "_tgt": "taskdetailpanel_starttimer",
+      "source": "taskdetailpanel_starttimer",
+      "target": "taskdetailpanel_startrecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L986",
+      "weight": 1.0,
+      "_src": "taskdetailpanel_resumerecording",
+      "_tgt": "taskdetailpanel_starttimer",
+      "source": "taskdetailpanel_starttimer",
+      "target": "taskdetailpanel_resumerecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L985",
+      "weight": 1.0,
+      "_src": "taskdetailpanel_pauserecording",
+      "_tgt": "taskdetailpanel_stoptimer",
+      "source": "taskdetailpanel_stoptimer",
+      "target": "taskdetailpanel_pauserecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskDetailPanel.tsx",
+      "source_location": "L987",
+      "weight": 1.0,
+      "_src": "taskdetailpanel_stoprecording",
+      "_tgt": "taskdetailpanel_stoptimer",
+      "source": "taskdetailpanel_stoptimer",
+      "target": "taskdetailpanel_stoprecording",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
-      "source_location": "L91",
+      "source_location": "L119",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_tasklist_tsx",
       "_tgt": "tasklist_handledragover",
@@ -3405,7 +3948,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
-      "source_location": "L96",
+      "source_location": "L125",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_tasklist_tsx",
       "_tgt": "tasklist_handledragleave",
@@ -3417,7 +3960,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\tasks\\TaskList.tsx",
-      "source_location": "L100",
+      "source_location": "L130",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_tasks_tasklist_tsx",
       "_tgt": "tasklist_handledrop",
@@ -3525,7 +4068,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L24",
+      "source_location": "L26",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_ui_notificationbell_tsx",
       "_tgt": "notificationbell_handleoutsideclick",
@@ -3537,7 +4080,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_ui_notificationbell_tsx",
       "_tgt": "notificationbell_handlenotificationclick",
@@ -3549,7 +4092,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L53",
+      "source_location": "L56",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_ui_notificationbell_tsx",
       "_tgt": "notificationbell_handlemarkallreadclick",
@@ -3561,7 +4104,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\components\\ui\\NotificationBell.tsx",
-      "source_location": "L67",
+      "source_location": "L70",
       "weight": 1.0,
       "_src": "d_task_manager_src_components_ui_notificationbell_tsx",
       "_tgt": "notificationbell_getcategorydetails",
@@ -3704,6 +4247,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\lib\\email.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_lib_email_ts",
+      "_tgt": "email_sendemailtaskreminder",
+      "source": "d_task_manager_src_lib_email_ts",
+      "target": "email_sendemailtaskreminder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "D:\\task_manager\\src\\lib\\prisma.ts",
       "source_location": "L12",
       "weight": 1.0,
@@ -3747,6 +4302,18 @@
       "_tgt": "utils_cn",
       "source": "d_task_manager_src_lib_utils_ts",
       "target": "utils_cn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\task_manager\\src\\lib\\whatsapp.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "d_task_manager_src_lib_whatsapp_ts",
+      "_tgt": "whatsapp_sendwhatsapptaskreminder",
+      "source": "d_task_manager_src_lib_whatsapp_ts",
+      "target": "whatsapp_sendwhatsapptaskreminder",
       "confidence_score": 1.0
     },
     {

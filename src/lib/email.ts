@@ -68,3 +68,43 @@ TaskCenter Administrator`;
     timestamp: new Date().toISOString(),
   };
 }
+
+export interface SendWelcomeEmailParams {
+  employeeEmail: string;
+  employeeName: string;
+  tempPassword: string;
+  loginLink: string;
+}
+
+export async function sendWelcomeEmail(params: SendWelcomeEmailParams) {
+  const { employeeEmail, employeeName, tempPassword, loginLink } = params;
+
+  const emailSubject = `Welcome to TaskCenter!`;
+  const emailBody = `Dear ${employeeName},
+
+Welcome to TaskCenter! Your account has been created successfully.
+
+Here are your login details:
+User ID / Email: ${employeeEmail}
+Temporary Password: ${tempPassword}
+
+Please log in using the link below and reset your password on your first sign-in:
+${loginLink}
+
+Best regards,
+TaskCenter Team`;
+
+  console.log("==================================================");
+  console.log(`[EMAIL INTEGRATION] Sending welcome email to: ${employeeEmail}`);
+  console.log(`[SUBJECT]: ${emailSubject}`);
+  console.log(`[BODY]:\n${emailBody}`);
+  console.log("==================================================");
+
+  return {
+    success: true,
+    sentTo: employeeEmail,
+    subject: emailSubject,
+    timestamp: new Date().toISOString(),
+  };
+}
+

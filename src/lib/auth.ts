@@ -4,7 +4,7 @@ export type JWTPayload = {
   id: string;
   email: string;
   name: string;
-  role: "ADMIN" | "EMPLOYEE";
+  role: "ADMIN" | "MANAGER" | "TEAM_LEADER" | "EMPLOYEE";
   mustResetPassword: boolean;
 };
 

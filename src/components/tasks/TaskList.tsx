@@ -250,6 +250,7 @@ export default function TaskList({ tasks: initialTasks }: { tasks?: Task[] }) {
     );
   }
 
+
   // DEFAULT: List View
   return (
     <div className="space-y-2">

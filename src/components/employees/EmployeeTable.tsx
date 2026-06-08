@@ -12,9 +12,10 @@ interface EmployeeTableProps {
   employees: User[];
   onEdit: (emp: User) => void;
   onDelete: (emp: User) => void;
+  onStatusChange: (emp: User, newStatus: any) => void;
 }
 
-export default function EmployeeTable({ employees, onEdit, onDelete }: EmployeeTableProps) {
+export default function EmployeeTable({ employees, onEdit, onDelete, onStatusChange }: EmployeeTableProps) {
   const { tasks, setSelectedTask } = useTaskStore();
   
   // States
@@ -205,17 +206,26 @@ export default function EmployeeTable({ employees, onEdit, onDelete }: EmployeeT
 
                     {/* Status */}
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <span
+                      <select
+                        value={emp.status || (emp.isActive ? "ACTIVE" : "INACTIVE")}
+                        onChange={(e) => onStatusChange(emp, e.target.value)}
                         className={cn(
-                          "inline-flex items-center gap-1 py-0.5 px-2 text-[10px] font-medium uppercase tracking-[0.05em] rounded-full shrink-0",
-                          emp.isActive
+                          "inline-flex items-center gap-1 py-0.5 px-2 text-[10px] font-medium uppercase tracking-[0.05em] rounded-full shrink-0 border border-border-strong cursor-pointer outline-none",
+                          emp.status === "ACTIVE" || (!emp.status && emp.isActive)
                             ? "bg-status-done-bg text-status-done-text"
-                            : "bg-status-cancelled-bg text-status-cancelled-text"
+                            : emp.status === "INACTIVE" || emp.status === "RESIGNED" || (!emp.status && !emp.isActive)
+                            ? "bg-status-cancelled-bg text-status-cancelled-text"
+                            : emp.status === "SUSPENDED"
+                            ? "bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400"
+                            : "bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400" // ON_LEAVE
                         )}
                       >
-                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", emp.isActive ? "bg-status-done-text" : "bg-status-cancelled-text")} />
-                        {emp.isActive ? "Active" : "Inactive"}
-                      </span>
+                        <option value="ACTIVE" className="bg-surface text-text-primary">Active</option>
+                        <option value="INACTIVE" className="bg-surface text-text-primary">Inactive</option>
+                        <option value="SUSPENDED" className="bg-surface text-text-primary">Suspended</option>
+                        <option value="RESIGNED" className="bg-surface text-text-primary">Resigned</option>
+                        <option value="ON_LEAVE" className="bg-surface text-text-primary">On Leave</option>
+                      </select>
                     </td>
 
                     {/* Active Tasks Count */}

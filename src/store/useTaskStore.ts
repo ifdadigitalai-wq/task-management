@@ -33,6 +33,8 @@ const initialFilters: FilterState = {
   search: "",
   dateRange: "all",
   tags: [],
+  department: "ALL",
+  team: "ALL",
 };
 
 export const filterTasks = (tasks: Task[], filters: FilterState): Task[] => {
@@ -49,6 +51,16 @@ export const filterTasks = (tasks: Task[], filters: FilterState): Task[] => {
 
     // 3. Assignee Filter
     if (filters.assigneeId !== "ALL" && task.assigneeId !== filters.assigneeId) {
+      return false;
+    }
+
+    // 3b. Department Filter
+    if (filters.department && filters.department !== "ALL" && task.department !== filters.department) {
+      return false;
+    }
+
+    // 3c. Team Filter
+    if (filters.team && filters.team !== "ALL" && task.assignee?.team !== filters.team) {
       return false;
     }
 
@@ -118,7 +130,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   filteredTasks: [],
   selectedTask: null,
   filters: initialFilters,
-  viewMode: "list",
+  viewMode: "kanban",
   currentUser: null,
   theme: "morning",
 

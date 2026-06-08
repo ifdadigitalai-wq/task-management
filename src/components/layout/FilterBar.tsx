@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { List, LayoutGrid, X } from "lucide-react";
+import { List, Kanban, X } from "lucide-react";
 import { useTaskStore } from "@/store/useTaskStore";
-import { User } from "@/types";
+import { User, Department } from "@/types";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
@@ -11,20 +11,36 @@ export function FilterBar() {
   const { filters, setFilters, viewMode, setViewMode, currentUser } = useTaskStore();
   const pathname = usePathname();
   const [employees, setEmployees] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [teams, setTeams] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<string>("createdAt-desc");
 
   useEffect(() => {
-    if (currentUser?.role === "ADMIN") {
-      fetch("/api/users")
-        .then((res) => res.json())
-        .then((payload) => {
-          if (payload.success) {
-            setEmployees(payload.data);
-          }
-        })
-        .catch(console.error);
-    }
-  }, [currentUser]);
+    // Fetch employees list
+    fetch("/api/users")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success && Array.isArray(payload.data)) {
+          setEmployees(payload.data);
+          // Extract unique teams
+          const uniqueTeams = Array.from(
+            new Set(payload.data.map((u: User) => u.team).filter(Boolean))
+          ) as string[];
+          setTeams(uniqueTeams);
+        }
+      })
+      .catch(console.error);
+
+    // Fetch departments list
+    fetch("/api/departments")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) {
+          setDepartments(payload.data || []);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilters({ status: e.target.value as any });
@@ -36,6 +52,14 @@ export function FilterBar() {
 
   const handleAssigneeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilters({ assigneeId: e.target.value });
+  };
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters({ department: e.target.value });
+  };
+
+  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters({ team: e.target.value });
   };
 
   const handleDateRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -65,6 +89,12 @@ export function FilterBar() {
       key: "assigneeId",
       defaultValue: "ALL",
     });
+  }
+  if (filters.department && filters.department !== "ALL") {
+    activeChips.push({ label: `Department: ${filters.department}`, key: "department", defaultValue: "ALL" });
+  }
+  if (filters.team && filters.team !== "ALL") {
+    activeChips.push({ label: `Team: ${filters.team}`, key: "team", defaultValue: "ALL" });
   }
   if (filters.dateRange && filters.dateRange !== "all") {
     activeChips.push({ label: `Due: ${filters.dateRange.replace("-", " ")}`, key: "dateRange", defaultValue: "all" });
@@ -132,6 +162,40 @@ export function FilterBar() {
             </select>
           )}
 
+          {/* Department Filter */}
+          <select
+            value={filters.department || "ALL"}
+            onChange={handleDepartmentChange}
+            className={cn(
+              "h-7 text-[12px] bg-transparent border border-border-strong rounded-full pl-3 pr-8 !py-0 outline-none cursor-pointer font-medium transition-all",
+              filters.department !== "ALL" ? "bg-brand-light border-brand text-brand-text" : "text-text-secondary hover:bg-bg"
+            )}
+          >
+            <option value="ALL" className="text-text-primary bg-surface">All Departments</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.name} className="text-text-primary bg-surface">
+                {d.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Team Filter */}
+          <select
+            value={filters.team || "ALL"}
+            onChange={handleTeamChange}
+            className={cn(
+              "h-7 text-[12px] bg-transparent border border-border-strong rounded-full pl-3 pr-8 !py-0 outline-none cursor-pointer font-medium transition-all",
+              filters.team !== "ALL" ? "bg-brand-light border-brand text-brand-text" : "text-text-secondary hover:bg-bg"
+            )}
+          >
+            <option value="ALL" className="text-text-primary bg-surface">All Teams</option>
+            {teams.map((t) => (
+              <option key={t} value={t} className="text-text-primary bg-surface">
+                {t}
+              </option>
+            ))}
+          </select>
+
           {/* Date Range */}
           <select
             value={filters.dateRange}
@@ -177,6 +241,7 @@ export function FilterBar() {
           >
             <List className="w-3.5 h-3.5" />
           </button>
+
           <button
             onClick={() => setViewMode("kanban")}
             className={cn(
@@ -185,7 +250,7 @@ export function FilterBar() {
             )}
             title="Kanban Board"
           >
-            <LayoutGrid className="w-3.5 h-3.5" />
+            <Kanban className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -206,7 +271,7 @@ export function FilterBar() {
                 onClick={() => clearChip(chip.key, chip.defaultValue)}
                 className="w-3.5 h-3.5 rounded-full hover:bg-brand/20 flex items-center justify-center transition-colors shrink-0 focus-visible:outline-none"
               >
-                <X className="w-3 h-3 text-brand" />
+                <X className="w-3 w-3 text-brand" />
               </button>
             </span>
           ))}
@@ -216,6 +281,8 @@ export function FilterBar() {
                 status: "ALL",
                 priority: "ALL",
                 assigneeId: "ALL",
+                department: "ALL",
+                team: "ALL",
                 dateRange: "all",
               });
             }}

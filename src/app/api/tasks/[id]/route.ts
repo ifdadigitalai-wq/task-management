@@ -48,6 +48,14 @@ export async function GET(
             },
           },
         },
+        attachments: true,
+        comments: {
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true } },
+          },
+          orderBy: { createdAt: "asc" },
+        },
+        reminderSettings: true,
       },
     });
 
@@ -139,9 +147,42 @@ export async function PATCH(
     if (body.actualMinutes !== undefined) updateData.actualMinutes = body.actualMinutes ? parseInt(body.actualMinutes) : null;
     if (body.assigneeId !== undefined) updateData.assigneeId = body.assigneeId;
     if (body.tags !== undefined) updateData.tags = body.tags;
-    if (body.attachments !== undefined) updateData.attachments = body.attachments;
     if (body.checklistItems !== undefined) updateData.checklistItems = body.checklistItems;
     if (body.recurrence !== undefined) updateData.recurrence = body.recurrence;
+    if (body.department !== undefined) updateData.department = body.department;
+    if (body.frequency !== undefined) updateData.frequency = body.frequency;
+    if (body.customFrequency !== undefined) updateData.customFrequency = body.customFrequency;
+    if (body.progress !== undefined) updateData.progress = body.progress;
+    if (body.attachments !== undefined) {
+      updateData.attachments = {
+        deleteMany: {},
+        create: body.attachments.map((att: any) => ({
+          url: att.url,
+          filename: att.filename || att.name || "attachment",
+          uploadedBy: session.name,
+        })),
+      };
+    }
+    if (body.reminderSettings !== undefined) {
+      updateData.reminderSettings = {
+        upsert: {
+          create: {
+            beforeDueDate: body.reminderSettings.beforeDueDate ?? true,
+            onDueDate: body.reminderSettings.onDueDate ?? true,
+            recurring: body.reminderSettings.recurring ?? false,
+            emailNotification: body.reminderSettings.emailNotification ?? false,
+            inAppNotification: body.reminderSettings.inAppNotification ?? true,
+          },
+          update: {
+            beforeDueDate: body.reminderSettings.beforeDueDate,
+            onDueDate: body.reminderSettings.onDueDate,
+            recurring: body.reminderSettings.recurring,
+            emailNotification: body.reminderSettings.emailNotification,
+            inAppNotification: body.reminderSettings.inAppNotification,
+          },
+        },
+      };
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const task = await tx.task.update({

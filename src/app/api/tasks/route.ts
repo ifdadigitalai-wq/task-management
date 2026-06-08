@@ -121,6 +121,14 @@ export async function GET(req: Request) {
         timers: {
           select: { id: true, startedAt: true, stoppedAt: true, durationMinutes: true },
         },
+        attachments: true,
+        comments: {
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true } },
+          },
+          orderBy: { createdAt: "asc" },
+        },
+        reminderSettings: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -178,9 +186,31 @@ export async function POST(req: Request) {
           templateId: body.templateId ?? undefined,
           parentTaskId: body.parentTaskId ?? undefined,
           tags: Array.isArray(body.tags) ? body.tags : [],
-          attachments: body.attachments ?? undefined, // Store as JSON
           checklistItems: body.checklistItems ?? undefined, // Store as JSON
           recurrence: body.recurrence ?? undefined,     // Store as JSON
+          department: body.department || "General",
+          frequency: body.frequency || "ONE_TIME",
+          customFrequency: body.customFrequency || null,
+          attachments: body.attachments && Array.isArray(body.attachments)
+            ? {
+                create: body.attachments.map((att: any) => ({
+                  url: att.url,
+                  filename: att.filename || att.name || "attachment",
+                  uploadedBy: session.name,
+                })),
+              }
+            : undefined,
+          reminderSettings: body.reminderSettings
+            ? {
+                create: {
+                  beforeDueDate: body.reminderSettings.beforeDueDate ?? true,
+                  onDueDate: body.reminderSettings.onDueDate ?? true,
+                  recurring: body.reminderSettings.recurring ?? false,
+                  emailNotification: body.reminderSettings.emailNotification ?? false,
+                  inAppNotification: body.reminderSettings.inAppNotification ?? true,
+                },
+              }
+            : undefined,
         },
         include: {
           assignee: { select: { id: true, name: true, email: true, phone: true } },

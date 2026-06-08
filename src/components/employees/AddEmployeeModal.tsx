@@ -6,15 +6,15 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 
 const DEPARTMENTS = [
-  "Admin Department",
-  "Centre Head/ Management",
-  "Sales/counseling",
-  "Academic",
-  "Faculty",
-  "Backend",
-  "Account & Finance",
-  "HR & Placement",
-  "IT Support",
+  "Admin department",
+  "Centre head / Management",
+  "Sales / counselling department",
+  "Academics department",
+  "Faculty department",
+  "Backend department",
+  "Accounts & Finance department",
+  "IT department",
+  "HR & Placement department"
 ];
 
 interface AddEmployeeModalProps {
@@ -63,6 +63,20 @@ export default function AddEmployeeModal({ onClose, onCreated }: AddEmployeeModa
       const payload = await res.json();
       if (!payload.success) {
         throw new Error(payload.error || "Failed to create employee.");
+      }
+
+      try {
+        await fetch("/api/employees/send-welcome-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim(),
+            name: name.trim(),
+            tempPassword: password,
+          }),
+        });
+      } catch (welErr) {
+        console.error("Welcome email error:", welErr);
       }
 
       onCreated();
@@ -130,6 +144,7 @@ export default function AddEmployeeModal({ onClose, onCreated }: AddEmployeeModa
                 className="w-full !pl-10 h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
               />
             </div>
+            <p className="text-[10px] text-text-tertiary mt-1">Your Email ID will be your User ID.</p>
           </FormField>
 
           {/* Phone & Department */}

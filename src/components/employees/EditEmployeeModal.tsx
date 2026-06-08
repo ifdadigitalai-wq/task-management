@@ -7,15 +7,15 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 
 const DEPARTMENTS = [
-  "Admin Department",
-  "Centre Head/ Management",
-  "Sales/counseling",
-  "Academic",
-  "Faculty",
-  "Backend",
-  "Account & Finance",
-  "HR & Placement",
-  "IT Support",
+  "Admin department",
+  "Centre head / Management",
+  "Sales / counselling department",
+  "Academics department",
+  "Faculty department",
+  "Backend department",
+  "Accounts & Finance department",
+  "IT department",
+  "HR & Placement department"
 ];
 
 function toDateInput(iso?: string | Date | null): string {
@@ -39,7 +39,7 @@ export default function EditEmployeeModal({ employee, onClose, onUpdated }: Edit
   const [jobTitle, setJobTitle] = useState(employee.jobTitle ?? "");
   const [password, setPassword] = useState("");
   const [joinedAt, setJoinedAt] = useState(toDateInput(employee.joinedAt));
-  const [role, setRole] = useState<"EMPLOYEE" | "ADMIN">(employee.role);
+  const [role, setRole] = useState<UserType["role"]>(employee.role);
   const [isActive, setIsActive] = useState(employee.isActive);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -223,6 +223,8 @@ export default function EditEmployeeModal({ employee, onClose, onUpdated }: Edit
               >
                 <option value="EMPLOYEE">Employee (Restricted)</option>
                 <option value="ADMIN">Admin (Full Control)</option>
+                <option value="MANAGER">Manager</option>
+                <option value="TEAM_LEADER">Team Leader</option>
               </select>
             </FormField>
           </div>

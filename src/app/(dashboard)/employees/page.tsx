@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Users, RefreshCw, AlertTriangle } from "lucide-react";
+import { Plus, Search, Users, RefreshCw, AlertTriangle, Upload, X } from "lucide-react";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import AddEmployeeModal from "@/components/employees/AddEmployeeModal";
 import EditEmployeeModal from "@/components/employees/EditEmployeeModal";
 import { User as UserType } from "@/types";
 import { useTimeTheme } from "@/hooks/useTimeTheme";
 import { useToast } from "@/hooks/useToast";
+import { Button } from "@/components/ui/Button";
+import * as XLSX from "xlsx";
 
 function DeleteConfirmModal({
   employee,
@@ -77,6 +79,243 @@ function DeleteConfirmModal({
   );
 }
 
+function StatusChangeConfirmModal({
+  employee,
+  newStatus,
+  employees,
+  onCancel,
+  onConfirm,
+}: {
+  employee: UserType;
+  newStatus: string;
+  employees: UserType[];
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const [transferTasks, setTransferTasks] = useState(false);
+  const [targetEmployeeId, setTargetEmployeeId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
+
+  const handleConfirm = async () => {
+    setSubmitting(true);
+    try {
+      const statusRes = await fetch(`/api/users/${employee.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const statusPayload = await statusRes.json();
+      if (!statusPayload.success) throw new Error(statusPayload.error || "Failed to update status.");
+
+      if (transferTasks && targetEmployeeId) {
+        const transferRes = await fetch("/api/tasks/transfer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fromUserId: employee.id,
+            toUserId: targetEmployeeId,
+            reason: `Employee status changed to ${newStatus}`,
+          }),
+        });
+        const transferPayload = await transferRes.json();
+        if (!transferPayload.success) throw new Error(transferPayload.error || "Failed to transfer tasks.");
+        toast.success(`Tasks successfully transferred.`);
+      }
+
+      toast.success(`${employee.name} status updated to ${newStatus}.`);
+      onConfirm();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to change status.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const otherEmployees = employees.filter((e) => e.id !== employee.id && e.isActive);
+
+  return (
+    <>
+      <div onClick={onCancel} className="fixed inset-0 bg-black/35 backdrop-blur-xs z-50 transition-opacity" />
+      <div onClick={(e) => e.stopPropagation()} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200">
+        <h3 className="text-base font-extrabold text-slate-850 dark:text-slate-100 mb-2">Change Employee Status?</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+          You are changing the status of <strong>{employee.name}</strong> to <strong>{newStatus}</strong>. This will deactivate their active access.
+        </p>
+
+        <div className="space-y-4 mb-6">
+          <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-350 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={transferTasks}
+              onChange={(e) => setTransferTasks(e.target.checked)}
+              className="rounded text-brand focus:ring-brand/30 h-4 w-4 cursor-pointer"
+            />
+            Transfer all existing tasks to another employee
+          </label>
+
+          {transferTasks && (
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Select Target Employee</label>
+              <select
+                value={targetEmployeeId}
+                onChange={(e) => setTargetEmployeeId(e.target.value)}
+                className="w-full h-9 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs font-semibold px-3 focus:outline-none"
+              >
+                <option value="">Choose employee...</option>
+                {otherEmployees.map((e) => (
+                  <option key={e.id} value={e.id}>{e.name} ({e.department || "No Department"})</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-855 pt-4">
+          <button onClick={onCancel} className="px-4 py-2 border border-slate-200 dark:border-slate-850 text-slate-650 dark:text-slate-400 font-bold text-xs rounded-xl hover:bg-slate-50">Cancel</button>
+          <button
+            onClick={handleConfirm}
+            disabled={submitting || (transferTasks && !targetEmployeeId)}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold text-xs rounded-xl shadow-md transition-all animate-in zoom-in-95 duration-150"
+          >
+            {submitting ? "Updating..." : "Update Status"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ImportEmployeesModal({
+  onClose,
+  onImported,
+}: {
+  onClose: () => void;
+  onImported: () => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const toast = useToast();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setImporting(true);
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: "binary" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json<any>(ws);
+
+        const parsed = data.map((row: any) => {
+          const getVal = (keys: string[]) => {
+            const key = Object.keys(row).find(k => keys.includes(k.toLowerCase().trim()));
+            return key ? row[key] : null;
+          };
+
+          return {
+            name: getVal(["name", "full name", "employee name", "username", "employee"]),
+            email: getVal(["email", "email address", "email id", "mail"]),
+            role: getVal(["role", "access level", "type"]) || "EMPLOYEE",
+            department: getVal(["department", "dept"]),
+            team: getVal(["team", "team name"]),
+            phone: getVal(["phone", "phone number", "contact", "mobile"]),
+            jobTitle: getVal(["job title", "title", "designation"]),
+          };
+        }).filter(emp => emp.name && emp.email);
+
+        if (parsed.length === 0) {
+          toast.error("No valid employees found. Make sure to have 'name' and 'email' columns.");
+          setImporting(false);
+          return;
+        }
+
+        const res = await fetch("/api/employees/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employees: parsed }),
+        });
+
+        const payload = await res.json();
+        if (payload.success) {
+          toast.success(`Successfully imported ${payload.data.importedCount} employees!`);
+          
+          const imported = payload.data.imported || [];
+          for (const imp of imported) {
+            try {
+              await fetch("/api/employees/send-welcome-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: imp.email,
+                  name: imp.name,
+                  tempPassword: imp.tempPassword,
+                }),
+              });
+            } catch (err) {
+              console.error("Welcome email error:", err);
+            }
+          }
+
+          onImported();
+          onClose();
+        } else {
+          toast.error(payload.error || "Failed to import employees.");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Error parsing file.");
+      } finally {
+        setImporting(false);
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  return (
+    <>
+      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] z-50" />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-[400px] bg-surface rounded-xl shadow-lg p-6 animate-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-border">
+          <h3 className="text-[14px] font-medium text-text-primary">Import Employees</h3>
+          <button onClick={onClose} className="p-1 hover:bg-bg rounded-md text-text-tertiary">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4 mb-6">
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Select a CSV or Excel (.xlsx/.xls) file containing employee details. Column headers must include <strong>name</strong> and <strong>email</strong>.
+          </p>
+
+          <input
+            type="file"
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            onChange={handleFileChange}
+            className="w-full text-xs text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-border-strong file:text-xs file:font-semibold file:bg-bg file:text-text-primary file:cursor-pointer"
+          />
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-border">
+          <Button onClick={onClose} variant="secondary" className="h-[34px] px-4">Cancel</Button>
+          <Button onClick={handleUpload} disabled={importing || !file} variant="primary" className="h-[34px] px-4">
+            {importing ? "Importing..." : "Upload & Import"}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function EmployeesPage() {
   const timeTheme = useTimeTheme();
   const toast = useToast();
@@ -86,8 +325,10 @@ export default function EmployeesPage() {
 
   // Modals state
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editTarget, setEditTarget] = useState<UserType | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserType | null>(null);
+  const [statusChangeTarget, setStatusChangeTarget] = useState<{ employee: UserType; newStatus: string } | null>(null);
 
   const fetchEmployees = useCallback(async () => {
     try {
@@ -107,6 +348,30 @@ export default function EmployeesPage() {
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
+
+  const handleStatusChange = async (emp: UserType, newStatus: string) => {
+    if (newStatus === "ACTIVE") {
+      try {
+        const res = await fetch(`/api/users/${emp.id}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        const payload = await res.json();
+        if (payload.success) {
+          toast.success(`${emp.name} is now active.`);
+          fetchEmployees();
+        } else {
+          toast.error(payload.error || "Failed to update status.");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("An error occurred.");
+      }
+    } else {
+      setStatusChangeTarget({ employee: emp, newStatus });
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -130,10 +395,18 @@ export default function EmployeesPage() {
               setLoading(true);
               fetchEmployees();
             }}
-            className="p-2 border border-slate-200 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-slate-550 active:scale-95 transition-all"
+            className="p-2 border border-slate-200 dark:border-slate-855 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-slate-550 active:scale-95 transition-all"
             title="Refresh team list"
           >
             <RefreshCw className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 hover:bg-bg rounded-xl text-xs font-bold active:scale-95 transition-all"
+          >
+            <Upload className="w-4 h-4" />
+            Import Employees
           </button>
           
           <button
@@ -158,6 +431,7 @@ export default function EmployeesPage() {
             employees={employees}
             onEdit={(emp) => setEditTarget(emp)}
             onDelete={(emp) => setDeleteTarget(emp)}
+            onStatusChange={handleStatusChange}
           />
         )}
       </div>
@@ -190,6 +464,29 @@ export default function EmployeesPage() {
           }}
         />
       )}
+
+      {/* Status Change Confirm Modal */}
+      {statusChangeTarget && (
+        <StatusChangeConfirmModal
+          employee={statusChangeTarget.employee}
+          newStatus={statusChangeTarget.newStatus}
+          employees={employees}
+          onCancel={() => setStatusChangeTarget(null)}
+          onConfirm={() => {
+            setStatusChangeTarget(null);
+            fetchEmployees();
+          }}
+        />
+      )}
+
+      {/* Import Employees Modal */}
+      {showImport && (
+        <ImportEmployeesModal
+          onClose={() => setShowImport(false)}
+          onImported={fetchEmployees}
+        />
+      )}
     </div>
   );
 }
+

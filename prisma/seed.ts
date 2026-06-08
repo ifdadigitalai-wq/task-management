@@ -19,6 +19,32 @@ async function main() {
   await prisma.taskTemplate.deleteMany({});
   await prisma.holiday.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.department.deleteMany({});
+
+  // Seed departments
+  const defaultDepts = [
+    "Admin department",
+    "Centre head / Management",
+    "Sales / counselling department",
+    "Academics department",
+    "Faculty department",
+    "Backend department",
+    "Accounts & Finance department",
+    "IT department",
+    "HR & Placement department"
+  ];
+  
+  const deptMap: Record<string, any> = {};
+  for (const name of defaultDepts) {
+    const deptObj = await prisma.department.create({
+      data: {
+        name,
+        description: `Standard operational ${name}.`,
+      },
+    });
+    deptMap[name] = deptObj;
+    console.log(`✅ Seeded Department: ${name}`);
+  }
 
   // 1. Create Admin
   const adminPassword = await bcrypt.hash("Admin@123", 12);
@@ -29,7 +55,8 @@ async function main() {
       passwordHash: adminPassword,
       role: "ADMIN",
       mustResetPassword: false,
-      department: "Admin Department",
+      department: "Admin department",
+      departmentId: deptMap["Admin department"]?.id || null,
       jobTitle: "Administrator",
       avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&h=256&q=80",
       phone: "+91 99999 88888",
@@ -40,7 +67,13 @@ async function main() {
 
   // 2. Create 5 Employees
   const employees = [];
-  const depts = ["Academic", "Faculty", "Backend", "Account & Finance", "HR & Placement"];
+  const deptsMapping = [
+    "Academics department",
+    "Faculty department",
+    "Backend department",
+    "Accounts & Finance department",
+    "HR & Placement department"
+  ];
   const jobTitles = ["Senior Instructor", "Lead Faculty", "Backend Architect", "Finance Officer", "HR Lead"];
   const avatars = [
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&h=256&q=80",
@@ -52,6 +85,7 @@ async function main() {
   
   for (let i = 1; i <= 5; i++) {
     const passwordHash = await bcrypt.hash(`Employee${i}@123`, 12);
+    const deptName = deptsMapping[i - 1];
     const employee = await prisma.user.create({
       data: {
         email: `Employee${i}@ifda.com`,
@@ -59,7 +93,8 @@ async function main() {
         passwordHash,
         role: "EMPLOYEE",
         mustResetPassword: true,
-        department: depts[i - 1],
+        department: deptName,
+        departmentId: deptMap[deptName]?.id || null,
         jobTitle: jobTitles[i - 1],
         avatarUrl: avatars[i - 1],
         phone: `+91 98765 4321${i}`,
@@ -135,11 +170,14 @@ async function main() {
         templateId: i % 3 === 0 ? template1.id : undefined,
         tags: [assignee.department || "General", priority],
         checklistItems: i % 2 === 0 ? ["Step A checklist item", "Step B checklist item"] : [],
-        attachments: [
-          { name: "specs_v1.pdf", size: 102400 },
-          { name: "screenshot.png", size: 450300 },
-        ],
+        attachments: {
+          create: [
+            { filename: "specs_v1.pdf", url: "https://uploadthing.com/specs_v1.pdf", uploadedBy: "System Admin" },
+            { filename: "screenshot.png", url: "https://uploadthing.com/screenshot.png", uploadedBy: "System Admin" },
+          ]
+        },
         recurrence: { rule: i % 4 === 0 ? "WEEKLY" : "NONE", interval: 1 },
+        department: assignee.department || "General",
       },
     });
   }

@@ -149,13 +149,13 @@ function VoiceRecordingModal({ onSave, onClose }: { onSave: (blob: Blob, name: s
   );
 }
 
-// ── Main AssignTaskModal ───────────────────────────────────────────────────────
 export function AssignTaskModal({ onClose }: { onClose: () => void }) {
   const { addTask } = useTaskStore();
   const toast = useToast();
 
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [employees, setEmployees] = useState<UserType[]>([]);
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   
   const [title, setTitle] = useState("");
@@ -172,12 +172,25 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
   const [voiceRecordings, setVoiceRecordings] = useState<{ name: string; blob: Blob }[]>([]);
   const [remindWhatsApp, setRemindWhatsApp] = useState(false);
   const [remindEmail, setRemindEmail] = useState(false);
+
+  // New fields
+  const [department, setDepartment] = useState("");
+  const [frequency, setFrequency] = useState("ONE_TIME");
+  const [customFrequency, setCustomFrequency] = useState("");
+
+  // Reminder settings
+  const [reminderBeforeDue, setReminderBeforeDue] = useState(true);
+  const [reminderOnDue, setReminderOnDue] = useState(true);
+  const [reminderRecurring, setReminderRecurring] = useState(false);
+  const [reminderEmail, setReminderEmail] = useState(false);
+  const [reminderInApp, setReminderInApp] = useState(true);
+  const [showReminders, setShowReminders] = useState(false);
   
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch users and templates on mount
+  // Fetch users, templates, and departments on mount
   useEffect(() => {
     fetch("/api/users", { cache: "no-store" })
       .then((res) => res.json())
@@ -190,6 +203,13 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
       .then((res) => res.json())
       .then((payload) => {
         if (payload.success) setTemplates(payload.data);
+      })
+      .catch(console.error);
+
+    fetch("/api/departments")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) setDepartments(payload.data);
       })
       .catch(console.error);
   }, []);
@@ -248,6 +268,10 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
       toast.error("Task title is required.");
       return;
     }
+    if (!department) {
+      toast.error("Department is a mandatory field.");
+      return;
+    }
 
     setSubmitting(true);
 
@@ -269,12 +293,9 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
           files: filesToUpload,
         });
         uploadedAttachments = uploadRes.map((res) => {
-          const isAudio = res.name.endsWith(".webm") || res.name.startsWith("recording-");
           return {
-            name: res.name,
-            size: res.size,
             url: res.url,
-            type: isAudio ? "audio" : "file",
+            filename: res.name,
           };
         });
       }
@@ -297,6 +318,16 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
             remindWhatsApp && "whatsapp",
             remindEmail && "email",
           ].filter(Boolean),
+          department,
+          frequency,
+          customFrequency: frequency === "CUSTOM" ? customFrequency.trim() : null,
+          reminderSettings: {
+            beforeDueDate: reminderBeforeDue,
+            onDueDate: reminderOnDue,
+            recurring: reminderRecurring,
+            emailNotification: reminderEmail,
+            inAppNotification: reminderInApp,
+          },
         }),
       });
 
@@ -318,10 +349,10 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      {/* Backdrop — z-modal-backdrop = 70 */}
+      {/* Backdrop ── z-modal-backdrop = 70 */}
       <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center" style={{ zIndex: "var(--z-modal-backdrop)" }} />
       
-      {/* Modal Container — z-modal = 80 */}
+      {/* Modal Container ── z-modal = 80 */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[520px] max-h-[85vh] overflow-y-auto bg-surface rounded-xl shadow-lg flex flex-col animate-in zoom-in-95 duration-150" style={{ zIndex: "var(--z-modal)" }}>
         
         {/* Header */}
@@ -357,8 +388,25 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
             </select>
           </FormField>
 
+          {/* Department */}
+          <FormField label="Department *" required>
+            <select
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              required
+              className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+            >
+              <option value="">Select Department...</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.name}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+
           {/* Title */}
-          <FormField label="Task Title" required>
+          <FormField label="Task Title *" required>
             <input
               type="text"
               placeholder="E.g., Review billing reports..."
@@ -440,6 +488,103 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
                 <option value="MONTHLY">Monthly</option>
               </select>
             </FormField>
+          </div>
+
+          {/* Frequency & Custom Frequency Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Task Frequency">
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10"
+              >
+                <option value="ONE_TIME">One Time</option>
+                <option value="DAILY">Daily</option>
+                <option value="WEEKLY">Weekly</option>
+                <option value="MONTHLY">Monthly</option>
+                <option value="QUARTERLY">Quarterly</option>
+                <option value="YEARLY">Yearly</option>
+                <option value="CUSTOM">Custom Frequency</option>
+              </select>
+            </FormField>
+
+            {frequency === "CUSTOM" && (
+              <FormField label="Custom Frequency Rule" required>
+                <input
+                  type="text"
+                  placeholder="e.g. Every 2 weeks on Tuesday"
+                  value={customFrequency}
+                  onChange={(e) => setCustomFrequency(e.target.value)}
+                  required
+                  className="block w-full h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+                />
+              </FormField>
+            )}
+          </div>
+
+          {/* Collapsible Auto Reminder Settings */}
+          <div className="border border-border rounded-xl overflow-hidden bg-bg/5">
+            <button
+              type="button"
+              onClick={() => setShowReminders(!showReminders)}
+              className="w-full flex items-center justify-between p-3.5 text-[12px] font-medium text-text-primary hover:bg-bg/40 transition-colors select-none"
+            >
+              <span>Auto Reminder Settings</span>
+              <span className="text-text-tertiary">{showReminders ? "▲" : "▼"}</span>
+            </button>
+            {showReminders && (
+              <div className="p-4 border-t border-border bg-surface space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={reminderBeforeDue}
+                      onChange={(e) => setReminderBeforeDue(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    Before Due Date
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={reminderOnDue}
+                      onChange={(e) => setReminderOnDue(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    On Due Date
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={reminderRecurring}
+                      onChange={(e) => setReminderRecurring(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    Recurring
+                  </label>
+                </div>
+                <div className="flex gap-x-6 pt-2 border-t border-border-strong/5">
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={reminderEmail}
+                      onChange={(e) => setReminderEmail(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    Email Reminders
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={reminderInApp}
+                      onChange={(e) => setReminderInApp(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    In-App Notifications
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reminders / Notifications via WhatsApp/Email */}
@@ -551,7 +696,7 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
               size="sm"
               icon={<Mic className="w-3.5 h-3.5" />}
               onClick={() => setShowVoiceModal(true)}
-              className="text-[#EF4444] border-[#FECACA] hover:bg-[#FEF2F2] dark:hover:bg-red-950/20"
+              className="text-[#EF4444] border-[#FECACA] hover:bg-[#FEF2F2] dark:hover:bg-red-955/20"
             >
               Record voice note
             </Button>
@@ -576,7 +721,7 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
           {voiceRecordings.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {voiceRecordings.map((v, i) => (
-                <div key={i} className="inline-flex items-center gap-2 p-2 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-[#EF4444] dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                <div key={i} className="inline-flex items-center gap-2 p-2 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-[#EF4444] dark:bg-red-955/20 dark:border-red-900/40 dark:text-red-400">
                   <Mic className="w-3.5 h-3.5" />
                   <span className="text-[12px] font-medium">Voice note {i + 1}</span>
                   <button type="button" onClick={() => setVoiceRecordings(voiceRecordings.filter((_, idx) => idx !== i))} className="hover:opacity-75 focus-visible:outline-none">
@@ -616,4 +761,5 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
     </>
   );
 }
+
 export default AssignTaskModal;

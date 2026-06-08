@@ -1,4 +1,8 @@
-export type UserRole = "ADMIN" | "EMPLOYEE";
+export type UserRole = "ADMIN" | "MANAGER" | "TEAM_LEADER" | "EMPLOYEE";
+
+export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | "RESIGNED" | "ON_LEAVE";
+
+export type TaskFrequency = "ONE_TIME" | "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM";
 
 export type EventType = "LEAVE" | "EVENT" | "OFFICIAL";
 
@@ -14,7 +18,11 @@ export interface User {
   email: string;
   passwordHash?: string;
   role: UserRole;
+  status: UserStatus;
   department?: string | null;
+  departmentId?: string | null;
+  departmentObj?: Department | null;
+  team?: string | null;
   jobTitle?: string | null;
   avatarUrl?: string | null;
   phone?: string | null;
@@ -44,15 +52,81 @@ export interface Task {
   parentTask?: Task | null;
   subTasks?: Task[];
   tags: string[];
-  attachments?: any; // JSON representation
   recurrence?: any;   // JSON representation
   checklistItems?: any; // JSON representation of {text, completed}[]
   createdAt: string | Date;
   updatedAt: string | Date;
 
+  // New fields
+  department: string;
+  frequency: TaskFrequency;
+  customFrequency?: string | null;
+  progress: number;
+  isSubtask: boolean;
+
+  // New relations
+  attachments?: TaskAttachment[];
+  comments?: TaskComment[];
+  reminderSettings?: TaskReminder | null;
+
   // client side additions
   updates?: TaskUpdate[];
   timers?: TaskTimer[];
+}
+
+export interface TaskAttachment {
+  id: string;
+  taskId: string;
+  url: string;
+  filename: string;
+  uploadedBy: string;
+  uploadedAt: string | Date;
+}
+
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  user?: User;
+  content: string;
+  createdAt: string | Date;
+}
+
+export interface TaskReminder {
+  id: string;
+  taskId: string;
+  beforeDueDate: boolean;
+  onDueDate: boolean;
+  recurring: boolean;
+  emailNotification: boolean;
+  inAppNotification: boolean;
+}
+
+export interface AuditLog {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId?: string | null;
+  performedBy: string;
+  details: any;
+  createdAt: string | Date;
+}
+
+export interface TaskTransfer {
+  id: string;
+  taskId: string;
+  fromUserId: string;
+  toUserId: string;
+  transferredBy: string;
+  transferredAt: string | Date;
+  reason: string;
+}
+
+export interface Department {
+  id: string;
+  name: string;
+  description?: string | null;
+  members?: User[];
 }
 
 export interface TaskUpdate {
@@ -64,10 +138,10 @@ export interface TaskUpdate {
   type: UpdateType;
   attachments?: any;
   createdAt: string | Date;
-  comments?: TaskComment[];
+  comments?: TaskUpdateComment[];
 }
 
-export interface TaskComment {
+export interface TaskUpdateComment {
   id: string;
   taskUpdateId: string;
   userId: string;
@@ -150,6 +224,8 @@ export interface FilterState {
   dateRange: string; // "today" | "yesterday" | "tomorrow" | "this-week" | "all"
   tags: string[];
   sortBy?: string;
+  department: string | "ALL";
+  team: string | "ALL";
 }
 
 export type ViewMode = "list" | "kanban";

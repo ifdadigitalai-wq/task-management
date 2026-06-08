@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   X, MessageSquare, Trash2, RefreshCw, Paperclip,
   Mic, ImageIcon, Send, ChevronRight, Play, Pause,
-  CheckCircle2, Clock, ListTodo, Plus, Calendar, AlertCircle, Edit, Save, Check, StopCircle
+  CheckCircle2, Clock, ListTodo, Plus, Calendar, AlertCircle, Edit, Save, Check, StopCircle, Loader2, UserCheck
 } from "lucide-react";
-import { Task, TaskStatus, Priority, TaskUpdate, User, ApiResponse } from "@/types";
+import { Task, TaskStatus, Priority, TaskUpdate, User, ApiResponse, TaskComment, Department, TaskFrequency } from "@/types";
 import { useTaskStore } from "@/store/useTaskStore";
 import { useToast } from "@/hooks/useToast";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
@@ -15,6 +15,7 @@ import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { uploadFiles } from "@/lib/uploadthing-client";
+import { hasPermission } from "@/lib/rbac";
 
 const STATUSES: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"];
 
@@ -38,7 +39,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
   const toast = useToast();
   
   const [task, setTask] = useState<Task | null>(initialTask);
-  const [activeTab, setActiveTab] = useState<"details" | "updates" | "subtasks">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "updates" | "subtasks" | "comments">("details");
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,23 +51,32 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
   const [editAssigneeId, setEditAssigneeId] = useState("");
   const [editEstimatedHours, setEditEstimatedHours] = useState(0);
   const [editEstimatedMins, setEditEstimatedMins] = useState(0);
+  const [editDepartment, setEditDepartment] = useState("General");
+  const [editFrequency, setEditFrequency] = useState<TaskFrequency>("ONE_TIME");
+  const [editCustomFrequency, setEditCustomFrequency] = useState("");
   
-  // Data lists
   // Data lists
   const [updates, setUpdates] = useState<TaskUpdate[]>([]);
   const [subtasks, setSubtasks] = useState<Task[]>([]);
   const [employees, setEmployees] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [directComments, setDirectComments] = useState<TaskComment[]>([]);
   
   // Inputs
   const [newRemark, setNewRemark] = useState("");
   const [newCommentText, setNewCommentText] = useState<Record<string, string>>({});
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [newDirectComment, setNewDirectComment] = useState("");
 
   // Update attachments states
   const [updateSelectedFiles, setUpdateSelectedFiles] = useState<File[]>([]);
   const [updateVoiceRecordings, setUpdateVoiceRecordings] = useState<{ name: string; blob: Blob }[]>([]);
   const [showUpdateVoiceModal, setShowUpdateVoiceModal] = useState(false);
   const updateFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Direct Attachment states
+  const [directAttachmentLoading, setDirectAttachmentLoading] = useState(false);
+  const directAttachmentInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpdateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -87,13 +97,17 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
       setEditPriority(initialTask.priority);
       setEditDueDate(initialTask.dueDate ? new Date(initialTask.dueDate) : null);
       setEditAssigneeId(initialTask.assigneeId || "");
+      setEditDepartment(initialTask.department || "General");
+      setEditFrequency(initialTask.frequency || "ONE_TIME");
+      setEditCustomFrequency(initialTask.customFrequency || "");
       
       const totalMinutes = initialTask.estimatedMinutes || 0;
       setEditEstimatedHours(Math.floor(totalMinutes / 60));
       setEditEstimatedMins(totalMinutes % 60);
 
-      // Load updates, timers, subtasks
+      // Load updates, timers, subtasks, direct comments
       fetchTaskRelations(initialTask.id);
+      fetchDirectComments(initialTask.id);
     } else {
       setTask(null);
     }
@@ -102,23 +116,29 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
   // Poll task relations every 10 seconds for real-time updates/comments/subtasks
   useEffect(() => {
     if (!initialTask?.id) return;
-    const interval = setInterval(() => fetchTaskRelations(initialTask.id), 10000);
+    const interval = setInterval(() => {
+      fetchTaskRelations(initialTask.id);
+      fetchDirectComments(initialTask.id);
+    }, 10000);
     return () => clearInterval(interval);
   }, [initialTask?.id]);
 
-  // Fetch employees list
+  // Fetch employees & departments lists
   useEffect(() => {
-    if (currentUser?.role === "ADMIN") {
-      fetch("/api/users", { cache: "no-store" })
-        .then((res) => res.json())
-        .then((payload) => {
-          if (payload.success) setEmployees(payload.data);
-        })
-        .catch(console.error);
-    }
-  }, [currentUser]);
+    fetch("/api/users", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) setEmployees(payload.data || []);
+      })
+      .catch(console.error);
 
-
+    fetch("/api/departments")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) setDepartments(payload.data || []);
+      })
+      .catch(console.error);
+  }, []);
 
   const fetchTaskRelations = async (taskId: string) => {
     try {
@@ -133,6 +153,20 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchDirectComments = async (taskId: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}/comments`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload.success) {
+          setDirectComments(payload.data || []);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch comments", err);
     }
   };
 
@@ -196,6 +230,9 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
           dueDate: editDueDate ? editDueDate.toISOString() : null,
           assigneeId: editAssigneeId || null,
           estimatedMinutes: totalMinutes,
+          department: editDepartment,
+          frequency: editFrequency,
+          customFrequency: editFrequency === "CUSTOM" ? editCustomFrequency.trim() : null,
         }),
       });
       const payload = await res.json();
@@ -215,6 +252,94 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const handleProgressChange = async (newProgress: number) => {
+    if (!task) return;
+    setTask({ ...task, progress: newProgress });
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/progress`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progress: newProgress }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+      } else {
+        toast.error(payload.error || "Failed to update progress.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update progress.");
+    }
+  };
+
+  const handleDelegateAssignee = async (newAssigneeId: string) => {
+    if (!task) return;
+    if (!newAssigneeId) return;
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/assign-team-member`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assigneeId: newAssigneeId }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+        setEditAssigneeId(newAssigneeId);
+        toast.success("Task successfully delegated!");
+      } else {
+        toast.error(payload.error || "Failed to delegate task.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delegate task.");
+    }
+  };
+
+  const handleUploadDirectAttachments = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!task || !e.target.files || e.target.files.length === 0) return;
+    setDirectAttachmentLoading(true);
+    try {
+      const filesToUpload = Array.from(e.target.files);
+      toast.info("Uploading attachment(s)...");
+      const uploadRes = await uploadFiles("taskAttachment", {
+        files: filesToUpload,
+      });
+      const attachmentsPayload = uploadRes.map((res) => ({
+        url: res.url,
+        filename: res.name,
+      }));
+
+      const res = await fetch(`/api/tasks/${task.id}/attachments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attachments: attachmentsPayload }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        const updatedTask = {
+          ...task,
+          attachments: [...(task.attachments || []), ...payload.data],
+        };
+        setTask(updatedTask);
+        storeUpdateTask(updatedTask);
+        toast.success("Attachment(s) added successfully!");
+      } else {
+        toast.error(payload.error || "Failed to add attachment(s).");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(`Attachment upload failed: ${err.message || String(err)}`);
+    } finally {
+      setDirectAttachmentLoading(false);
+      if (directAttachmentInputRef.current) {
+        directAttachmentInputRef.current.value = "";
+      }
+    }
+  };
+
   const handlePostUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!task) return;
@@ -223,7 +348,6 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     if (!newRemark.trim() && !hasAttachments) return;
 
     try {
-      // 1. Prepare files list for UploadThing
       const filesToUpload: File[] = [];
       updateSelectedFiles.forEach((file) => {
         filesToUpload.push(file);
@@ -300,6 +424,29 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const handlePostDirectComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!task || !newDirectComment.trim()) return;
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newDirectComment.trim() }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setDirectComments([...directComments, payload.data]);
+        setNewDirectComment("");
+        toast.success("Comment added.");
+      } else {
+        toast.error(payload.error || "Failed to add comment.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add comment.");
+    }
+  };
+
   const handleAddSubtask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!task || !newSubtaskTitle.trim()) return;
@@ -313,6 +460,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
           parentTaskId: task.id,
           priority: task.priority,
           assigneeId: task.assigneeId,
+          department: task.department || "General",
         }),
       });
       const payload = await res.json();
@@ -325,8 +473,6 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
       console.error(err);
     }
   };
-
-
 
   const handleDeleteTask = async () => {
     if (!task) return;
@@ -391,548 +537,732 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
   const statusStyle = STATUS_COLORS[task.status] || STATUS_COLORS.TODO;
   const priorityStyle = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM;
 
+  const canEdit = currentUser?.role === "ADMIN" || currentUser?.role === "MANAGER" || currentUser?.role === "TEAM_LEADER";
+  const canDelegate = currentUser ? hasPermission(currentUser.role, "delegate") : false;
+  const canCreateSubtask = currentUser ? hasPermission(currentUser.role, "create_subtask") : false;
+
   return (
     <>
-      {/* Backdrop — z-panel - 1 = 59 */}
+      {/* Centered Modal Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-all duration-300"
-        style={{ zIndex: "calc(var(--z-panel) - 1)" }}
-      />
-
-      {/* Slide-over panel — z-panel = 60 */}
-      <div
-        className={cn(
-          "fixed right-0 bottom-0 bg-surface border-l border-border shadow-lg flex flex-col transition-all duration-200 ease-in-out top-0",
-          "w-[min(480px,100vw)]",
-          "max-md:top-auto max-md:left-0 max-md:right-0 max-md:w-full max-md:h-[85vh] max-md:border-t max-md:border-l-0 rounded-t-xl md:rounded-t-none",
-          "animate-in slide-in-from-right max-md:slide-in-from-bottom"
-        )}
-        style={{ zIndex: "var(--z-panel)" }}
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-[3px] transition-all duration-300 flex items-center justify-center z-[50] p-4 max-sm:p-0"
       >
-        {/* Header */}
-        <div className="p-4 px-5 border-b border-border flex items-start justify-between gap-4 shrink-0">
-          <div className="flex-1 min-w-0">
-            {/* Badges row */}
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <StatusBadge status={task.status} />
-              
-              <PriorityBadge priority={task.priority} />
-
-              {task.dueDate && (
-                <span className="flex items-center gap-1 text-text-tertiary" style={{ fontSize: "0.75rem" }}>
-                  <Calendar className="w-3.5 h-3.5" />
-                  {new Date(task.dueDate).toLocaleDateString()}
+        {/* Modal Container */}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "bg-surface border border-border shadow-2xl flex flex-col transition-all duration-200 ease-in-out",
+            "w-full max-w-5xl h-[90vh] max-h-[850px] rounded-xl overflow-hidden animate-in zoom-in-95 max-sm:h-full max-sm:rounded-none"
+          )}
+        >
+          {/* Header */}
+          <div className="p-4 px-6 border-b border-border flex items-center justify-between gap-4 shrink-0 bg-bg/10">
+            <div className="flex-1 min-w-0">
+              {/* Badges row */}
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <StatusBadge status={task.status} />
+                <PriorityBadge priority={task.priority} />
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] text-text-secondary font-medium uppercase tracking-wider">
+                  {task.department || "General"}
                 </span>
-              )}
-            </div>
-
-            {/* Title / Edit Title */}
-            {editMode ? (
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[15px] font-medium focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
-              />
-            ) : (
-              <h2 className="text-text-primary font-medium tracking-tight line-clamp-2" style={{ fontSize: "0.9375rem" }}>
-                {task.title}
-              </h2>
-            )}
-          </div>
-
-          {/* Close & Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
-            {currentUser?.role === "ADMIN" && (
-              <button
-                onClick={() => (editMode ? handleSaveChanges() : setEditMode(true))}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-text-secondary hover:bg-bg hover:text-text-primary transition-all focus:outline-none"
-                title={editMode ? "Save Changes" : "Edit Fields"}
-              >
-                {editMode ? <Check className="w-4 h-4 text-[#16A34A]" /> : <Edit className="w-4 h-4" />}
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-text-secondary hover:bg-bg hover:text-text-primary transition-all focus:outline-none"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Selection */}
-        <div className="h-9 flex border-b border-border px-5 shrink-0 bg-bg/20">
-          {(["details", "updates", "subtasks"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                "h-full flex items-center font-normal px-4 text-text-secondary border-b-2 border-transparent transition-all cursor-pointer hover:text-text-primary uppercase tracking-[0.05em]",
-                activeTab === tab && "border-brand text-text-primary font-medium"
-              )}
-              style={{ fontSize: "0.75rem" }}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Scrollable Contents */}
-        <div className="flex-1 overflow-y-auto p-4 px-5 space-y-4">
-          {/* 1. DETAILS TAB */}
-          {activeTab === "details" && (
-            <div className="space-y-1">
-              {/* Description */}
-              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Description</span>
-                {editMode ? (
-                  <textarea
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none resize-none"
-                  />
-                ) : (
-                  <p className="text-[13px] text-text-primary leading-relaxed">
-                    {task.description || "No description provided for this task."}
-                  </p>
+                {task.frequency && task.frequency !== "ONE_TIME" && (
+                  <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/20 text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold uppercase tracking-wider">
+                    🔄 {task.frequency === "CUSTOM" ? (task.customFrequency || "Custom") : task.frequency}
+                  </span>
+                )}
+                {task.dueDate && (
+                  <span className="flex items-center gap-1 text-text-tertiary text-[11px] ml-2">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                  </span>
                 )}
               </div>
 
-              {/* Assignee & Due Date Edit Fields */}
+              {/* Title / Edit Title */}
               {editMode ? (
-                <>
-                  <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Assignee</span>
-                    <select
-                      value={editAssigneeId}
-                      onChange={(e) => setEditAssigneeId(e.target.value)}
-                      className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
-                    >
-                      <option value="">Unassigned</option>
-                      {employees.filter((e) => e.isActive).map((e) => (
-                        <option key={e.id} value={e.id}>{e.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Due Date</span>
-                    <DateRangePicker value={editDueDate} onChange={setEditDueDate} showTime={true} />
-                  </div>
-                  <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Priority</span>
-                    <select
-                      value={editPriority}
-                      onChange={(e) => setEditPriority(e.target.value as Priority)}
-                      className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
-                    >
-                      <option value="LOW">Low</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="HIGH">High</option>
-                      <option value="CRITICAL">Critical</option>
-                    </select>
-                  </div>
-                </>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[16px] font-semibold focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+                />
               ) : (
-                <>
-                  <div className="py-2.5 border-b border-border flex items-center justify-between">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Assignee</span>
-                    <div className="flex items-center gap-2">
-                      {task.assignee ? (
-                        <>
-                          <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-brand-light text-brand-text text-[9px] font-medium border border-border">
-                            {task.assignee.avatarUrl ? (
-                              <img src={task.assignee.avatarUrl} alt={task.assignee.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <span>{task.assignee.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}</span>
-                            )}
-                          </div>
-                          <span className="text-[13px] text-text-primary">{task.assignee.name}</span>
-                        </>
+                <h2 className="text-text-primary font-semibold tracking-tight text-lg truncate">
+                  {task.title}
+                </h2>
+              )}
+            </div>
+
+            {/* Close & Action Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
+              {canEdit && (
+                <button
+                  onClick={() => (editMode ? handleSaveChanges() : setEditMode(true))}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-text-secondary hover:bg-bg hover:text-text-primary transition-all focus:outline-none border border-border"
+                  title={editMode ? "Save Changes" : "Edit Fields"}
+                >
+                  {editMode ? <Check className="w-4 h-4 text-[#16A34A]" /> : <Edit className="w-4 h-4" />}
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-text-secondary hover:bg-bg hover:text-text-primary transition-all focus:outline-none border border-border"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Columns */}
+          <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 overflow-hidden">
+            {/* Left Area (2/3 size) */}
+            <div className="md:col-span-2 overflow-y-auto p-6 space-y-6 border-r border-border flex flex-col min-h-0">
+              {/* Tab Selector */}
+              <div className="h-9 flex border-b border-border shrink-0 bg-bg/5 rounded-t-md">
+                {(["details", "updates", "subtasks", "comments"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={cn(
+                      "h-full flex items-center font-normal px-4 text-text-secondary border-b-2 border-transparent transition-all cursor-pointer hover:text-text-primary uppercase tracking-[0.05em]",
+                      activeTab === tab && "border-brand text-text-primary font-semibold"
+                    )}
+                    style={{ fontSize: "0.75rem" }}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* Scrollable tab panel contents */}
+              <div className="flex-1 min-h-0 space-y-5">
+                {/* 1. DETAILS TAB */}
+                {activeTab === "details" && (
+                  <div className="space-y-5">
+                    {/* Description */}
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Description</span>
+                      {editMode ? (
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          rows={6}
+                          className="w-full px-3 py-2 border border-border-strong rounded bg-bg text-text-primary text-[13px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none resize-none"
+                        />
                       ) : (
-                        <span className="text-[13px] text-text-tertiary">Unassigned</span>
+                        <div className="text-[13.5px] text-text-primary leading-relaxed whitespace-pre-wrap bg-bg/30 p-4 rounded-lg border border-border/40">
+                          {task.description || "No description provided for this task."}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Metadata attributes editable in details tab too */}
+                    {editMode && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Assignee</span>
+                          <select
+                            value={editAssigneeId}
+                            onChange={(e) => setEditAssigneeId(e.target.value)}
+                            className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
+                          >
+                            <option value="">Unassigned</option>
+                            {employees.filter((e) => e.isActive).map((e) => (
+                              <option key={e.id} value={e.id}>{e.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Priority</span>
+                          <select
+                            value={editPriority}
+                            onChange={(e) => setEditPriority(e.target.value as Priority)}
+                            className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
+                          >
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="CRITICAL">Critical</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Department</span>
+                          <select
+                            value={editDepartment}
+                            onChange={(e) => setEditDepartment(e.target.value)}
+                            className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
+                          >
+                            <option value="General">General</option>
+                            {departments.map((dept) => (
+                              <option key={dept.id} value={dept.name}>{dept.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Frequency</span>
+                          <select
+                            value={editFrequency}
+                            onChange={(e) => setEditFrequency(e.target.value as TaskFrequency)}
+                            className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
+                          >
+                            <option value="ONE_TIME">One Time</option>
+                            <option value="DAILY">Daily</option>
+                            <option value="WEEKLY">Weekly</option>
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="QUARTERLY">Quarterly</option>
+                            <option value="YEARLY">Yearly</option>
+                            <option value="CUSTOM">Custom</option>
+                          </select>
+                        </div>
+                        {editFrequency === "CUSTOM" && (
+                          <div className="flex flex-col gap-1.5 sm:col-span-2">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Custom Recurrence (e.g. Every 2 Weeks)</span>
+                            <input
+                              type="text"
+                              value={editCustomFrequency}
+                              onChange={(e) => setEditCustomFrequency(e.target.value)}
+                              placeholder="e.g. every Wednesday"
+                              className="w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                            />
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Due Date</span>
+                          <DateRangePicker value={editDueDate} onChange={setEditDueDate} showTime={true} />
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="flex-1 flex flex-col gap-1.5">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Est. Hours</span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={editEstimatedHours}
+                              onChange={(e) => setEditEstimatedHours(Math.max(0, parseInt(e.target.value) || 0))}
+                              className="w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                            />
+                          </div>
+                          <div className="flex-1 flex flex-col gap-1.5">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Est. Mins</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="59"
+                              value={editEstimatedMins}
+                              onChange={(e) => setEditEstimatedMins(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                              className="w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!editMode && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2 border-t border-border pt-4 text-xs text-text-secondary">
+                        <div className="flex justify-between items-center py-1 border-b border-border/50">
+                          <span className="font-semibold uppercase text-text-tertiary">Created By</span>
+                          <span>{task.creator?.name || "System"}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-1 border-b border-border/50">
+                          <span className="font-semibold uppercase text-text-tertiary">Department</span>
+                          <span>{task.department || "General"}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-1 border-b border-border/50">
+                          <span className="font-semibold uppercase text-text-tertiary">Frequency</span>
+                          <span>{task.frequency}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-1 border-b border-border/50">
+                          <span className="font-semibold uppercase text-text-tertiary">Progress</span>
+                          <span className="font-bold text-brand">{task.progress}%</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. DIRECT COMMENTS TAB */}
+                {activeTab === "comments" && (
+                  <div className="space-y-4 flex flex-col h-full">
+                    {/* Add Comment Input Form */}
+                    <form onSubmit={handlePostDirectComment} className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Write a direct comment on this task..."
+                        value={newDirectComment}
+                        onChange={(e) => setNewDirectComment(e.target.value)}
+                        className="block w-full px-3 py-2 border border-border-strong rounded bg-bg text-text-primary text-[13px] focus:outline-none focus:border-brand"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!newDirectComment.trim()}
+                        className="px-4 py-2 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[13px] disabled:opacity-50 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        Send
+                      </button>
+                    </form>
+
+                    {/* Comments Feed list */}
+                    <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                      {directComments.length === 0 ? (
+                        <div className="text-center py-8 text-text-tertiary text-[13px]">
+                          No direct comments yet. Write one above.
+                        </div>
+                      ) : (
+                        directComments.map((comment) => (
+                          <div key={comment.id} className="p-3 bg-bg/40 border border-border rounded-lg flex gap-3 items-start">
+                            <UserAvatar src={comment.user?.avatarUrl} name={comment.user?.name} size="sm" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-semibold text-text-primary">{comment.user?.name || "Member"}</span>
+                                <span className="text-[10px] text-text-tertiary">{new Date(comment.createdAt).toLocaleString()}</span>
+                              </div>
+                              <p className="text-xs text-text-primary mt-1 leading-relaxed whitespace-pre-wrap">
+                                {comment.content}
+                              </p>
+                            </div>
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>
-                  <div className="py-2.5 border-b border-border flex items-center justify-between">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Created By</span>
-                    <span className="text-[13px] text-text-primary font-medium">{task.creator?.name || "System"}</span>
-                  </div>
-                </>
-              )}
+                )}
 
-              {/* Tags */}
-              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Tags</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {task.tags && task.tags.length > 0 ? (
-                    task.tags.map((tag) => (
-                      <span key={tag} className="px-2.5 py-0.5 rounded-full bg-bg border border-border text-[10px] text-text-secondary font-medium">
-                        {tag}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-[13px] text-text-tertiary">No tags assigned</span>
-                  )}
-                </div>
-              </div>
+                {/* 3. UPDATES TAB (Existing updates & remarks) */}
+                {activeTab === "updates" && (
+                  <div className="space-y-4">
+                    {/* Add Update Input */}
+                    <form onSubmit={handlePostUpdate} className="space-y-2.5">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Post progress update or comment..."
+                          value={newRemark}
+                          onChange={(e) => setNewRemark(e.target.value)}
+                          className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                        />
+                        <button
+                          type="submit"
+                          className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[12px] active:scale-95 transition-all shrink-0 cursor-pointer"
+                        >
+                          Send
+                        </button>
+                      </div>
+                      
+                      {/* File Attachment & Voice Note controls for Updates */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => updateFileInputRef.current?.click()}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded border border-border bg-transparent text-[11px] text-text-secondary hover:bg-bg hover:text-text-primary transition-colors cursor-pointer select-none font-medium"
+                        >
+                          <Paperclip className="w-3.5 h-3.5" />
+                          Attach File
+                        </button>
+                        <input
+                          ref={updateFileInputRef}
+                          type="file"
+                          multiple
+                          className="hidden"
+                          onChange={handleUpdateFileChange}
+                        />
 
+                        <button
+                          type="button"
+                          onClick={() => setShowUpdateVoiceModal(true)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded border border-[#FECACA] bg-transparent text-[11px] text-[#EF4444] hover:bg-[#FEF2F2] transition-colors cursor-pointer select-none font-medium"
+                        >
+                          <Mic className="w-3.5 h-3.5" />
+                          Record audio
+                        </button>
+                      </div>
 
+                      {/* Update Files Preview */}
+                      {updateSelectedFiles.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {updateSelectedFiles.map((f, i) => (
+                            <div key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-bg border border-border text-[10.5px]">
+                              <span className="truncate max-w-[100px] font-medium text-text-primary">{f.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setUpdateSelectedFiles(updateSelectedFiles.filter((_, idx) => idx !== i))}
+                                className="hover:opacity-75 text-text-tertiary hover:text-text-primary"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-              {/* File Attachments */}
-              <div className="py-2.5 border-b border-border flex flex-col gap-1.5">
-                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">Attached Materials</span>
-                {task.attachments && Array.isArray(task.attachments) && task.attachments.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-2 mt-1">
-                    {task.attachments.map((file: any, i: number) => {
-                      const isAudio = file.type === "audio" || file.name.endsWith(".webm") || file.name.startsWith("recording-");
-                      return (
-                        <div key={i} className="flex flex-col gap-1.5 p-2 rounded bg-bg border border-border text-[13px] text-text-primary">
-                          <div className="flex items-center justify-between">
-                            <span className="truncate pr-4 font-medium">{file.name}</span>
-                            <div className="flex items-center gap-2">
-                              {file.size && <span className="text-[10px] text-text-tertiary">({(file.size / 1024).toFixed(1)} KB)</span>}
-                              {file.url && (
-                                <a
-                                  href={file.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[#6366F1] dark:text-[#818CF8] hover:underline font-bold text-[11px]"
-                                >
-                                  Open
-                                </a>
+                      {/* Update Voice Notes Preview */}
+                      {updateVoiceRecordings.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {updateVoiceRecordings.map((v, i) => (
+                            <div key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FEF2F2] border border-[#FECACA] text-[#EF4444] text-[10.5px] font-medium dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                              <Mic className="w-3.5 h-3.5" />
+                              <span>Voice note {i + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => setUpdateVoiceRecordings(updateVoiceRecordings.filter((_, idx) => idx !== i))}
+                                className="hover:opacity-75"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </form>
+
+                    {/* Updates Feed */}
+                    <div className="space-y-3.5">
+                      {updates.length === 0 ? (
+                        <div className="text-center py-8 text-text-tertiary text-[12px]">
+                          No status updates posted yet.
+                        </div>
+                      ) : (
+                        updates.map((up) => (
+                          <div key={up.id} className="p-3.5 bg-bg/40 border border-border rounded-lg space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <UserAvatar src={up.user?.avatarUrl} name={up.user?.name} size="sm" />
+                                <div>
+                                  <p className="text-[12px] font-medium text-text-primary">{up.user?.name || "System"}</p>
+                                  <p className="text-[10px] text-text-tertiary">{new Date(up.createdAt).toLocaleString()}</p>
+                                </div>
+                              </div>
+                              {up.type !== "COMMENT" && (
+                                <span className="px-2 py-0.5 rounded bg-brand-light text-brand-text text-[9px] font-medium uppercase tracking-wider">
+                                  {up.type.replace("_", " ")}
+                                </span>
                               )}
                             </div>
-                          </div>
-                          {isAudio && file.url && (
-                            <audio controls src={file.url} className="w-full mt-1 h-8 rounded" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <span className="text-[13px] text-text-tertiary">No attachments provided</span>
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* 2. UPDATES & COMMENTS TAB */}
-          {activeTab === "updates" && (
-            <div className="space-y-4">
-              {/* Add Update Input */}
-              <form onSubmit={handlePostUpdate} className="space-y-2.5">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Post progress update or comment..."
-                    value={newRemark}
-                    onChange={(e) => setNewRemark(e.target.value)}
-                    className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
-                  />
-                  <button
-                    type="submit"
-                    className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[12px] active:scale-95 transition-all shrink-0 cursor-pointer"
-                  >
-                    Send
-                  </button>
-                </div>
-                
-                {/* File Attachment & Voice Note controls for Updates */}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => updateFileInputRef.current?.click()}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded border border-border bg-transparent text-[11px] text-text-secondary hover:bg-bg hover:text-text-primary transition-colors cursor-pointer select-none font-medium"
-                  >
-                    <Paperclip className="w-3.5 h-3.5" />
-                    Attach File
-                  </button>
-                  <input
-                    ref={updateFileInputRef}
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={handleUpdateFileChange}
-                  />
+                            <p className="text-[12px] text-text-primary leading-relaxed font-medium pl-1">
+                              {up.content}
+                            </p>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowUpdateVoiceModal(true)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded border border-[#FECACA] bg-transparent text-[11px] text-[#EF4444] hover:bg-[#FEF2F2] transition-colors cursor-pointer select-none font-medium"
-                  >
-                    <Mic className="w-3.5 h-3.5" />
-                    Record audio
-                  </button>
-                </div>
-
-                {/* Update Files Preview */}
-                {updateSelectedFiles.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {updateSelectedFiles.map((f, i) => (
-                      <div key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-bg border border-border text-[10.5px]">
-                        <span className="truncate max-w-[100px] font-medium text-text-primary">{f.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => setUpdateSelectedFiles(updateSelectedFiles.filter((_, idx) => idx !== i))}
-                          className="hover:opacity-75 text-text-tertiary hover:text-text-primary"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Update Voice Notes Preview */}
-                {updateVoiceRecordings.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {updateVoiceRecordings.map((v, i) => (
-                      <div key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FEF2F2] border border-[#FECACA] text-[#EF4444] text-[10.5px] font-medium dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
-                        <Mic className="w-3.5 h-3.5" />
-                        <span>Voice note {i + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => setUpdateVoiceRecordings(updateVoiceRecordings.filter((_, idx) => idx !== i))}
-                          className="hover:opacity-75"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </form>
-
-              {/* Updates Feed */}
-              <div className="space-y-3.5">
-                {updates.length === 0 ? (
-                  <div className="text-center py-8 text-text-tertiary text-[12px]">
-                    No status updates posted yet.
-                  </div>
-                ) : (
-                  updates.map((up) => (
-                    <div key={up.id} className="p-3.5 bg-bg/40 border border-border rounded-lg space-y-3">
-                      {/* Author header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <UserAvatar src={up.user?.avatarUrl} name={up.user?.name} size="sm" />
-                          <div>
-                            <p className="text-[12px] font-medium text-text-primary">{up.user?.name || "System"}</p>
-                            <p className="text-[10px] text-text-tertiary">{new Date(up.createdAt).toLocaleString()}</p>
-                          </div>
-                        </div>
-                        {up.type !== "COMMENT" && (
-                          <span className="px-2 py-0.5 rounded bg-brand-light text-brand-text text-[9px] font-medium uppercase tracking-wider">
-                            {up.type.replace("_", " ")}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <p className="text-[12px] text-text-primary leading-relaxed font-medium pl-1">
-                        {up.content}
-                      </p>
-
-                      {/* Update Attachments */}
-                      {up.attachments && Array.isArray(up.attachments) && up.attachments.length > 0 && (
-                        <div className="grid grid-cols-1 gap-1.5 mt-1.5 pl-1">
-                          {up.attachments.map((file: any, fileIdx: number) => {
-                            const isAudio = file.type === "audio" || file.name.endsWith(".webm") || file.name.startsWith("recording-");
-                            return (
-                              <div key={fileIdx} className="flex flex-col gap-1 p-2 rounded bg-surface border border-border text-[11px] text-text-primary">
-                                <div className="flex items-center justify-between">
-                                  <span className="truncate pr-4 font-semibold">{file.name}</span>
-                                  {file.url && (
-                                    <a
-                                      href={file.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-[#6366F1] dark:text-[#818CF8] hover:underline font-bold text-[10px]"
-                                    >
-                                      Open
-                                    </a>
-                                  )}
-                                </div>
-                                {isAudio && file.url && (
-                                  <audio controls src={file.url} className="w-full mt-1 h-7 rounded" />
-                                )}
+                            {/* Update Attachments */}
+                            {up.attachments && Array.isArray(up.attachments) && up.attachments.length > 0 && (
+                              <div className="grid grid-cols-1 gap-1.5 mt-1.5 pl-1">
+                                {up.attachments.map((file: any, fileIdx: number) => {
+                                  const isAudio = file.type === "audio" || file.name.endsWith(".webm") || file.name.startsWith("recording-");
+                                  return (
+                                    <div key={fileIdx} className="flex flex-col gap-1 p-2 rounded bg-surface border border-border text-[11px] text-text-primary">
+                                      <div className="flex items-center justify-between">
+                                        <span className="truncate pr-4 font-semibold">{file.name}</span>
+                                        {file.url && (
+                                          <a
+                                            href={file.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-[#6366F1] dark:text-[#818CF8] hover:underline font-bold text-[10px]"
+                                          >
+                                            Open
+                                          </a>
+                                        )}
+                                      </div>
+                                      {isAudio && file.url && (
+                                        <audio controls src={file.url} className="w-full mt-1 h-7 rounded" />
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
+                            )}
+
+                            {/* Threaded Nested Comments */}
+                            <div className="pl-5 border-l border-border space-y-2">
+                              {up.comments && up.comments.map((c) => (
+                                <div key={c.id} className="p-2 bg-surface border border-border rounded space-y-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="text-[10px] font-medium text-text-primary">{c.user?.name || "System"}</p>
+                                    <span className="text-[8px] text-text-tertiary">{new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                  </div>
+                                  <p className="text-[11px] text-text-secondary">{c.body}</p>
+                                </div>
+                              ))}
+
+                              <div className="flex gap-2 mt-2">
+                                <input
+                                  type="text"
+                                  placeholder="Reply to update..."
+                                  value={newCommentText[up.id] || ""}
+                                  onChange={(e) => setNewCommentText({ ...newCommentText, [up.id]: e.target.value })}
+                                  onKeyDown={(e) => { if (e.key === "Enter") handlePostComment(up.id); }}
+                                  className="block w-full px-3 py-1 border border-border-strong rounded bg-surface text-text-primary text-[11px] focus:outline-none focus:border-brand"
+                                />
+                                <button
+                                  onClick={() => handlePostComment(up.id)}
+                                  className="px-2.5 py-1 bg-bg hover:bg-bg/60 rounded text-text-secondary hover:text-text-primary text-[10px] font-medium"
+                                >
+                                  Reply
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. SUBTASKS TAB */}
+                {activeTab === "subtasks" && (
+                  <div className="space-y-4">
+                    {/* Add inline subtask form */}
+                    {canCreateSubtask && (
+                      <form onSubmit={handleAddSubtask} className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Enter subtask title..."
+                          value={newSubtaskTitle}
+                          onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                          className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!newSubtaskTitle.trim()}
+                          className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[12px] disabled:opacity-50 active:scale-95 transition-all shrink-0 cursor-pointer"
+                        >
+                          Add Subtask
+                        </button>
+                      </form>
+                    )}
+
+                    {/* Checklist Items */}
+                    {task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0 && (
+                      <div className="space-y-2">
+                        <h3 className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">Checklist</h3>
+                        <div className="space-y-1.5">
+                          {task.checklistItems.map((item: any, idx: number) => (
+                            <div
+                              key={idx}
+                              onClick={() => handleChecklistToggle(idx)}
+                              className="flex items-center gap-2.5 p-2.5 bg-bg/30 border border-border rounded cursor-pointer hover:opacity-85 transition-opacity"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={item.completed}
+                                onChange={() => {}} // handled by parent onClick
+                                className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                              />
+                              <span className={cn("text-[12px] font-medium text-text-primary truncate", item.completed && "line-through text-text-tertiary")}>
+                                {item.text}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Subtasks List */}
+                    <div className="space-y-2">
+                      <h3 className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">Subtasks List</h3>
+                      {subtasks.length === 0 ? (
+                        <div className="text-center py-4 text-text-tertiary text-[12px]">No subtasks created.</div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {subtasks.map((sub) => (
+                            <div key={sub.id} className="flex items-center justify-between p-2.5 bg-bg/30 border border-border rounded">
+                              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => handleToggleSubtaskStatus(sub)}>
+                                <input
+                                  type="checkbox"
+                                  checked={sub.status === "DONE"}
+                                  onChange={() => {}} // handled by parent onClick
+                                  className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                                />
+                                <span className={cn("text-[12px] font-medium text-text-primary truncate max-w-[220px]", sub.status === "DONE" && "line-through text-text-tertiary")}>
+                                  {sub.title}
+                                </span>
+                              </div>
+                              <StatusBadge status={sub.status} showDot={false} />
+                            </div>
+                          ))}
                         </div>
                       )}
-
-                      {/* Threaded Nested Comments */}
-                      <div className="pl-5 border-l border-border space-y-2">
-                        {up.comments && up.comments.map((c) => (
-                          <div key={c.id} className="p-2 bg-surface border border-border rounded space-y-1">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-[10px] font-medium text-text-primary">{c.user?.name || "System"}</p>
-                              <span className="text-[8px] text-text-tertiary">{new Date(c.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                            </div>
-                            <p className="text-[11px] text-text-secondary">{c.body}</p>
-                          </div>
-                        ))}
-
-                        {/* Inline comment inputs */}
-                        <div className="flex gap-2 mt-2">
-                          <input
-                            type="text"
-                            placeholder="Reply to update..."
-                            value={newCommentText[up.id] || ""}
-                            onChange={(e) => setNewCommentText({ ...newCommentText, [up.id]: e.target.value })}
-                            onKeyDown={(e) => { if (e.key === "Enter") handlePostComment(up.id); }}
-                            className="block w-full px-3 py-1 border border-border-strong rounded bg-surface text-text-primary text-[11px] focus:outline-none focus:border-brand"
-                          />
-                          <button
-                            onClick={() => handlePostComment(up.id)}
-                            className="px-2.5 py-1 bg-bg hover:bg-bg/60 rounded text-text-secondary hover:text-text-primary text-[10px] font-medium"
-                          >
-                            Reply
-                          </button>
-                        </div>
-                      </div>
                     </div>
-                  ))
+                  </div>
                 )}
               </div>
             </div>
-          )}
 
-          {/* 4. SUBTASKS TAB */}
-          {activeTab === "subtasks" && (
-            <div className="space-y-4">
-              {/* Add inline subtask */}
-              {currentUser?.role === "ADMIN" && (
-                <form onSubmit={handleAddSubtask} className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Enter subtask title..."
-                    value={newSubtaskTitle}
-                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                    className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] focus:outline-none focus:border-brand"
-                  />
-                  <button
-                    type="submit"
-                    className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white rounded font-medium text-[12px] active:scale-95 transition-all shrink-0 cursor-pointer"
-                  >
-                    Add
-                  </button>
-                </form>
-              )}
-
-              {/* Checklist Items (moved from Details tab) */}
-              {task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0 && (
+            {/* Right Area Sidebar (1/3 size) */}
+            <div className="md:col-span-1 overflow-y-auto p-6 space-y-6 bg-bg/5 flex flex-col justify-between min-h-0 border-t md:border-t-0 border-border">
+              <div className="space-y-6">
+                {/* 1. Progress Slider Section */}
                 <div className="space-y-2">
-                  <h3 className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Checklist</h3>
-                  <div className="space-y-1.5">
-                    {task.checklistItems.map((item: any, idx: number) => (
-                      <div
-                        key={idx}
-                        onClick={() => handleChecklistToggle(idx)}
-                        className="flex items-center gap-2.5 p-2.5 bg-bg/30 border border-border rounded cursor-pointer hover:opacity-85 transition-opacity"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={item.completed}
-                          onChange={() => {}} // handled by parent onClick
-                          className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                        />
-                        <span className={cn("text-[12px] font-medium text-text-primary truncate", item.completed && "line-through text-text-tertiary")}>
-                          {item.text}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="flex justify-between items-center">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Task Progress</span>
+                    <span className="text-xs font-bold text-brand">{task.progress || 0}%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={task.progress || 0}
+                      onChange={(e) => handleProgressChange(parseInt(e.target.value))}
+                      className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand"
+                    />
                   </div>
                 </div>
-              )}
 
-              {/* Subtasks List */}
-              <div className="space-y-2">
-                <h3 className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Subtasks List</h3>
-                {subtasks.length === 0 ? (
-                  <div className="text-center py-4 text-text-tertiary text-[12px]">No subtasks created.</div>
-                ) : (
-                  <div className="space-y-1.5">
-                    {subtasks.map((sub) => (
-                      <div key={sub.id} className="flex items-center justify-between p-2.5 bg-bg/30 border border-border rounded">
-                        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => handleToggleSubtaskStatus(sub)}>
-                          <input
-                            type="checkbox"
-                            checked={sub.status === "DONE"}
-                            onChange={() => {}} // handled by parent onClick
-                            className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                          />
-                          <span className={cn("text-[12px] font-medium text-text-primary truncate max-w-[220px]", sub.status === "DONE" && "line-through text-text-tertiary")}>
-                            {sub.title}
-                          </span>
+                {/* 2. Assignee & Team Member Delegator */}
+                <div className="space-y-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary block">Assignee</span>
+                  <div className="flex items-center gap-3 p-2 bg-surface border border-border rounded-lg">
+                    {task.assignee ? (
+                      <>
+                        <UserAvatar src={task.assignee.avatarUrl} name={task.assignee.name} size="md" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-text-primary truncate">{task.assignee.name}</p>
+                          <p className="text-[10px] text-text-tertiary truncate">{task.assignee.email}</p>
                         </div>
-                        <StatusBadge status={sub.status} showDot={false} />
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2 text-text-tertiary py-1 pl-1 text-xs">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>Unassigned</span>
                       </div>
-                    ))}
+                    )}
                   </div>
+
+                  {/* Delegator Button / dropdown */}
+                  {canDelegate && (
+                    <div className="space-y-1.5 pt-1">
+                      <label className="text-[10px] font-medium text-text-secondary flex items-center gap-1.5">
+                        <UserCheck className="w-3.5 h-3.5 text-brand" />
+                        Delegate / Reassign To:
+                      </label>
+                      <select
+                        value={task.assigneeId || ""}
+                        onChange={(e) => handleDelegateAssignee(e.target.value)}
+                        className="block w-full px-3 py-1.5 border border-border-strong rounded bg-surface text-text-primary text-xs cursor-pointer focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                      >
+                        <option value="" disabled>Select Team Member...</option>
+                        {employees.filter((e) => e.isActive && e.id !== task.assigneeId).map((e) => (
+                          <option key={e.id} value={e.id}>{e.name} ({e.role})</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Direct Task Attachments */}
+                <div className="space-y-2.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary block">Task Attachments</span>
+                  {task.attachments && Array.isArray(task.attachments) && task.attachments.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {task.attachments.map((file, i) => {
+                        const isAudio = file.filename.endsWith(".webm") || file.filename.startsWith("recording-");
+                        return (
+                          <div key={file.id || i} className="flex flex-col gap-1 p-2 rounded bg-surface border border-border text-xs text-text-primary">
+                            <div className="flex items-center justify-between">
+                              <span className="truncate pr-4 font-medium" title={file.filename}>{file.filename}</span>
+                              <a
+                                href={file.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-brand hover:underline font-bold text-[10px] shrink-0"
+                              >
+                                View
+                              </a>
+                            </div>
+                            {isAudio && (
+                              <audio controls src={file.url} className="w-full mt-1 h-7 rounded" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-text-tertiary block pl-1">No attachments uploaded</span>
+                  )}
+
+                  {/* Add Attachment Button */}
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      disabled={directAttachmentLoading}
+                      onClick={() => directAttachmentInputRef.current?.click()}
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-dashed border-border hover:border-brand bg-transparent text-xs text-text-secondary hover:text-brand transition-colors cursor-pointer select-none font-medium disabled:opacity-50"
+                    >
+                      {directAttachmentLoading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Paperclip className="w-3.5 h-3.5" />
+                          Add Attachment
+                        </>
+                      )}
+                    </button>
+                    <input
+                      ref={directAttachmentInputRef}
+                      type="file"
+                      className="hidden"
+                      onChange={handleUploadDirectAttachments}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Action Controls Footer in Sidebar */}
+              <div className="space-y-2 pt-6 border-t border-border mt-auto">
+                {currentUser?.role === "ADMIN" ? (
+                  <button
+                    onClick={handleDeleteTask}
+                    className="w-full py-2 border border-[#FECACA] bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete Task
+                  </button>
+                ) : (
+                  <>
+                    {task.status === "TODO" && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleUpdateStatus("IN_PROGRESS")}
+                          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          Start Progress
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus("IN_REVIEW")}
+                          className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          Mark for Review
+                        </button>
+                      </div>
+                    )}
+                    {task.status === "IN_PROGRESS" && (
+                      <button
+                        onClick={() => handleUpdateStatus("IN_REVIEW")}
+                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Mark for Review
+                      </button>
+                    )}
+                    {task.status === "IN_REVIEW" && (
+                      <div className="text-center py-2 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-900/50">
+                        <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
+                          Awaiting Admin Review
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {currentUser?.role === "ADMIN" ? (
-          <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
-            <button
-              onClick={handleDeleteTask}
-              className="px-4 py-2 border border-[#FECACA] bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Delete Task
-            </button>
           </div>
-        ) : (
-          // Employee view footer buttons
-          <>
-            {task.status === "TODO" && (
-              <div className="p-4 border-t border-border shrink-0 flex items-center justify-end gap-2.5 bg-bg/25">
-                <button
-                  onClick={() => handleUpdateStatus("IN_PROGRESS")}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
-                >
-                  <Play className="w-3.5 h-3.5" />
-                  In Progress
-                </button>
-                <button
-                  onClick={() => handleUpdateStatus("IN_REVIEW")}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  Mark as Completed
-                </button>
-              </div>
-            )}
-            {task.status === "IN_PROGRESS" && (
-              <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
-                <button
-                  onClick={() => handleUpdateStatus("IN_REVIEW")}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-medium rounded transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  Mark as Completed
-                </button>
-              </div>
-            )}
-            {task.status === "IN_REVIEW" && (
-              <div className="p-4 border-t border-border shrink-0 flex items-center justify-end bg-bg/25">
-                <span className="text-[12px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/20 px-3 py-1.5 rounded-full border border-purple-200 dark:border-purple-900/50">
-                  Awaiting Admin Review
-                </span>
-              </div>
-            )}
-          </>
-        )}
+        </div>
       </div>
 
       {showUpdateVoiceModal && (
@@ -991,11 +1321,9 @@ function VoiceRecordingModal({ onSave, onClose }: { onSave: (blob: Blob, name: s
 
   return (
     <>
-      {/* Overlay — z-modal-backdrop = 70 */}
-      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center" style={{ zIndex: "calc(var(--z-modal-backdrop) + 10)" }} />
+      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center" style={{ zIndex: 9999 }} />
       
-      {/* Modal Container — z-modal = 80 */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[360px] bg-surface border border-border rounded-xl shadow-lg p-6 animate-in zoom-in-95 duration-150" style={{ zIndex: "calc(var(--z-modal) + 10)" }}>
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[360px] bg-surface border border-border rounded-xl shadow-lg p-6 animate-in zoom-in-95 duration-150" style={{ zIndex: 10000 }}>
         <div className="flex items-center justify-between mb-4">
           <span className="text-[13px] font-medium text-text-primary">Voice Recording</span>
           <button onClick={onClose} className="p-1 hover:bg-bg rounded-md text-text-tertiary">
@@ -1014,22 +1342,6 @@ function VoiceRecordingModal({ onSave, onClose }: { onSave: (blob: Blob, name: s
             {state === "done" && "Recording saved"}
           </div>
         </div>
-
-        {/* Waves Animation */}
-        {(state === "recording" || state === "paused") && (
-          <div className="flex justify-center items-center gap-1 mb-6 h-8">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div
-                key={i}
-                className={`w-0.5 rounded-full ${state === "recording" ? "bg-[#EF4444]" : "bg-border-strong"}`}
-                style={{
-                  height: `${6 + Math.abs(Math.sin(i * 0.5) * 16) + Math.cos(i * 0.8) * 8}px`,
-                  animation: state === "recording" ? `wave-anim ${1 + (i % 3) * 0.2}s ease-in-out infinite` : "none"
-                }}
-              />
-            ))}
-          </div>
-        )}
 
         {state === "done" && audioUrl && (
           <div className="mb-6">

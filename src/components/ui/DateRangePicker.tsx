@@ -72,9 +72,7 @@ export function DateRangePicker({
     }
     
     onChange(newDate);
-    if (!showTime) {
-      setIsOpen(false);
-    }
+    setIsOpen(false);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {

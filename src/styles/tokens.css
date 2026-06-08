@@ -52,10 +52,10 @@
   --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.35), 0 2px 6px rgb(0 0 0 / 0.20);
 
   /* ── Brand (Light Mode) ── */
-  --theme-brand:       #4F46E5;
-  --theme-brand-hover: #4338CA;
-  --theme-brand-light: rgba(79, 70, 229, 0.08);
-  --theme-brand-text:  #4F46E5;
+  --theme-brand:       #2563EB;
+  --theme-brand-hover: #1D4ED8;
+  --theme-brand-light: rgba(37, 99, 235, 0.08);
+  --theme-brand-text:  #2563EB;
 
   /* ── Semantic colors (Light Mode) ── */
   --theme-bg:             #F8FAFC;
@@ -109,10 +109,10 @@
 /* ── Dark Mode Overrides ── */
 .dark {
   /* Brand */
-  --theme-brand:       #6366F1;
-  --theme-brand-hover: #4F46E5;
-  --theme-brand-light: rgba(99, 102, 241, 0.12);
-  --theme-brand-text:  #818CF8;
+  --theme-brand:       #3B82F6;
+  --theme-brand-hover: #2563EB;
+  --theme-brand-light: rgba(59, 130, 246, 0.12);
+  --theme-brand-text:  #60A5FA;
 
   /* Semantic colors */
   --theme-bg:             #0F1117;

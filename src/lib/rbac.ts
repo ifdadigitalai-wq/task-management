@@ -1,10 +1,50 @@
-export type UserRole = "ADMIN" | "EMPLOYEE";
+export type UserRole = "ADMIN" | "MANAGER" | "TEAM_LEADER" | "EMPLOYEE";
+
+export type PermissionAction =
+  | "import_employees"
+  | "change_status"
+  | "view_audit_log"
+  | "bulk_assign"
+  | "create_subtask"
+  | "delegate"
+  | "create_task";
+
+const ROLE_PERMISSIONS: Record<UserRole, PermissionAction[]> = {
+  ADMIN: [
+    "import_employees",
+    "change_status",
+    "view_audit_log",
+    "bulk_assign",
+    "create_subtask",
+    "delegate",
+    "create_task"
+  ],
+  MANAGER: [
+    "bulk_assign",
+    "create_subtask",
+    "delegate",
+    "create_task"
+  ],
+  TEAM_LEADER: [
+    "create_subtask",
+    "delegate",
+    "create_task"
+  ],
+  EMPLOYEE: [
+    "create_task"
+  ]
+};
+
+export function hasPermission(role: UserRole, action: PermissionAction): boolean {
+  return ROLE_PERMISSIONS[role]?.includes(action) || false;
+}
 
 const ADMIN_ONLY_ROUTES = [
   "/employees",
   "/all-tasks",
   "/task-templates",
   "/task-directory",
+  "/audit-log",
 ];
 
 const EMPLOYEE_ONLY_ROUTES = [
@@ -13,17 +53,8 @@ const EMPLOYEE_ONLY_ROUTES = [
   "/notifications",
 ];
 
-const BOTH_ROUTES = [
-  "/dashboard",
-  "/profile",
-  "/holidays",
-];
-
 /**
  * Checks if a user role is permitted to access a given route path.
- * 
- * - ADMIN can access Admin-only, Both, and Employee routes (Admin can also have personal tasks/activities).
- * - EMPLOYEE can access Employee-only and Both routes, but is forbidden from Admin-only routes.
  */
 export function canAccess(role: UserRole, path: string): boolean {
   const cleanPath = path.split("?")[0].replace(/\/$/, "");
@@ -34,20 +65,13 @@ export function canAccess(role: UserRole, path: string): boolean {
   );
 
   if (isAdminRoute) {
-    return role === "ADMIN";
+    if (cleanPath === "/audit-log" || cleanPath.startsWith("/audit-log/")) {
+      return role === "ADMIN";
+    }
+    return role === "ADMIN" || role === "MANAGER" || role === "TEAM_LEADER";
   }
 
-  // Check if it matches an employee-only route prefix
-  const isEmployeeRoute = EMPLOYEE_ONLY_ROUTES.some(
-    (r) => cleanPath === r || cleanPath.startsWith(r + "/")
-  );
-
-  if (isEmployeeRoute) {
-    // Both ADMIN and EMPLOYEE can access notifications/activities/my-tasks,
-    // but employees are the primary audience. Let's allow admins too for convenience.
-    return true;
-  }
-
-  // All other dashboard routes (like /dashboard, /profile, /holidays) are accessible to both roles
+  // All other dashboard routes (like /dashboard, /profile, /holidays) are accessible to all roles
   return true;
 }
+

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
-import { Folder, Search, Filter, Calendar, Tag, Clock, ArrowUpDown, Eye } from "lucide-react";
+import { Folder, Search, Filter, Calendar, Tag, Clock, ArrowUpDown, Eye, ToggleLeft, ToggleRight } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
 import { Task, Priority, TaskStatus } from "@/types";
@@ -16,7 +16,8 @@ export default function TaskDirectoryPage() {
   const [selectedPriority, setSelectedPriority] = useState<string>("ALL");
   const [selectedTag, setSelectedTag] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"title" | "dueDate" | "priority" | "status" | "created">("created");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [groupByDepartment, setGroupByDepartment] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -37,8 +38,25 @@ export default function TaskDirectoryPage() {
     }
   };
 
-  // Filter Tasks (Blank as of now)
-  const filteredTasks: Task[] = [];
+  // Filter Tasks
+  const filteredTasks = tasks.filter((task) => {
+    // Search
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      const matchTitle = task.title.toLowerCase().includes(q);
+      const matchDesc = task.description?.toLowerCase().includes(q) || false;
+      const matchTags = task.tags.some((tag) => tag.toLowerCase().includes(q));
+      if (!matchTitle && !matchDesc && !matchTags) return false;
+    }
+    // Status
+    if (selectedStatus !== "ALL" && task.status !== selectedStatus) return false;
+    // Priority
+    if (selectedPriority !== "ALL" && task.priority !== selectedPriority) return false;
+    // Tag
+    if (selectedTag !== "ALL" && !task.tags.includes(selectedTag)) return false;
+
+    return true;
+  });
 
   // Sort Tasks
   const sortedTasks = [...filteredTasks].sort((a, b) => {
@@ -67,6 +85,18 @@ export default function TaskDirectoryPage() {
     if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
     return 0;
   });
+
+  // Group by department
+  const tasksByDepartment: Record<string, Task[]> = {};
+  if (groupByDepartment) {
+    sortedTasks.forEach((task) => {
+      const dept = task.department || "General";
+      if (!tasksByDepartment[dept]) {
+        tasksByDepartment[dept] = [];
+      }
+      tasksByDepartment[dept].push(task);
+    });
+  }
 
   const getPriorityBadge = (p: Priority) => {
     const styles = {
@@ -97,10 +127,115 @@ export default function TaskDirectoryPage() {
     );
   };
 
+  // Helper component to render task table rows
+  const renderTableRows = (tasksList: Task[]) => {
+    return tasksList.map((task) => (
+      <tr
+        key={task.id}
+        onClick={() => setSelectedTask(task)}
+        className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors cursor-pointer group animate-in fade-in duration-150"
+      >
+        <td className="px-6 py-3.5 text-xs text-slate-500 font-mono">
+          {new Date(task.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
+        </td>
+        <td className="px-6 py-3.5">
+          <div>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1 max-w-[220px]">
+              {task.title}
+            </p>
+            {task.description && (
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1 mt-0.5 max-w-[220px]">
+                {task.description}
+              </p>
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-3.5">
+          {getPriorityBadge(task.priority)}
+        </td>
+        <td className="px-6 py-3.5">
+          {getStatusBadge(task.status)}
+        </td>
+        <td className="px-6 py-3.5">
+          {task.assignee ? (
+            <div className="flex items-center gap-2">
+              <UserAvatar src={task.assignee.avatarUrl} name={task.assignee.name} size="sm" />
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 truncate max-w-[100px]">
+                {task.assignee.name}
+              </span>
+            </div>
+          ) : (
+            <span className="text-[10px] font-bold text-slate-400">Unassigned</span>
+          )}
+        </td>
+        <td className="px-6 py-3.5">
+          <div className="flex flex-wrap gap-1 max-w-[150px]">
+            {task.tags && task.tags.length > 0 ? (
+              task.tags.slice(0, 2).map((t) => (
+                <span key={t} className="px-1.5 py-0.5 rounded bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold">
+                  {t}
+                </span>
+              ))
+            ) : (
+              <span className="text-[10px] text-slate-300 dark:text-slate-600">—</span>
+            )}
+            {task.tags && task.tags.length > 2 && (
+              <span className="text-[9px] text-slate-400 font-bold">
+                +{task.tags.length - 2}
+              </span>
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-3.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
+          {task.dueDate ? (
+            <span className={new Date(task.dueDate) < new Date() && task.status !== "DONE" ? "text-rose-500 font-bold" : ""}>
+              {new Date(task.dueDate).toLocaleDateString([], { month: "short", day: "numeric", year: "2-digit" })}
+            </span>
+          ) : (
+            <span className="text-slate-300 dark:text-slate-600">—</span>
+          )}
+        </td>
+        <td className="px-6 py-3.5 text-center" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => setSelectedTask(task)}
+            className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-95"
+          >
+            <Eye className="w-3.5 h-3.5" />
+          </button>
+        </td>
+      </tr>
+    ));
+  };
+
+  const renderTableHeader = () => {
+    return (
+      <tr className="border-b border-slate-100 dark:border-slate-850 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-slate-50/50 dark:bg-slate-900/10">
+        <th className="px-6 py-3 cursor-pointer hover:text-slate-600" onClick={() => handleSort("created")}>
+          Created {sortBy === "created" && (sortOrder === "asc" ? "↑" : "↓")}
+        </th>
+        <th className="px-6 py-3 cursor-pointer hover:text-slate-600" onClick={() => handleSort("title")}>
+          Task Title {sortBy === "title" && (sortOrder === "asc" ? "↑" : "↓")}
+        </th>
+        <th className="px-6 py-3 cursor-pointer hover:text-slate-600" onClick={() => handleSort("priority")}>
+          Priority {sortBy === "priority" && (sortOrder === "asc" ? "↑" : "↓")}
+        </th>
+        <th className="px-6 py-3 cursor-pointer hover:text-slate-600" onClick={() => handleSort("status")}>
+          Status {sortBy === "status" && (sortOrder === "asc" ? "↑" : "↓")}
+        </th>
+        <th className="px-6 py-3">Assignee</th>
+        <th className="px-6 py-3">Tags & Categories</th>
+        <th className="px-6 py-3 cursor-pointer hover:text-slate-600" onClick={() => handleSort("dueDate")}>
+          Due Date {sortBy === "dueDate" && (sortOrder === "asc" ? "↑" : "↓")}
+        </th>
+        <th className="px-6 py-3 text-center">Actions</th>
+      </tr>
+    );
+  };
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto select-none">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 bg-white/40 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white/40 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Folder className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -113,9 +248,29 @@ export default function TaskDirectoryPage() {
           </p>
         </div>
 
-        <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 text-xs font-bold">
-          {sortedTasks.length} Tasks Listed
-        </span>
+        <div className="flex items-center gap-3">
+          {/* Group by Department toggle */}
+          <button
+            onClick={() => setGroupByDepartment(!groupByDepartment)}
+            className="flex items-center gap-2 px-3 py-1.5 border border-border bg-surface hover:bg-bg/40 text-text-secondary hover:text-text-primary text-xs font-semibold rounded-xl transition-all shadow-xs"
+          >
+            {groupByDepartment ? (
+              <>
+                <ToggleRight className="w-5 h-5 text-brand" />
+                <span>Grouped by Dept</span>
+              </>
+            ) : (
+              <>
+                <ToggleLeft className="w-5 h-5 text-text-tertiary" />
+                <span>Group by Dept</span>
+              </>
+            )}
+          </button>
+
+          <span className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 text-xs font-bold">
+            {sortedTasks.length} Tasks Listed
+          </span>
+        </div>
       </div>
 
       {/* Directory filters */}
@@ -182,128 +337,47 @@ export default function TaskDirectoryPage() {
         )}
       </div>
 
-      {/* Directory Table Grid */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/65 dark:border-slate-800/65 rounded-3xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse min-w-[900px] text-left">
-            <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-850 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-slate-50/50 dark:bg-slate-900/10">
-                <th className="px-6 py-4 cursor-pointer hover:text-slate-650" onClick={() => handleSort("created")}>
-                  Created {sortBy === "created" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th className="px-6 py-4 cursor-pointer hover:text-slate-650" onClick={() => handleSort("title")}>
-                  Task Title {sortBy === "title" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th className="px-6 py-4 cursor-pointer hover:text-slate-650" onClick={() => handleSort("priority")}>
-                  Priority {sortBy === "priority" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th className="px-6 py-4 cursor-pointer hover:text-slate-650" onClick={() => handleSort("status")}>
-                  Status {sortBy === "status" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th className="px-6 py-4">Assignee</th>
-                <th className="px-6 py-4">Tags & Categories</th>
-                <th className="px-6 py-4 cursor-pointer hover:text-slate-650" onClick={() => handleSort("dueDate")}>
-                  Due Date {sortBy === "dueDate" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th className="px-6 py-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
-              {sortedTasks.map((task) => (
-                <tr
-                  key={task.id}
-                  onClick={() => setSelectedTask(task)}
-                  className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors cursor-pointer group"
-                >
-                  {/* Created Date */}
-                  <td className="px-6 py-4 text-xs text-slate-500 font-mono">
-                    {new Date(task.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
-                  </td>
-
-                  {/* Title */}
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1 max-w-[220px]">
-                        {task.title}
-                      </p>
-                      {task.description && (
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1 mt-0.5 max-w-[220px]">
-                          {task.description}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Priority */}
-                  <td className="px-6 py-4">
-                    {getPriorityBadge(task.priority)}
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4">
-                    {getStatusBadge(task.status)}
-                  </td>
-
-                  {/* Assignee */}
-                  <td className="px-6 py-4">
-                    {task.assignee ? (
-                      <div className="flex items-center gap-2">
-                        <UserAvatar src={task.assignee.avatarUrl} name={task.assignee.name} size="sm" />
-                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 truncate max-w-[100px]">
-                          {task.assignee.name}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] font-bold text-slate-400">Unassigned</span>
-                    )}
-                  </td>
-
-                  {/* Tags */}
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1 max-w-[150px]">
-                      {task.tags && task.tags.length > 0 ? (
-                        task.tags.slice(0, 2).map((t) => (
-                          <span key={t} className="px-1.5 py-0.5 rounded bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold">
-                            {t}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-[10px] text-slate-300 dark:text-slate-600">—</span>
-                      )}
-                      {task.tags && task.tags.length > 2 && (
-                        <span className="text-[9px] text-slate-400 font-bold">
-                          +{task.tags.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Due Date */}
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
-                    {task.dueDate ? (
-                      <span className={new Date(task.dueDate) < new Date() && task.status !== "DONE" ? "text-rose-500 font-bold" : ""}>
-                        {new Date(task.dueDate).toLocaleDateString([], { month: "short", day: "numeric", year: "2-digit" })}
-                      </span>
-                    ) : (
-                      <span className="text-slate-300 dark:text-slate-600">—</span>
-                    )}
-                  </td>
-
-                  {/* Action link */}
-                  <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => setSelectedTask(task)}
-                      className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-95"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Directory Table Grid (Grouped or standard) */}
+      {groupByDepartment ? (
+        <div className="space-y-6">
+          {Object.entries(tasksByDepartment).map(([deptName, deptTasks]) => (
+            <div key={deptName} className="space-y-3 bg-white dark:bg-slate-900 border border-slate-200/65 dark:border-slate-800/65 rounded-3xl p-5 shadow-xs">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  🏢 {deptName}
+                </h3>
+                <span className="text-[10px] font-bold text-text-tertiary bg-bg px-2.5 py-1 rounded-full">
+                  {deptTasks.length} tasks
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse min-w-[900px] text-left">
+                  <thead>{renderTableHeader()}</thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                    {renderTableRows(deptTasks)}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+          {Object.keys(tasksByDepartment).length === 0 && (
+            <div className="text-center py-12 bg-white dark:bg-slate-900 border rounded-3xl text-xs text-text-tertiary">
+              No tasks match your filters.
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/65 dark:border-slate-800/65 rounded-3xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[900px] text-left">
+              <thead>{renderTableHeader()}</thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                {renderTableRows(sortedTasks)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Global Detail Panel */}
       {selectedTask && (

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, LogOut, User, Menu } from "lucide-react";
+import { Plus, LogOut, User, Menu, Search, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 import { useTaskStore } from "@/store/useTaskStore";
@@ -11,20 +11,35 @@ import { AssignTaskModal } from "@/components/AssignTaskModal";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { SearchBar } from "@/components/ui/SearchBar";
+import { StatusBadge } from "@/components/ui/Badge";
 import { Notification } from "@/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/hooks/useToast";
 
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, fetchCurrentUser, setFilters, filters, fetchTasks } = useTaskStore();
+  const toast = useToast();
+  const { currentUser, fetchCurrentUser, setSelectedTask, fetchTasks } = useTaskStore();
   const { toggleSidebar } = useThemeStore();
 
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [profileOpen, setProfileOpen] = useState(false);
+
+  // Global search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{
+    employees: any[];
+    departments: any[];
+    teams: any[];
+    tasks: any[];
+  } | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Dynamic Page Title
   const getPageTitle = () => {
@@ -40,10 +55,13 @@ export function TopNav() {
     if (cleanPath === "/notifications") return "Notifications Center";
     if (cleanPath === "/profile")       return "My Profile & Settings";
     if (cleanPath === "/delegatedBy")   return "Tasks Delegated By Me";
+    if (cleanPath === "/departments")   return "Departments Directory";
+    if (cleanPath === "/onboarding")    return "Onboarding Templates";
+    if (cleanPath === "/audit-log")     return "Security Audit Logs";
     return "Management Center";
   };
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (isInitial = false) => {
     try {
       const res = await fetch("/api/notifications");
       if (res.status === 401) {
@@ -55,7 +73,19 @@ export function TopNav() {
       if (!contentType.includes("application/json")) return;
       const payload = await res.json();
       if (payload.success && payload.data) {
-        setNotifications(payload.data.notifications || []);
+        const fetchedNotifs = payload.data.notifications || [];
+        
+        // If not initial fetch, check for new notifications to show toast
+        if (!isInitial && notifications.length > 0) {
+          const newUnread = fetchedNotifs.filter(
+            (n: Notification) => !n.read && !notifications.some((old) => old.id === n.id)
+          );
+          newUnread.forEach((n: Notification) => {
+            toast.info(n.message);
+          });
+        }
+        
+        setNotifications(fetchedNotifs);
       }
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
@@ -66,13 +96,13 @@ export function TopNav() {
     if (!currentUser) {
       fetchCurrentUser();
     }
-    fetchNotifications();
+    fetchNotifications(true);
 
-    // Poll notifications and tasks every 10 seconds for near-real-time sync
+    // Poll notifications and tasks every 30 seconds
     const interval = setInterval(() => {
-      fetchNotifications();
+      fetchNotifications(false);
       fetchTasks();
-    }, 10000);
+    }, 30000);
 
     const handleOpenAssignModal = () => {
       if (currentUser?.role === "ADMIN") {
@@ -85,7 +115,56 @@ export function TopNav() {
       clearInterval(interval);
       window.removeEventListener("open-assign-task-modal", handleOpenAssignModal);
     };
-  }, [currentUser]);
+  }, [currentUser, notifications]);
+
+  // Click outside search dropdown handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle Search Input Change with Debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setSearchQuery(q);
+
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    if (!q.trim()) {
+      setSearchResults(null);
+      return;
+    }
+
+    setSearchLoading(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload.success) {
+            setSearchResults(payload.data);
+          }
+        }
+      } catch (err) {
+        console.error("Global search failed:", err);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 40000 / 100); // 400ms debounce
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults(null);
+    setSearchFocused(false);
+  };
 
   const handleMarkRead = (id: string) => {
     setNotifications((prev) =>
@@ -106,15 +185,24 @@ export function TopNav() {
     }
   };
 
-  const showSearch =
-    pathname === "/my-tasks" ||
-    pathname === "/all-tasks" ||
-    pathname === "/delegatedBy";
+  const handleTaskClick = async (taskId: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload.success) {
+          setSelectedTask(payload.data);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    clearSearch();
+  };
 
   return (
-    /* TopNav height: 56px, sticky handled by parent wrapper */
     <div
-      className="h-[56px] border-b border-border px-5 flex items-center gap-3 shrink-0 select-none"
+      className="h-[56px] border-b border-border px-5 flex items-center gap-3 shrink-0 select-none sticky top-0 z-30"
       style={{ backgroundColor: "var(--color-surface)" }}
     >
       {/* Mobile Hamburger — 44×44 tap target */}
@@ -127,7 +215,7 @@ export function TopNav() {
       </button>
 
       {/* Page Title */}
-      <div className="min-w-0">
+      <div className="min-w-0 mr-4">
         <h1
           className="text-text-primary font-semibold truncate"
           style={{ fontSize: "0.9375rem" }}   /* 15px — body/nav size */
@@ -136,49 +224,153 @@ export function TopNav() {
         </h1>
       </div>
 
-      {/* Center Spacer */}
-      <div className="flex-1" />
+      {/* Global Search Bar input with results dropdown */}
+      <div className="flex-1 max-w-md relative" ref={searchContainerRef}>
+        <div className="relative w-full h-9">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-tertiary">
+            <Search className="h-4 w-4" />
+          </div>
+          <input
+            type="text"
+            placeholder="Global search (tasks, team, departments...)"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => setSearchFocused(true)}
+            className="w-full h-full pl-9 pr-9 bg-bg text-text-primary placeholder:text-text-tertiary placeholder:text-[13px] text-xs border border-border-strong rounded-lg transition-all duration-200 outline-none focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+          />
+          {searchLoading && (
+            <div className="absolute inset-y-0 right-3 flex items-center text-text-tertiary">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            </div>
+          )}
+          {!searchLoading && searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="absolute inset-y-0 right-3 flex items-center text-text-tertiary hover:text-text-primary transition-colors focus-visible:outline-none"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Global Search Dropdown Results */}
+        {searchFocused && searchResults && (
+          <div className="absolute left-0 right-0 mt-2 bg-surface border border-border shadow-xl rounded-xl p-4 space-y-4 max-h-[420px] overflow-y-auto z-[99]">
+            {/* 1. Tasks Category */}
+            {searchResults.tasks && searchResults.tasks.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Tasks ({searchResults.tasks.length})</span>
+                <div className="space-y-1">
+                  {searchResults.tasks.map((task: any) => (
+                    <div
+                      key={task.id}
+                      onClick={() => handleTaskClick(task.id)}
+                      className="p-2 hover:bg-bg rounded-lg cursor-pointer transition-colors flex items-center justify-between gap-3 text-xs"
+                    >
+                      <span className="font-medium text-text-primary truncate">{task.title}</span>
+                      <span className="shrink-0"><StatusBadge status={task.status} showDot={false} /></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 2. Employees Category */}
+            {searchResults.employees && searchResults.employees.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Team Members ({searchResults.employees.length})</span>
+                <div className="space-y-1">
+                  {searchResults.employees.map((emp: any) => (
+                    <Link
+                      key={emp.id}
+                      href="/employees"
+                      onClick={clearSearch}
+                      className="p-2 hover:bg-bg rounded-lg cursor-pointer transition-colors flex items-center gap-2.5 text-xs text-text-primary"
+                    >
+                      <UserAvatar src={emp.avatarUrl} name={emp.name} size="sm" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate">{emp.name}</p>
+                        <p className="text-[10.5px] text-text-tertiary truncate">{emp.email}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 3. Departments Category */}
+            {searchResults.departments && searchResults.departments.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Departments ({searchResults.departments.length})</span>
+                <div className="space-y-1">
+                  {searchResults.departments.map((dept: any) => (
+                    <Link
+                      key={dept.id}
+                      href="/departments"
+                      onClick={clearSearch}
+                      className="p-2 hover:bg-bg rounded-lg cursor-pointer transition-colors block text-xs text-text-primary font-semibold"
+                    >
+                      🏢 {dept.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 4. Teams Category */}
+            {searchResults.teams && searchResults.teams.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Teams ({searchResults.teams.length})</span>
+                <div className="space-y-1">
+                  {searchResults.teams.map((team: string) => (
+                    <Link
+                      key={team}
+                      href="/employees"
+                      onClick={clearSearch}
+                      className="p-2 hover:bg-bg rounded-lg cursor-pointer transition-colors block text-xs text-text-primary font-semibold"
+                    >
+                      👥 Team: {team}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {(!searchResults.tasks?.length &&
+              !searchResults.employees?.length &&
+              !searchResults.departments?.length &&
+              !searchResults.teams?.length) && (
+              <div className="text-center py-4 text-xs text-text-tertiary">
+                No matching results found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Right Action Items */}
       <div className="flex items-center gap-2.5 shrink-0">
-        {/* Create Task (Admin Only) — Problem 8: high-contrast button */}
+        {/* Create Task (Admin Only) */}
         {currentUser?.role === "ADMIN" && (
           <button
             onClick={() => setShowAssignModal(true)}
-            className="flex items-center gap-2 font-medium rounded-lg transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+            className="flex items-center gap-2 font-semibold rounded-lg transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 hover:scale-[1.02] active:scale-95"
             style={{
               background: "#4F46E5",
               color: "#FFFFFF",
               border: "none",
-              padding: "10px 20px",
-              fontSize: "0.9375rem",
-              fontWeight: 500,
+              padding: "8px 16px",
+              fontSize: "0.875rem",
+              fontWeight: 600,
               borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(79, 70, 229, 0.4)",
+              boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)",
               minHeight: "36px",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "#4338CA";
-              (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "#4F46E5";
-              (e.currentTarget as HTMLButtonElement).style.transform = "";
             }}
           >
             <Plus className="w-4 h-4" />
             Assign task
           </button>
-        )}
-
-        {/* SearchBar */}
-        {showSearch && (
-          <SearchBar
-            value={filters.search}
-            onChange={(val) => setFilters({ search: val })}
-            placeholder="Search tasks..."
-            className="hidden md:block"
-          />
         )}
 
         {/* Notifications */}
@@ -191,7 +383,7 @@ export function TopNav() {
         {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* User Profile Dropdown — z-dropdown (50) */}
+        {/* User Profile Dropdown */}
         <div className="relative">
           <button
             onClick={() => setProfileOpen(!profileOpen)}

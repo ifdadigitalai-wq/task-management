@@ -2,39 +2,51 @@
 
 import React, { useEffect, useState } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
+import { useRouter } from "next/navigation";
 import {
   Layers, CheckCircle, Clock, AlertTriangle, BarChart3,
-  Calendar, ChevronRight
+  Calendar, ChevronRight, User, Users, Briefcase
 } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import PerformanceAnalytics from "@/components/dashboard/PerformanceAnalytics";
+
 
 interface StatsData {
-  total: number;
-  overdue: number;
-  completedToday: number;
-  byStatus: Record<string, number>;
-  byPriority: Record<string, number>;
-  employees: any[];
-  departments: any[];
+  totalTasks: number;
+  completedTasks: number;
+  overdueTasks: number;
+  pendingTasks: number;
+  totalEmployees: number;
+  activeEmployees: number;
+  departmentStats: any[];
+  employeeStats: any[];
 }
 
 export default function DashboardPage() {
-  const { currentUser, fetchCurrentUser, setSelectedTask } = useTaskStore();
+  const { currentUser, fetchCurrentUser, setSelectedTask, setFilters } = useTaskStore();
+  const router = useRouter();
 
   const [stats, setStats] = useState<StatsData | null>(null);
   const [activities, setActivities] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
+  const [byStatusCounts, setByStatusCounts] = useState<Record<string, number>>({
+    TODO: 0,
+    IN_PROGRESS: 0,
+    IN_REVIEW: 0,
+    DONE: 0,
+    CANCELLED: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     try {
-      const statsRes = await fetch("/api/tasks/stats");
+      const statsRes = await fetch("/api/dashboard/stats");
       const statsPayload = await statsRes.json();
-      if (statsPayload.success) setStats(statsPayload.data);
+      if (statsPayload.success) {
+        setStats(statsPayload.data);
+      }
 
       const actRes = await fetch("/api/activities");
       const actPayload = await actRes.json();
@@ -47,8 +59,18 @@ export default function DashboardPage() {
 
       const tasksRes = await fetch("/api/tasks");
       const tasksPayload = await tasksRes.json();
-      if (tasksPayload.success) {
-        const activeTasks = (tasksPayload.data || []).filter(
+      if (tasksPayload.success && Array.isArray(tasksPayload.data)) {
+        // Calculate status counts
+        const counts: Record<string, number> = { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0, CANCELLED: 0 };
+        tasksPayload.data.forEach((task: any) => {
+          if (counts[task.status] !== undefined) {
+            counts[task.status]++;
+          }
+        });
+        setByStatusCounts(counts);
+
+        // Upcoming tasks
+        const activeTasks = tasksPayload.data.filter(
           (t: any) => t.status !== "DONE" && t.status !== "CANCELLED"
         );
         const sorted = activeTasks.sort((a: any, b: any) => {
@@ -68,7 +90,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!currentUser) fetchCurrentUser();
     fetchDashboardData();
-    const id = setInterval(fetchDashboardData, 15000);
+    const id = setInterval(fetchDashboardData, 30000);
     return () => clearInterval(id);
   }, [currentUser]);
 
@@ -82,20 +104,22 @@ export default function DashboardPage() {
     );
   }
 
-  const isAdmin = currentUser.role === "ADMIN";
+  const isAdmin = currentUser.role === "ADMIN" || currentUser.role === "MANAGER";
 
   // Donut chart segments
   const statusSegments = [
-    { label: "To Do", count: stats?.byStatus.TODO || 0, color: "#94A3B8" },
-    { label: "In Progress", count: stats?.byStatus.IN_PROGRESS || 0, color: "#60A5FA" },
-    { label: "In Review", count: stats?.byStatus.IN_REVIEW || 0, color: "#A78BFA" },
-    { label: "Completed", count: stats?.byStatus.DONE || 0, color: "#34D399" },
-    { label: "Cancelled", count: stats?.byStatus.CANCELLED || 0, color: "#F87171" },
+    { label: "To Do", count: byStatusCounts.TODO, color: "#94A3B8" },
+    { label: "In Progress", count: byStatusCounts.IN_PROGRESS, color: "#60A5FA" },
+    { label: "In Review", count: byStatusCounts.IN_REVIEW, color: "#A78BFA" },
+    { label: "Completed", count: byStatusCounts.DONE, color: "#34D399" },
+    { label: "Cancelled", count: byStatusCounts.CANCELLED, color: "#F87171" },
   ];
 
-  const totalTasks = stats?.total || 0;
-  const completedTasks = stats?.byStatus.DONE || 0;
-  const overdueTasks = stats?.overdue || 0;
+  const totalTasks = stats?.totalTasks || 0;
+  const completedTasks = stats?.completedTasks || 0;
+  const overdueTasks = stats?.overdueTasks || 0;
+  const totalEmployees = stats?.totalEmployees || 0;
+  const activeEmployees = stats?.activeEmployees || 0;
   const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   const formatActivityAction = (act: any) => {
@@ -132,10 +156,14 @@ export default function DashboardPage() {
     return action.replace(/_/g, " ").toLowerCase();
   };
 
+  const handleCardClick = (statusFilter: string) => {
+    setFilters({ status: statusFilter as any, department: "ALL", team: "ALL", assigneeId: "ALL" });
+    router.push(currentUser.role === "ADMIN" ? "/all-tasks" : "/my-tasks");
+  };
+
   return (
     <div className="space-y-6 select-none">
-
-      {/* ── PROBLEM 9: Greeting Header ── */}
+      {/* Greeting Header */}
       <div
         className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 rounded-xl border border-border"
         style={{
@@ -145,20 +173,18 @@ export default function DashboardPage() {
         }}
       >
         <div>
-          {/* Problem 9: h1 — 22px / 700 */}
           <h1
             className="text-text-primary"
             style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "2px" }}
           >
             Hello, {currentUser.name.split(" ")[0]}!
           </h1>
-          {/* Problem 9: subtitle — 15px / 400 */}
           <p style={{ fontSize: "0.8125rem", color: "rgba(156, 163, 175, 0.9)", fontWeight: 400 }}>
             Here is the live workload statistics and activity updates for today.
           </p>
         </div>
 
-        {/* "Live Workspace" button — high contrast */}
+        {/* Live Workspace status */}
         <button
           className="inline-flex items-center gap-2 rounded-lg font-medium transition-all shrink-0 focus-visible:outline-none"
           style={{
@@ -171,14 +197,6 @@ export default function DashboardPage() {
             borderRadius: "6px",
             boxShadow: "0 4px 12px rgba(79, 70, 229, 0.4)",
           }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "#4338CA";
-            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "#4F46E5";
-            (e.currentTarget as HTMLButtonElement).style.transform = "";
-          }}
         >
           <span
             className="w-2 h-2 rounded-full animate-ping"
@@ -188,44 +206,61 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* ── PROBLEM 3: KPI Cards ── */}
-      {/* Problem 10: grid responsive — 2 cols mobile, 4 cols desktop */}
+      {/* KPI Cards */}
       <div
         className="grid gap-4"
         style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}
       >
         {/* KPI 1: Total Tasks */}
-        <KpiCard
-          label={isAdmin ? "Total Tasks" : "My Assigned"}
-          value={totalTasks}
-          delta="+8%"
-          deltaPositive
-          comparison="vs last week"
-          icon={<Layers />}
-          iconColor="#6366F1"
-        />
+        <div className="cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all" onClick={() => handleCardClick("ALL")}>
+          <KpiCard
+            label={currentUser.role === "ADMIN" ? "Total Tasks" : "My Assigned"}
+            value={totalTasks}
+            delta="+8%"
+            deltaPositive
+            comparison="vs last week"
+            icon={<Layers />}
+            iconColor="#6366F1"
+          />
+        </div>
         {/* KPI 2: Completed */}
-        <KpiCard
-          label="Completed"
-          value={completedTasks}
-          delta="+15%"
-          deltaPositive
-          comparison="vs last week"
-          icon={<CheckCircle />}
-          iconColor="#34D399"
-        />
+        <div className="cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all" onClick={() => handleCardClick("DONE")}>
+          <KpiCard
+            label="Completed"
+            value={completedTasks}
+            delta="+15%"
+            deltaPositive
+            comparison="vs last week"
+            icon={<CheckCircle />}
+            iconColor="#34D399"
+          />
+        </div>
         {/* KPI 3: Overdue */}
-        <KpiCard
-          label="Overdue"
-          value={overdueTasks}
-          delta={overdueTasks > 0 ? "+2 new" : "0%"}
-          deltaPositive={overdueTasks === 0}
-          comparison="vs yesterday"
-          icon={<AlertTriangle />}
-          iconColor={overdueTasks > 0 ? "#F87171" : "#6366F1"}
-        />
-        {/* KPI 4: Completion Rate */}
-        {isAdmin && (
+        <div className="cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all" onClick={() => handleCardClick("TODO")}>
+          <KpiCard
+            label="Overdue"
+            value={overdueTasks}
+            delta={overdueTasks > 0 ? `+${overdueTasks} new` : "0%"}
+            deltaPositive={overdueTasks === 0}
+            comparison="vs yesterday"
+            icon={<AlertTriangle />}
+            iconColor={overdueTasks > 0 ? "#F87171" : "#6366F1"}
+          />
+        </div>
+        {/* KPI 4: Active Employees (For Admins) or Completion Rate */}
+        {currentUser.role === "ADMIN" ? (
+          <div className="cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all" onClick={() => router.push("/employees")}>
+            <KpiCard
+              label="Active Employees"
+              value={`${activeEmployees} / ${totalEmployees}`}
+              delta="Live"
+              deltaPositive
+              comparison="total team size"
+              icon={<Users />}
+              iconColor="#10B981"
+            />
+          </div>
+        ) : (
           <KpiCard
             label="Completion Rate"
             value={`${completionRate}%`}
@@ -238,39 +273,34 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── PROBLEM 4 & 5: Charts & Workload ── */}
-      {/* Problem 10: 1 col mobile → 3 col desktop */}
+      {/* Charts & Workload */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-        {/* Status Breakdown — PROBLEM 4 card title fix */}
+        {/* Status Breakdown */}
         <div
           className="rounded-xl border border-border"
           style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
-          {/* Problem 4: card title — 16px/600, no uppercase */}
           <h3
             className="text-text-primary"
             style={{ fontSize: "0.875rem", fontWeight: 650, letterSpacing: "-0.01em", marginBottom: "12px" }}
           >
             Task Status Breakdown
           </h3>
-          {/* Problem 6: Donut chart with larger center text */}
           <DonutChart data={statusSegments} />
         </div>
 
-        {/* Team Workload — PROBLEM 4 & 5 */}
+        {/* Team Workload & Department metrics */}
         <div
           className="lg:col-span-2 rounded-xl border border-border flex flex-col justify-between"
           style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
           <div>
-            {/* Problem 4: card title */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3.5">
               <h3
                 className="text-text-primary"
                 style={{ fontSize: "0.875rem", fontWeight: 650, letterSpacing: "-0.01em" }}
               >
-                {isAdmin ? "Team Workload & Utilization" : "My Upcoming Actions"}
+                {isAdmin ? "Team Workload & Distribution" : "My Upcoming Actions"}
               </h3>
               {!isAdmin && upcomingTasks.length > 0 && (
                 <Link
@@ -284,81 +314,91 @@ export default function DashboardPage() {
             </div>
 
             {isAdmin ? (
-              // ADMIN view — PROBLEM 5: employee name/dept hierarchy
-              <div className="space-y-0">
-                {stats?.employees && stats.employees.length > 0 ? (
-                  stats.employees.slice(0, 5).map((emp, idx) => {
-                    const empRate =
-                      emp.maxScore === 0
-                        ? 0
-                        : Math.round((emp.score / emp.maxScore) * 100);
-                    return (
-                      <div
-                        key={emp.id}
-                        className="flex flex-col gap-2"
-                        style={{
-                          padding: "10px 12px",
-                          borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          {/* Problem 5: name + dept hierarchy */}
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <UserAvatar src={emp.avatarUrl} name={emp.name} size="sm" />
-                            <span
-                              className="text-text-primary font-medium truncate"
-                              style={{ fontSize: "0.9375rem" }}
-                            >
-                              {emp.name}
-                            </span>
-                            {emp.dept && (
-                              <span
-                                style={{
-                                  fontSize: "0.8125rem",
-                                  fontWeight: 400,
-                                  color: "rgba(156, 163, 175, 0.85)",
-                                  marginLeft: "6px",
-                                }}
-                              >
-                                ({emp.dept})
-                              </span>
-                            )}
-                          </div>
-                          {/* Problem 5: tasks count + utilization */}
-                          <span style={{ fontSize: "0.8125rem", color: "#818CF8" }}>
-                            {emp.total} tasks • {empRate}%
-                          </span>
-                        </div>
-                        {/* Problem 5: progress bar — 6px height, gradient fill */}
-                        <div
-                          className="rounded-full overflow-hidden"
-                          style={{
-                            height: "6px",
-                            background: "rgba(255,255,255,0.08)",
-                          }}
-                        >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Employee Performance list */}
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Employee Workloads</span>
+                  <div className="space-y-1">
+                    {stats?.employeeStats && stats.employeeStats.length > 0 ? (
+                      stats.employeeStats.slice(0, 4).map((emp) => {
+                        const empRate = emp.total === 0 ? 0 : Math.round((emp.completed / emp.total) * 100);
+                        return (
                           <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${Math.min(empRate, 100)}%`,
-                              background:
-                                empRate === 0
-                                  ? "transparent"
-                                  : "linear-gradient(to right, #6366F1, #818CF8)",
+                            key={emp.id}
+                            onClick={() => {
+                              setFilters({ assigneeId: emp.id, status: "ALL", department: "ALL", team: "ALL" });
+                              router.push("/all-tasks");
                             }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div
-                    className="text-center py-10 text-text-tertiary"
-                    style={{ fontSize: "0.9375rem" }}
-                  >
-                    No employee statistics available.
+                            className="flex flex-col gap-2 p-2 bg-bg/30 border border-border rounded-lg hover:border-brand/40 cursor-pointer transition-all hover:bg-bg/60"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <UserAvatar src={emp.avatarUrl} name={emp.name} size="sm" />
+                                <div className="min-w-0">
+                                  <p className="text-[12px] font-semibold text-text-primary truncate">{emp.name}</p>
+                                  {emp.department && (
+                                    <p className="text-[10px] text-text-tertiary truncate">🏢 {emp.department}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-[10.5px] text-brand font-semibold shrink-0">
+                                {emp.completed}/{emp.total} Tasks ({empRate}%)
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                                style={{ width: `${empRate}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-6 text-xs text-text-tertiary">No workload data</div>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Department Performance list (Clickable) */}
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Department Metrics</span>
+                  <div className="space-y-1">
+                    {stats?.departmentStats && stats.departmentStats.length > 0 ? (
+                      stats.departmentStats.slice(0, 4).map((dept) => {
+                        const deptRate = dept.total === 0 ? 0 : Math.round((dept.completed / dept.total) * 100);
+                        return (
+                          <div
+                            key={dept.id}
+                            onClick={() => {
+                              setFilters({ department: dept.name, status: "ALL", team: "ALL", assigneeId: "ALL" });
+                              router.push("/all-tasks");
+                            }}
+                            className="flex flex-col gap-2 p-2 bg-bg/30 border border-border rounded-lg hover:border-brand/40 cursor-pointer transition-all hover:bg-bg/60"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="min-w-0">
+                                <p className="text-[12px] font-semibold text-text-primary truncate">🏢 {dept.name}</p>
+                                <p className="text-[10px] text-text-tertiary truncate">{dept.memberCount} members</p>
+                              </div>
+                              <span className="text-[10.5px] text-brand font-semibold shrink-0">
+                                {dept.completed}/{dept.total} Tasks ({deptRate}%)
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-brand rounded-full transition-all duration-300"
+                                style={{ width: `${deptRate}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-6 text-xs text-text-tertiary">No department metrics configured</div>
+                    )}
+                  </div>
+                </div>
               </div>
             ) : (
               // EMPLOYEE view: upcoming tasks
@@ -439,16 +479,13 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Activities & Notifications ── */}
-      {/* Problem 10: 1 col mobile → 3 col desktop */}
+      {/* Activities & Notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
         {/* Recent Activities */}
         <div
           className="lg:col-span-2 rounded-xl border border-border"
           style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
-          {/* Problem 4: card title */}
           <div className="flex items-center justify-between mb-3.5">
             <h3
               className="text-text-primary"
@@ -498,7 +535,6 @@ export default function DashboardPage() {
                         </span>
                       )}
                     </p>
-                    {/* Problem 1: timestamps min 12px */}
                     <p
                       className="text-text-tertiary mt-0.5"
                       style={{ fontSize: "0.75rem" }}
@@ -528,7 +564,6 @@ export default function DashboardPage() {
           style={{ padding: "14px 16px", backgroundColor: "var(--color-surface)" }}
         >
           <div>
-            {/* Problem 4: card title */}
             <div className="flex items-center justify-between mb-3.5">
               <h3
                 className="text-text-primary"
@@ -565,7 +600,6 @@ export default function DashboardPage() {
                       >
                         {n.message}
                       </p>
-                      {/* Timestamp — min 12px */}
                       <span
                         className="text-text-tertiary block mt-1"
                         style={{ fontSize: "0.75rem" }}
@@ -601,16 +635,16 @@ export default function DashboardPage() {
             className="text-text-tertiary border-t border-border pt-3 mt-4 text-center"
             style={{ fontSize: "0.75rem" }}
           >
-            System polls notifications every 15s.
+            System polls notifications every 30s.
           </p>
         </div>
       </div>
-      {isAdmin && <PerformanceAnalytics />}
+
     </div>
   );
 }
 
-// ── KPI Card — PROBLEM 3 spec ──────────────────────────────────────────────────
+// KPI Card helper
 function KpiCard({
   label, value, delta, deltaPositive, comparison, icon, iconColor,
 }: {
@@ -631,9 +665,7 @@ function KpiCard({
         backgroundColor: "var(--color-surface)",
       }}
     >
-      {/* Label row + Icon */}
       <div className="flex items-start justify-between">
-        {/* Problem 3: label — 12px/500/uppercase */}
         <p
           className="font-medium uppercase"
           style={{
@@ -644,7 +676,6 @@ function KpiCard({
         >
           {label}
         </p>
-        {/* Problem 3: icon box — 44×44, border-radius 10px */}
         <div
           className="flex items-center justify-center rounded-lg shrink-0"
           style={{
@@ -659,7 +690,6 @@ function KpiCard({
         </div>
       </div>
 
-      {/* Value — Problem 3: 36px/700 */}
       <p
         className="text-text-primary leading-none"
         style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em" }}
@@ -667,9 +697,7 @@ function KpiCard({
         {value}
       </p>
 
-      {/* Delta chip + comparison */}
       <div className="flex items-center gap-1.5 mt-1">
-        {/* Problem 3: delta chip */}
         <span
           className="rounded-full font-semibold text-[10px] px-1.5 py-0.5"
           style={{
@@ -681,7 +709,6 @@ function KpiCard({
         >
           {delta}
         </span>
-        {/* Problem 3: comparison text */}
         <span style={{ fontSize: "0.6875rem", color: "rgba(156, 163, 175, 0.9)" }}>
           {comparison}
         </span>
@@ -690,7 +717,7 @@ function KpiCard({
   );
 }
 
-// ── Donut Chart — PROBLEM 6 spec ───────────────────────────────────────────────
+// Donut Chart helper
 function DonutChart({ data }: { data: { label: string; count: number; color: string }[] }) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
 
@@ -713,10 +740,8 @@ function DonutChart({ data }: { data: { label: string; count: number; color: str
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-2 select-none">
-      {/* SVG Donut */}
       <div className="relative w-44 h-44">
         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-          {/* Track */}
           <circle
             cx="50" cy="50" r={radius}
             fill="transparent"
@@ -747,7 +772,6 @@ function DonutChart({ data }: { data: { label: string; count: number; color: str
           })}
         </svg>
 
-        {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             className="text-text-primary leading-none"
@@ -764,7 +788,6 @@ function DonutChart({ data }: { data: { label: string; count: number; color: str
         </div>
       </div>
 
-      {/* Legend Grid */}
       <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 w-full px-2">
         {data.map((item, idx) => {
           if (item.count === 0) return null;
