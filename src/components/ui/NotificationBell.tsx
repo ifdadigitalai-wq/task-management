@@ -69,12 +69,14 @@ export function NotificationBell({
   // Determine category color and icon
   const getCategoryDetails = (message: string) => {
     const msg = message.toLowerCase();
-    if (msg.includes("assign")) {
+    if (msg.includes("assign") || msg.includes("delegate") || msg.includes("transfer")) {
       return { color: "bg-[#EFF6FF] text-[#2563EB]" }; // blue
     } else if (msg.includes("overdue") || msg.includes("late")) {
       return { color: "bg-[#FEF2F2] text-[#EF4444]" }; // red
     } else if (msg.includes("comment") || msg.includes("reply") || msg.includes("replied")) {
       return { color: "bg-[#F5F3FF] text-[#7C3AED]" }; // purple
+    } else if (msg.includes("complete") || msg.includes("done")) {
+      return { color: "bg-[#ECFDF5] text-[#10B981]" }; // green
     }
     return { color: "bg-[#F1F5F9] text-[#475569]" }; // fallback gray
   };

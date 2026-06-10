@@ -54,12 +54,14 @@ export async function POST(
 
     // Create notification for assignee
     if (subtask.assigneeId) {
+      const recipient = await prisma.user.findUnique({ where: { id: subtask.assigneeId }, select: { role: true } });
+      const link = recipient?.role === "ADMIN" ? `/all-tasks?taskId=${subtask.id}` : `/my-tasks?taskId=${subtask.id}`;
       await prisma.notification.create({
         data: {
           userId: subtask.assigneeId,
           type: "SUBTASK_ASSIGNED",
           message: `${session.name} assigned you a subtask: "${subtask.title}"`,
-          link: `/my-tasks?taskId=${subtask.id}`,
+          link,
         },
       });
     }

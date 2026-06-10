@@ -85,10 +85,11 @@ export async function POST(
 
         // 3. Determine recipient
         const recipientId = session.id === task.assigneeId ? task.creatorId : task.assigneeId;
-        const link = `/my-tasks?taskId=${task.id}`;
 
         // 4. Create the Notification
         if (recipientId) {
+          const recipient = await tx.user.findUnique({ where: { id: recipientId }, select: { role: true } });
+          const link = recipient?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
           await tx.notification.create({
             data: {
               userId: recipientId,

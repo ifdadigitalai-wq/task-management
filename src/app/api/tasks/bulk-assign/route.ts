@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
     const assignee = await prisma.user.findUnique({
       where: { id: assigneeId },
-      select: { name: true },
+      select: { name: true, role: true },
     });
 
     if (!assignee) {
@@ -45,6 +45,8 @@ export async function POST(req: Request) {
       select: { id: true, title: true },
     });
 
+    const linkPath = assignee.role === "ADMIN" ? "/all-tasks" : "/my-tasks";
+
     await Promise.all(
       tasks.map((task) =>
         prisma.notification.create({
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
             userId: assigneeId,
             type: "TASK_ASSIGNED",
             message: `${session.name} assigned task to you: "${task.title}"`,
-            link: `/my-tasks?taskId=${task.id}`,
+            link: `${linkPath}?taskId=${task.id}`,
           },
         })
       )

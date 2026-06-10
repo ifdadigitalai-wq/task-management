@@ -11,6 +11,55 @@ export async function GET() {
 
     const now = new Date();
 
+    if (session.role === "EMPLOYEE") {
+      const whereClause = {
+        parentTaskId: null,
+        OR: [
+          { assigneeId: session.id },
+          { creatorId: session.id },
+          { AND: [{ delegationToId: session.id }, { delegationPending: true }, { delegationStatus: "PENDING" }] }
+        ]
+      };
+
+      const totalTasks = await prisma.task.count({ where: whereClause });
+
+      const pendingTasks = await prisma.task.count({
+        where: {
+          ...whereClause,
+          status: { notIn: ["DONE", "CANCELLED"] }
+        }
+      });
+
+      const completedTasks = await prisma.task.count({
+        where: {
+          ...whereClause,
+          status: "DONE"
+        }
+      });
+
+      const overdueTasks = await prisma.task.count({
+        where: {
+          ...whereClause,
+          status: { notIn: ["DONE", "CANCELLED"] },
+          dueDate: { lt: now }
+        }
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          totalEmployees: 0,
+          activeEmployees: 0,
+          totalTasks,
+          pendingTasks,
+          completedTasks,
+          overdueTasks,
+          departmentStats: [],
+          employeeStats: []
+        }
+      });
+    }
+
     // 1. Employees counts
     const totalEmployees = await prisma.user.count();
     const activeEmployees = await prisma.user.count({

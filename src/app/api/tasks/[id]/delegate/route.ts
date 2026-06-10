@@ -107,22 +107,26 @@ export async function POST(
       });
 
       // Notify Y
+      const recipientY = await prisma.user.findUnique({ where: { id: colleagueId }, select: { role: true } });
+      const linkY = recipientY?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
       await prisma.notification.create({
         data: {
           userId: colleagueId,
           type: "DELEGATION_PENDING",
           message: `${currentUser!.name} requested to delegate the task "${task.title}" to you.`,
-          link: `/my-tasks?taskId=${task.id}`
+          link: linkY
         }
       });
 
       // Notify X (Requester)
+      const recipientX = await prisma.user.findUnique({ where: { id: currentUserId }, select: { role: true } });
+      const linkX = recipientX?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
       await prisma.notification.create({
         data: {
           userId: currentUserId,
           type: "DELEGATION_REQUESTED",
           message: `You requested to delegate the task "${task.title}" to ${colleague.name}.`,
-          link: `/my-tasks?taskId=${task.id}`
+          link: linkX
         }
       });
 
@@ -208,12 +212,14 @@ export async function POST(
       });
 
       // Re-notify Y
+      const recipientY = await prisma.user.findUnique({ where: { id: task.delegationToId }, select: { role: true } });
+      const linkY = recipientY?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
       await prisma.notification.create({
         data: {
           userId: task.delegationToId,
           type: "DELEGATION_PENDING",
           message: `Reminder: ${currentUser?.name} requested to delegate the task "${task.title}" to you.`,
-          link: `/my-tasks?taskId=${task.id}`
+          link: linkY
         }
       });
 
@@ -274,12 +280,14 @@ export async function POST(
       const notificationMsg = `The task "${task.title}" delegation request from emp. ${delegationFrom?.name} from dept. ${delegationFrom?.department} has been accepted by ${colleagueY?.name}`;
 
       // 1. Notify X (delegationFrom)
+      const recipientX = await prisma.user.findUnique({ where: { id: delegationFrom!.id }, select: { role: true } });
+      const linkX = recipientX?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
       await prisma.notification.create({
         data: {
           userId: delegationFrom!.id,
           type: "DELEGATION_ACCEPTED",
           message: notificationMsg,
-          link: `/my-tasks?taskId=${task.id}`
+          link: linkX
         }
       });
 
@@ -352,12 +360,14 @@ export async function POST(
       const notificationMsg = `The task "${task.title}" delegation request from emp. ${delegationFrom?.name} from dept. ${delegationFrom?.department} has been declined by ${colleagueY?.name}`;
 
       // 1. Notify X (delegationFrom)
+      const recipientX = await prisma.user.findUnique({ where: { id: delegationFrom!.id }, select: { role: true } });
+      const linkX = recipientX?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
       await prisma.notification.create({
         data: {
           userId: delegationFrom!.id,
           type: "DELEGATION_DECLINED",
           message: notificationMsg,
-          link: `/my-tasks?taskId=${task.id}`
+          link: linkX
         }
       });
 

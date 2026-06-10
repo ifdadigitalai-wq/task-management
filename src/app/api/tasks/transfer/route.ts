@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     const fromUser = await prisma.user.findUnique({ where: { id: fromUserId }, select: { name: true } });
-    const toUser = await prisma.user.findUnique({ where: { id: toUserId }, select: { name: true } });
+    const toUser = await prisma.user.findUnique({ where: { id: toUserId }, select: { name: true, role: true } });
 
     if (!fromUser || !toUser) {
       return NextResponse.json({ success: false, error: "Source or Target user not found" }, { status: 404 });
@@ -57,14 +57,16 @@ export async function POST(req: Request) {
       )
     );
 
+    const linkPath = toUser.role === "ADMIN" ? "/all-tasks" : "/my-tasks";
+
     await Promise.all(
       tasks.map((task) =>
         prisma.notification.create({
           data: {
             userId: toUserId,
-            type: "TASK_DELEGATED",
-            message: `Task "${task.title}" transferred to you from ${fromUser.name}`,
-            link: `/my-tasks?taskId=${task.id}`,
+            type: "TASK_ASSIGNED",
+            message: `Task "${task.title}" has been transferred and assigned to you. (Previous assignee: ${fromUser.name})`,
+            link: `${linkPath}?taskId=${task.id}`,
           },
         })
       )

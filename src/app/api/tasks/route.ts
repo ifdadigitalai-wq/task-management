@@ -272,7 +272,7 @@ export async function POST(req: Request) {
             : undefined,
         },
         include: {
-          assignee: { select: { id: true, name: true, email: true, phone: true } },
+          assignee: { select: { id: true, name: true, email: true, phone: true, role: true } },
           creator: { select: { id: true, name: true, email: true } },
         },
       });
@@ -351,7 +351,9 @@ export async function POST(req: Request) {
     if (result.assigneeId && result.assignee) {
       const { remindVia } = body;
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const taskLink = `${appUrl}/my-tasks?taskId=${result.id}`;
+      const taskLink = result.assignee.role === "ADMIN"
+        ? `${appUrl}/all-tasks?taskId=${result.id}`
+        : `${appUrl}/my-tasks?taskId=${result.id}`;
 
       if (Array.isArray(remindVia)) {
         if (remindVia.includes("whatsapp") && result.assignee.phone) {

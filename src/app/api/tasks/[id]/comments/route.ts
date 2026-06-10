@@ -93,12 +93,14 @@ export async function POST(
       if (task.creatorId && task.creatorId !== session.id) notifyUserIds.add(task.creatorId);
 
       for (const uid of notifyUserIds) {
+        const recipient = await prisma.user.findUnique({ where: { id: uid }, select: { role: true } });
+        const link = recipient?.role === "ADMIN" ? `/all-tasks?taskId=${taskId}` : `/my-tasks?taskId=${taskId}`;
         await prisma.notification.create({
           data: {
             userId: uid,
             type: "TASK_COMMENT",
-            message: `${session.name} commented on "${task.title}": "${body.content.substring(0, 30)}..."`,
-            link: `/my-tasks?taskId=${taskId}`,
+            message: `${session.name} commented on task "${task.title}": "${body.content.substring(0, 30)}..."`,
+            link,
           },
         });
       }

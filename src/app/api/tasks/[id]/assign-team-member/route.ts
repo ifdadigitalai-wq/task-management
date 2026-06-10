@@ -51,12 +51,14 @@ export async function POST(
     });
 
     // Create notification for new assignee
+    const recipient = await prisma.user.findUnique({ where: { id: body.assigneeId }, select: { role: true } });
+    const link = recipient?.role === "ADMIN" ? `/all-tasks?taskId=${task.id}` : `/my-tasks?taskId=${task.id}`;
     await prisma.notification.create({
       data: {
         userId: body.assigneeId,
         type: "TASK_DELEGATED",
         message: `${session.name} delegated a task to you: "${task.title}"`,
-        link: `/my-tasks?taskId=${task.id}`,
+        link,
       },
     });
 
