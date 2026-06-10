@@ -71,6 +71,9 @@ export function Sidebar() {
       const params = new URLSearchParams(window.location.search);
       setCurrentDepartmentParam(params.get("department"));
     }
+    if (!pathname.startsWith("/employees")) {
+      setEmployeesDropdownOpen(false);
+    }
   }, [pathname]);
 
   React.useEffect(() => {
