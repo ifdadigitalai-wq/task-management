@@ -16,6 +16,9 @@ function MyTasksContent() {
   useEffect(() => {
     fetchTasks();
     if (!currentUser) fetchCurrentUser();
+
+    const interval = setInterval(fetchTasks, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   // Auto-open task detail panel when navigated via notification link
@@ -29,7 +32,11 @@ function MyTasksContent() {
     }
   }, [taskIdFromUrl, tasks, setSelectedTask]);
 
-  const myTasks = tasks.filter((t) => t.assigneeId === currentUser?.id);
+  const myTasks = tasks.filter(
+    (t) =>
+      t.assigneeId === currentUser?.id ||
+      (t.delegationPending && t.delegationToId === currentUser?.id && t.delegationStatus === "PENDING")
+  );
   const activeMyTasks = myTasks.filter((t) => t.status !== "DONE" && t.status !== "CANCELLED");
 
   return (

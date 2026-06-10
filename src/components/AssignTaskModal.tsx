@@ -150,7 +150,7 @@ function VoiceRecordingModal({ onSave, onClose }: { onSave: (blob: Blob, name: s
 }
 
 export function AssignTaskModal({ onClose }: { onClose: () => void }) {
-  const { addTask } = useTaskStore();
+  const { addTask, currentUser, fetchCurrentUser } = useTaskStore();
   const toast = useToast();
 
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
@@ -190,6 +190,20 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load current user
+  useEffect(() => {
+    if (!currentUser) {
+      fetchCurrentUser();
+    }
+  }, [currentUser, fetchCurrentUser]);
+
+  // Auto-set department for employee
+  useEffect(() => {
+    if (currentUser && currentUser.role === "EMPLOYEE" && currentUser.department) {
+      setDepartment(currentUser.department);
+    }
+  }, [currentUser]);
+
   // Fetch users, templates, and departments on mount
   useEffect(() => {
     fetch("/api/users", { cache: "no-store" })
@@ -222,6 +236,18 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
       setTitle(template.name);
       setDescription(template.description || "");
       setPriority(template.defaultPriority);
+      if (currentUser?.role === "ADMIN" && template.department) {
+        setDepartment(template.department);
+      }
+      setRecurrenceRule(template.recurrence?.rule || "NONE");
+      setFrequency(template.frequency || "ONE_TIME");
+      setCustomFrequency(template.customFrequency || "");
+      setRemindWhatsApp(
+        Array.isArray(template.remindVia) ? template.remindVia.includes("whatsapp") : false
+      );
+      setRemindEmail(
+        Array.isArray(template.remindVia) ? template.remindVia.includes("email") : false
+      );
       if (template.checklistItems && Array.isArray(template.checklistItems)) {
         setChecklist(
           template.checklistItems.map((item: string) => ({ text: item, completed: false }))
@@ -389,21 +415,32 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
           </FormField>
 
           {/* Department */}
-          <FormField label="Department *" required>
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              required
-              className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
-            >
-              <option value="">Select Department...</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.name}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </FormField>
+          {(currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE") && (
+            <FormField label="Department *" required>
+              <select
+                value={department}
+                onChange={(e) => {
+                  const newDept = e.target.value;
+                  setDepartment(newDept);
+                  const selectedEmp = employees.find((emp) => emp.id === assigneeId);
+                  if (selectedEmp && selectedEmp.department !== newDept) {
+                    setAssigneeId("");
+                  }
+                }}
+                required
+                className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none text-text-primary"
+              >
+                <option value="">Select Department...</option>
+                {departments
+                  .filter((d) => currentUser?.role !== "EMPLOYEE" || d.name === currentUser?.department)
+                  .map((d) => (
+                    <option key={d.id} value={d.name} className="bg-surface text-text-primary">
+                      {d.name}
+                    </option>
+                  ))}
+              </select>
+            </FormField>
+          )}
 
           {/* Title */}
           <FormField label="Task Title *" required>
@@ -467,11 +504,13 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
                 className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10"
               >
                 <option value="">Unassigned (Assign to Self)</option>
-                {employees.filter((e) => e.isActive).map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.name} ({e.department || "No department"})
-                  </option>
-                ))}
+                {employees
+                  .filter((e) => e.isActive && (!department || e.department === department))
+                  .map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.name} ({e.department || "No department"})
+                    </option>
+                  ))}
               </select>
             </FormField>
 

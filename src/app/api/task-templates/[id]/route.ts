@@ -27,6 +27,11 @@ export async function PATCH(
           description: body.description ?? undefined,
           defaultPriority: body.defaultPriority ? (body.defaultPriority as Priority) : undefined,
           checklistItems: body.checklistItems ?? undefined,
+          department: body.department ?? undefined,
+          frequency: body.frequency ?? undefined,
+          customFrequency: body.customFrequency !== undefined ? body.customFrequency : undefined,
+          recurrence: body.recurrence ?? undefined,
+          remindVia: body.remindVia ?? undefined,
         },
       });
 

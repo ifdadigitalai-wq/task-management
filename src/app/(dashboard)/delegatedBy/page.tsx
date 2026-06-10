@@ -16,9 +16,11 @@ export default function DelegatedByPage() {
 
   if (!currentUser) return null;
 
-  // Filter tasks created by me, but assigned to someone else
-  const delegatedTasks = tasks.filter(
-    (t) => t.creatorId === currentUser.id && t.assigneeId !== currentUser.id
+  // Admin sees all delegated tasks, others see tasks they delegated
+  const delegatedTasks = tasks.filter((t) => 
+    currentUser.role === "ADMIN"
+      ? (t.creatorId && t.assigneeId && t.creatorId !== t.assigneeId)
+      : (t.creatorId === currentUser.id && t.assigneeId !== currentUser.id)
   );
 
   const activeDelegated = delegatedTasks.filter(

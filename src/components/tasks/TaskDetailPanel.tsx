@@ -35,7 +35,7 @@ const PRIORITY_COLORS: Record<Priority, { bg: string; text: string }> = {
 };
 
 export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
-  const { selectedTask: initialTask, updateTask: storeUpdateTask, deleteTask: storeDeleteTask, currentUser } = useTaskStore();
+  const { selectedTask: initialTask, updateTask: storeUpdateTask, deleteTask: storeDeleteTask, currentUser, fetchCurrentUser } = useTaskStore();
   const toast = useToast();
   
   const [task, setTask] = useState<Task | null>(initialTask);
@@ -54,6 +54,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
   const [editDepartment, setEditDepartment] = useState("General");
   const [editFrequency, setEditFrequency] = useState<TaskFrequency>("ONE_TIME");
   const [editCustomFrequency, setEditCustomFrequency] = useState("");
+  const [selectedColleagueId, setSelectedColleagueId] = useState("");
   
   // Data lists
   const [updates, setUpdates] = useState<TaskUpdate[]>([]);
@@ -113,15 +114,22 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     }
   }, [initialTask]);
 
-  // Poll task relations every 10 seconds for real-time updates/comments/subtasks
+  // Poll task relations every 3 seconds for real-time updates/comments/subtasks
   useEffect(() => {
     if (!initialTask?.id) return;
     const interval = setInterval(() => {
       fetchTaskRelations(initialTask.id);
       fetchDirectComments(initialTask.id);
-    }, 10000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [initialTask?.id]);
+
+  // Fetch current user session if not loaded
+  useEffect(() => {
+    if (!currentUser) {
+      fetchCurrentUser().catch(console.error);
+    }
+  }, [currentUser, fetchCurrentUser]);
 
   // Fetch employees & departments lists
   useEffect(() => {
@@ -147,6 +155,8 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
         const payload = await res.json();
         if (payload.success && payload.data) {
           const detail = payload.data;
+          setTask(detail);
+          storeUpdateTask(detail);
           setUpdates(detail.updates || []);
           setSubtasks(detail.subTasks || []);
         }
@@ -198,11 +208,22 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     const checklist = Array.isArray(task.checklistItems) ? [...task.checklistItems] : [];
     checklist[index].completed = !checklist[index].completed;
 
+    // Calculate progress (if no subtasks exist)
+    let newProgress = task.progress;
+    if (subtasks.length === 0) {
+      const doneChecklist = checklist.filter((item: any) => item.completed).length;
+      const totalChecklist = checklist.length;
+      newProgress = Math.round((doneChecklist / totalChecklist) * 100);
+    }
+
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checklistItems: checklist }),
+        body: JSON.stringify({ 
+          checklistItems: checklist,
+          progress: newProgress
+        }),
       });
       const payload = await res.json();
       if (payload.success) {
@@ -295,6 +316,44 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     } catch (err) {
       console.error(err);
       toast.error("Failed to delegate task.");
+    }
+  };
+
+  const handleDelegationAction = async (
+    action: "request" | "cancel" | "resend" | "accept" | "decline" | "clear_declined",
+    colleagueId?: string
+  ) => {
+    if (!task) return;
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/delegate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, colleagueId }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        setTask(payload.data);
+        storeUpdateTask(payload.data);
+        setSelectedColleagueId("");
+        if (action === "request") {
+          toast.success("Delegation request sent successfully!");
+        } else if (action === "cancel") {
+          toast.success("Delegation request cancelled.");
+        } else if (action === "resend") {
+          toast.success("Delegation request resent!");
+        } else if (action === "accept") {
+          toast.success("Delegation request accepted!");
+        } else if (action === "decline") {
+          toast.success("Delegation request declined.");
+        } else if (action === "clear_declined") {
+          toast.success("Status cleared.");
+        }
+      } else {
+        toast.error(payload.error || "Action failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred.");
     }
   };
 
@@ -465,9 +524,19 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
       });
       const payload = await res.json();
       if (payload.success) {
-        setSubtasks([...subtasks, payload.data]);
+        const updatedSubtasks = [...subtasks, payload.data];
+        setSubtasks(updatedSubtasks);
         setNewSubtaskTitle("");
         toast.success("Subtask added successfully!");
+
+        // Recalculate parent progress locally since the server already updated it
+        const doneCount = updatedSubtasks.filter((s) => s.status === "DONE").length;
+        const totalCount = updatedSubtasks.length;
+        const newProgress = Math.round((doneCount / totalCount) * 100);
+
+        const updatedParent = { ...task, progress: newProgress };
+        setTask(updatedParent);
+        storeUpdateTask(updatedParent);
       }
     } catch (err) {
       console.error(err);
@@ -523,8 +592,20 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
       });
       const payload = await res.json();
       if (payload.success) {
-        setSubtasks(subtasks.map((s) => (s.id === sub.id ? payload.data : s)));
+        const updatedSubtasks = subtasks.map((s) => (s.id === sub.id ? payload.data : s));
+        setSubtasks(updatedSubtasks);
         toast.success(`Subtask status updated to ${nextStatus}`);
+
+        // Recalculate parent progress locally
+        if (task) {
+          const doneCount = updatedSubtasks.filter((s) => s.status === "DONE").length;
+          const totalCount = updatedSubtasks.length;
+          const newProgress = Math.round((doneCount / totalCount) * 100);
+
+          const updatedParent = { ...task, progress: newProgress };
+          setTask(updatedParent);
+          storeUpdateTask(updatedParent);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -668,9 +749,11 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                             className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
                           >
                             <option value="">Unassigned</option>
-                            {employees.filter((e) => e.isActive).map((e) => (
-                              <option key={e.id} value={e.id}>{e.name}</option>
-                            ))}
+                            {employees
+                              .filter((e) => e.isActive && (!editDepartment || editDepartment === "General" || e.department === editDepartment))
+                              .map((e) => (
+                                <option key={e.id} value={e.id}>{e.name}</option>
+                              ))}
                           </select>
                         </div>
                         <div className="flex flex-col gap-1.5">
@@ -690,7 +773,14 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                           <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">Department</span>
                           <select
                             value={editDepartment}
-                            onChange={(e) => setEditDepartment(e.target.value)}
+                            onChange={(e) => {
+                              const newDept = e.target.value;
+                              setEditDepartment(newDept);
+                              const selectedEmp = employees.find((emp) => emp.id === editAssigneeId);
+                              if (selectedEmp && newDept !== "General" && selectedEmp.department !== newDept) {
+                                setEditAssigneeId("");
+                              }
+                            }}
                             className="block w-full px-3 py-1.5 border border-border-strong rounded bg-bg text-text-primary text-[12px] cursor-pointer focus:outline-none focus:border-brand"
                           >
                             <option value="General">General</option>
@@ -1104,7 +1194,13 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                       max="100"
                       value={task.progress || 0}
                       onChange={(e) => handleProgressChange(parseInt(e.target.value))}
-                      className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand"
+                      disabled={subtasks.length > 0 || (!!task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0)}
+                      className={cn(
+                        "w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none accent-brand",
+                        (subtasks.length > 0 || (!!task.checklistItems && Array.isArray(task.checklistItems) && task.checklistItems.length > 0))
+                          ? "cursor-not-allowed opacity-60"
+                          : "cursor-pointer"
+                      )}
                     />
                   </div>
                 </div>
@@ -1222,42 +1318,151 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                     Delete Task
                   </button>
                 ) : (
-                  <>
-                    {task.status === "TODO" && (
-                      <div className="space-y-2">
+                  <div className="space-y-3">
+                    {/* CASE 1: Incoming pending delegation to current user (Employee Y) */}
+                    {task.delegationPending && task.delegationStatus === "PENDING" && task.delegationToId === currentUser?.id ? (
+                      <div className="space-y-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/10 border border-indigo-200 dark:border-indigo-900/40 rounded-xl">
+                        <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-2 text-center">
+                          Incoming Delegation Request
+                        </p>
                         <button
-                          onClick={() => handleUpdateStatus("IN_PROGRESS")}
-                          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
-                        >
-                          <Play className="w-3.5 h-3.5" />
-                          Start Progress
-                        </button>
-                        <button
-                          onClick={() => handleUpdateStatus("IN_REVIEW")}
-                          className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                          onClick={() => handleDelegationAction("accept")}
+                          className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
                         >
                           <Check className="w-3.5 h-3.5" />
-                          Mark for Review
+                          Accept the Task
+                        </button>
+                        <button
+                          onClick={() => handleDelegationAction("decline")}
+                          className="w-full py-2 border border-rose-200 hover:bg-rose-50/55 text-rose-600 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          Decline the Request
                         </button>
                       </div>
-                    )}
-                    {task.status === "IN_PROGRESS" && (
-                      <button
-                        onClick={() => handleUpdateStatus("IN_REVIEW")}
-                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        Mark for Review
-                      </button>
-                    )}
-                    {task.status === "IN_REVIEW" && (
-                      <div className="text-center py-2 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-900/50">
-                        <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                          Awaiting Admin Review
-                        </span>
+                    ) : null}
+
+                    {/* CASE 2: Pending delegation sent by current user (Employee X) */}
+                    {task.delegationPending && task.delegationStatus === "PENDING" && task.delegationFromId === currentUser?.id ? (
+                      <div className="space-y-2 p-3 bg-amber-50/55 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-900/40 rounded-xl">
+                        <div className="px-2.5 py-1 text-center bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-450 text-[10px] font-bold rounded-full uppercase tracking-wider whitespace-normal leading-snug">
+                          Waiting for employee {employees.find(e => e.id === task.delegationToId)?.name || "colleague"}'s response
+                        </div>
+                        <button
+                          onClick={() => handleDelegationAction("resend")}
+                          className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          Resend Request
+                        </button>
+                        <button
+                          onClick={() => handleDelegationAction("cancel")}
+                          className="w-full py-2 border border-border hover:bg-bg text-text-secondary text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          Cancel Request
+                        </button>
+                      </div>
+                    ) : null}
+
+                    {/* CASE 3: Declined delegation sent by current user (Employee X) */}
+                    {task.delegationPending && task.delegationStatus === "DECLINED" && task.delegationFromId === currentUser?.id ? (
+                      <div className="space-y-2 p-3 bg-rose-50/55 dark:bg-rose-950/10 border border-rose-200 dark:border-rose-900/40 rounded-xl">
+                        <div className="px-2.5 py-1 text-center bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-450 text-[10px] font-bold rounded-full uppercase tracking-wider whitespace-normal leading-snug">
+                          The task delegation request was cancelled by emp. {employees.find(e => e.id === task.delegationToId)?.name || "colleague"}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleDelegationAction("resend")}
+                            className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            Resend
+                          </button>
+                          <button
+                            onClick={() => handleDelegationAction("clear_declined")}
+                            className="flex-1 py-2 border border-border hover:bg-bg text-text-secondary text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                          >
+                            <Check className="w-3.5 h-3.5 text-[#16A34A]" />
+                            Ok
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* CASE 4: Active task with no pending delegation */}
+                    {!task.delegationPending && task.assigneeId === currentUser?.id && (
+                      <div className="space-y-2 pt-2 border-t border-border/50">
+                        <label className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">
+                          Delegate to Colleague
+                        </label>
+                        <div className="flex gap-2">
+                          <select
+                            value={selectedColleagueId}
+                            onChange={(e) => setSelectedColleagueId(e.target.value)}
+                            className="flex-1 px-3 py-1.5 border border-border-strong rounded-xl bg-surface text-text-primary text-xs cursor-pointer focus:outline-none focus:border-brand"
+                          >
+                            <option value="">Select Colleague...</option>
+                            {employees
+                              .filter((e) => e.isActive && e.id !== currentUser?.id && (!currentUser?.department || e.department === currentUser?.department))
+                              .map((e) => (
+                                <option key={e.id} value={e.id}>
+                                  {e.name}
+                                </option>
+                              ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => handleDelegationAction("request", selectedColleagueId)}
+                            disabled={!selectedColleagueId}
+                            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 active:scale-95 transition-all cursor-pointer shrink-0"
+                          >
+                            Send
+                          </button>
+                        </div>
                       </div>
                     )}
-                  </>
+
+                    {/* Standard progress buttons (only shown if not pending delegation to someone else) */}
+                    {(!task.delegationPending || task.delegationToId === currentUser?.id) && (
+                      <>
+                        {task.status === "TODO" && (
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => handleUpdateStatus("IN_PROGRESS")}
+                              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                            >
+                              <Play className="w-3.5 h-3.5" />
+                              Start Progress
+                            </button>
+                            <button
+                              onClick={() => handleUpdateStatus("IN_REVIEW")}
+                              className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              Mark for Review
+                            </button>
+                          </div>
+                        )}
+                        {task.status === "IN_PROGRESS" && (
+                          <button
+                            onClick={() => handleUpdateStatus("IN_REVIEW")}
+                            className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Mark for Review
+                          </button>
+                        )}
+                        {task.status === "IN_REVIEW" && (
+                          <div className="text-center py-2 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-900/50">
+                            <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
+                              Awaiting Admin Review
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

@@ -40,10 +40,21 @@ export async function POST(
     }
 
     if (session.role === "EMPLOYEE" && taskUpdate.user.role === "EMPLOYEE" && taskUpdate.userId !== session.id) {
-      return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: "Forbidden. You cannot comment on this task update." },
-        { status: 403 }
-      );
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: { department: true }
+      });
+      const updateCreator = await prisma.user.findUnique({
+        where: { id: taskUpdate.userId },
+        select: { department: true }
+      });
+      const isColleague = currentUser?.department && (currentUser.department === updateCreator?.department);
+      if (!isColleague) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Forbidden. You cannot comment on this task update." },
+          { status: 403 }
+        );
+      }
     }
 
     const result = await prisma.$transaction(async (tx) => {

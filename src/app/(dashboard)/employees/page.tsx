@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { Plus, Search, Users, RefreshCw, AlertTriangle, Upload, X } from "lucide-react";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import AddEmployeeModal from "@/components/employees/AddEmployeeModal";
@@ -10,25 +10,47 @@ import { useTimeTheme } from "@/hooks/useTimeTheme";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/ui/Button";
 import * as XLSX from "xlsx";
+import { useSearchParams, useRouter } from "next/navigation";
 
 function DeleteConfirmModal({
   employee,
+  employees,
   onCancel,
   onConfirm,
 }: {
   employee: UserType;
+  employees: UserType[];
   onCancel: () => void;
   onConfirm: () => void;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const [transferTasks, setTransferTasks] = useState(false);
+  const [targetEmployeeId, setTargetEmployeeId] = useState("");
   const toast = useToast();
 
   const handleDelete = async () => {
     setDeleting(true);
     try {
+      // 1. Transfer tasks if checkbox is checked
+      if (transferTasks && targetEmployeeId) {
+        const transferRes = await fetch("/api/tasks/transfer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fromUserId: employee.id,
+            toUserId: targetEmployeeId,
+            reason: "Employee deactivated/exited",
+          }),
+        });
+        const transferPayload = await transferRes.json();
+        if (!transferPayload.success) throw new Error(transferPayload.error || "Failed to transfer tasks.");
+        toast.success("Tasks successfully transferred.");
+      }
+
+      // 2. Deactivate employee
       const res = await fetch(`/api/users/${employee.id}`, { method: "DELETE" });
       const payload = await res.json();
-      if (!payload.success) throw new Error(payload.error || "Failed to delete.");
+      if (!payload.success) throw new Error(payload.error || "Failed to deactivate.");
       
       toast.success(`${employee.name} deactivated successfully.`);
       onConfirm();
@@ -38,6 +60,10 @@ function DeleteConfirmModal({
     }
   };
 
+  const otherEmployees = employees.filter(
+    (e) => e.id !== employee.id && e.isActive && e.department === employee.department
+  );
+
   return (
     <>
       <div
@@ -46,20 +72,59 @@ function DeleteConfirmModal({
       />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200 text-center"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200"
       >
         <div className="w-12 h-12 bg-rose-50 dark:bg-rose-955/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-6 h-6" />
         </div>
 
-        <h3 className="text-base font-extrabold text-slate-850 dark:text-slate-100 mb-1.5">
+        <h3 className="text-base font-extrabold text-slate-850 dark:text-slate-100 mb-1.5 text-center">
           Deactivate Employee?
         </h3>
-        <p className="text-xs text-slate-450 dark:text-slate-400 mb-6 leading-relaxed">
+        <p className="text-xs text-slate-450 dark:text-slate-400 mb-4 leading-relaxed text-center">
           Are you sure you want to deactivate <strong className="text-slate-800 dark:text-slate-200">{employee.name}</strong>? They will no longer be able to log in or manage tasks.
         </p>
 
-        <div className="flex items-center justify-center gap-3">
+        {/* Task Transfer Section */}
+        <div className="space-y-4 mb-6 border-t border-b border-slate-100 dark:border-slate-800/80 py-4">
+          <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-350 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={transferTasks}
+              onChange={(e) => setTransferTasks(e.target.checked)}
+              className="rounded text-brand focus:ring-brand/30 h-4 w-4 cursor-pointer"
+            />
+            Transfer all existing tasks to another employee
+          </label>
+
+          {transferTasks && (
+            <div className="space-y-1 animate-in slide-in-from-top-1 duration-150">
+              <label className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                Select Target Employee (Same Department)
+              </label>
+              {otherEmployees.length === 0 ? (
+                <p className="text-xs text-rose-500 font-semibold bg-rose-50 dark:bg-rose-955/20 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                  No other active employees found in the "{employee.department || "General"}" department.
+                </p>
+              ) : (
+                <select
+                  value={targetEmployeeId}
+                  onChange={(e) => setTargetEmployeeId(e.target.value)}
+                  className="w-full h-9 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs font-semibold px-3 focus:outline-none text-text-primary"
+                >
+                  <option value="">Choose employee...</option>
+                  {otherEmployees.map((e) => (
+                    <option key={e.id} value={e.id} className="bg-surface text-text-primary">
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 pt-2">
           <button
             onClick={onCancel}
             className="px-5 py-2.5 border border-slate-200 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-650 dark:text-slate-400 font-bold text-xs rounded-xl transition-all"
@@ -68,7 +133,7 @@ function DeleteConfirmModal({
           </button>
           <button
             onClick={handleDelete}
-            disabled={deleting}
+            disabled={deleting || (transferTasks && !targetEmployeeId)}
             className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white font-bold text-xs rounded-xl shadow-md active:scale-95 transition-all"
           >
             {deleting ? "Deactivating..." : "Deactivate"}
@@ -132,7 +197,9 @@ function StatusChangeConfirmModal({
     }
   };
 
-  const otherEmployees = employees.filter((e) => e.id !== employee.id && e.isActive);
+  const otherEmployees = employees.filter(
+    (e) => e.id !== employee.id && e.isActive && e.department === employee.department
+  );
 
   return (
     <>
@@ -155,18 +222,28 @@ function StatusChangeConfirmModal({
           </label>
 
           {transferTasks && (
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Select Target Employee</label>
-              <select
-                value={targetEmployeeId}
-                onChange={(e) => setTargetEmployeeId(e.target.value)}
-                className="w-full h-9 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs font-semibold px-3 focus:outline-none"
-              >
-                <option value="">Choose employee...</option>
-                {otherEmployees.map((e) => (
-                  <option key={e.id} value={e.id}>{e.name} ({e.department || "No Department"})</option>
-                ))}
-              </select>
+            <div className="space-y-1 animate-in slide-in-from-top-1 duration-150">
+              <label className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                Select Target Employee (Same Department)
+              </label>
+              {otherEmployees.length === 0 ? (
+                <p className="text-xs text-rose-500 font-semibold bg-rose-50 dark:bg-rose-955/20 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                  No other active employees found in the "{employee.department || "General"}" department.
+                </p>
+              ) : (
+                <select
+                  value={targetEmployeeId}
+                  onChange={(e) => setTargetEmployeeId(e.target.value)}
+                  className="w-full h-9 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs font-semibold px-3 focus:outline-none text-text-primary"
+                >
+                  <option value="">Choose employee...</option>
+                  {otherEmployees.map((e) => (
+                    <option key={e.id} value={e.id} className="bg-surface text-text-primary">
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
         </div>
@@ -316,12 +393,16 @@ function ImportEmployeesModal({
   );
 }
 
-export default function EmployeesPage() {
+function EmployeesContent() {
   const timeTheme = useTimeTheme();
   const toast = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const departmentParam = searchParams.get("department");
   
   const [employees, setEmployees] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [departments, setDepartments] = useState<any[]>([]);
 
   // Modals state
   const [showAdd, setShowAdd] = useState(false);
@@ -331,8 +412,12 @@ export default function EmployeesPage() {
   const [statusChangeTarget, setStatusChangeTarget] = useState<{ employee: UserType; newStatus: string } | null>(null);
 
   const fetchEmployees = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch("/api/users", { cache: "no-store" });
+      const url = departmentParam 
+        ? `/api/users?department=${encodeURIComponent(departmentParam)}` 
+        : "/api/users";
+      const res = await fetch(url, { cache: "no-store" });
       const payload = await res.json();
       if (payload.success) {
         setEmployees(payload.data || []);
@@ -343,11 +428,20 @@ export default function EmployeesPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [departmentParam, toast]);
 
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
+
+  useEffect(() => {
+    fetch("/api/departments")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) setDepartments(payload.data || []);
+      })
+      .catch(console.error);
+  }, []);
 
   const handleStatusChange = async (emp: UserType, newStatus: string) => {
     if (newStatus === "ACTIVE") {
@@ -381,7 +475,7 @@ export default function EmployeesPage() {
           <div className="flex items-center gap-2.5 mb-1">
             <Users className="w-5 h-5" style={{ color: timeTheme.accentColor }} />
             <h1 className="text-lg font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-              Team Management
+              Team Management {departmentParam ? `— ${departmentParam}` : ""}
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -390,6 +484,28 @@ export default function EmployeesPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <select
+            value={departmentParam || "ALL"}
+            onChange={(e) => {
+              const val = e.target.value;
+              const params = new URLSearchParams(window.location.search);
+              if (val === "ALL") {
+                params.delete("department");
+              } else {
+                params.set("department", val);
+              }
+              router.push(`/employees?${params.toString()}`);
+            }}
+            className="h-9 px-3 border border-slate-200 dark:border-slate-855 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs font-semibold focus:outline-none cursor-pointer text-text-primary"
+          >
+            <option value="ALL">All Employees</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.name} className="bg-surface text-text-primary">
+                {dept.name}
+              </option>
+            ))}
+          </select>
+
           <button
             onClick={() => {
               setLoading(true);
@@ -457,6 +573,7 @@ export default function EmployeesPage() {
       {deleteTarget && (
         <DeleteConfirmModal
           employee={deleteTarget}
+          employees={employees}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={() => {
             setDeleteTarget(null);
@@ -487,6 +604,19 @@ export default function EmployeesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function EmployeesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-20 text-slate-400 text-xs">
+        <div className="w-6 h-6 border-2 border-indigo-50 border-t-indigo-600 rounded-full animate-spin mb-2" />
+        Loading team profiles...
+      </div>
+    }>
+      <EmployeesContent />
+    </Suspense>
   );
 }
 

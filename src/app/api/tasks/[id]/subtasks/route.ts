@@ -75,6 +75,20 @@ export async function POST(
       },
     });
 
+    // Recalculate parent task progress
+    const siblingSubtasks = await prisma.task.findMany({
+      where: { parentTaskId },
+      select: { id: true, status: true }
+    });
+    const doneCount = siblingSubtasks.filter(s => s.status === "DONE").length;
+    const totalCount = siblingSubtasks.length;
+    const parentProgress = Math.round((doneCount / totalCount) * 100);
+
+    await prisma.task.update({
+      where: { id: parentTaskId },
+      data: { progress: parentProgress }
+    });
+
     return NextResponse.json({ success: true, data: subtask });
   } catch (error: any) {
     console.error("[POST SUBTASK ERROR]", error);

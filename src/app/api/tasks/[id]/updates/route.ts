@@ -36,8 +36,12 @@ export async function GET(
 
     let filteredUpdates = updates;
     if (session.role === "EMPLOYEE") {
+      const task = await prisma.task.findUnique({
+        where: { id },
+        select: { assigneeId: true, creatorId: true }
+      });
       filteredUpdates = updates.filter(
-        (up) => up.user.role === "ADMIN" || up.userId === session.id
+        (up) => up.user.role === "ADMIN" || up.userId === session.id || (task && (up.userId === task.assigneeId || up.userId === task.creatorId))
       );
     }
 
@@ -90,6 +94,29 @@ export async function POST(
         { success: false, error: "Task not found" },
         { status: 404 }
       );
+    }
+
+    // Verify access
+    if (session.role === "EMPLOYEE" && task.assigneeId !== session.id && task.creatorId !== session.id) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: { department: true }
+      });
+      const assignee = await prisma.user.findUnique({
+        where: { id: task.assigneeId || "" },
+        select: { department: true }
+      });
+      const creator = await prisma.user.findUnique({
+        where: { id: task.creatorId || "" },
+        select: { department: true }
+      });
+      const isColleague = currentUser?.department && (currentUser.department === assignee?.department || currentUser.department === creator?.department);
+      if (!isColleague) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Forbidden. You do not have permission to update this task." },
+          { status: 403 }
+        );
+      }
     }
 
     const result = await prisma.$transaction(async (tx) => {

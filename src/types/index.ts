@@ -63,6 +63,12 @@ export interface Task {
   customFrequency?: string | null;
   progress: number;
   isSubtask: boolean;
+  delegationPending: boolean;
+  delegationStatus?: string | null;
+  delegationToId?: string | null;
+  delegationFromId?: string | null;
+  delegationTo?: User | null;
+  delegationFrom?: User | null;
 
   // New relations
   attachments?: TaskAttachment[];
@@ -169,6 +175,13 @@ export interface TaskTemplate {
   createdById?: string | null;
   createdBy?: User | null;
   createdAt: string | Date;
+
+  // New fields
+  department: string;
+  frequency: TaskFrequency;
+  customFrequency?: string | null;
+  recurrence?: any;     // JSON representation
+  remindVia?: any;      // JSON representation of string[]
 }
 
 export interface Notification {

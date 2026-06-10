@@ -14,7 +14,8 @@ import {
   Calendar,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
 import React, { useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
@@ -30,7 +31,7 @@ const NAV_SECTIONS = [
       { name: "My Tasks",        href: "/my-tasks",     icon: ListTodo, badgeKey: "myTasks" },
       { name: "All Tasks",       href: "/all-tasks",    icon: Layers },
       { name: "Employees",       href: "/employees",    icon: User },
-      { name: "Delegated By Me", href: "/delegatedBy",  icon: Send },
+      { name: "Delegated Tasks", href: "/delegatedBy",  icon: Send },
     ],
   },
   {
@@ -61,6 +62,30 @@ export function Sidebar() {
     }
   }, [currentUser]);
 
+  const [departments, setDepartments] = React.useState<any[]>([]);
+  const [employeesDropdownOpen, setEmployeesDropdownOpen] = React.useState(false);
+  const [currentDepartmentParam, setCurrentDepartmentParam] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setCurrentDepartmentParam(params.get("department"));
+    }
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (currentUser?.role === "ADMIN") {
+      fetch("/api/departments")
+        .then((res) => res.json())
+        .then((payload) => {
+          if (payload.success) {
+            setDepartments(payload.data || []);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [currentUser]);
+
   const collapsed = mounted ? sidebarCollapsed : false;
 
   const isEmployee = currentUser?.role === "EMPLOYEE";
@@ -76,9 +101,12 @@ export function Sidebar() {
       }
       return {
         ...section,
-        items: section.items.filter(
-          (item) => item.name === "Dashboard" || item.name === "My Tasks"
-        ),
+        items: [
+          { name: "Dashboard",       href: "/dashboard",    icon: LayoutGrid },
+          { name: "My Tasks",        href: "/my-tasks",     icon: ListTodo, badgeKey: "myTasks" },
+          { name: "My Team",         href: "/my-team",      icon: User },
+          { name: "My Delegations",  href: "/my-delegations", icon: Send }
+        ],
       };
     }
     return section;
@@ -165,9 +193,92 @@ export function Sidebar() {
               {/* Nav items */}
               <div className="space-y-0.5">
                 {section.items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isEmployeesItem = item.name === "Employees";
+                  const isActive = isEmployeesItem 
+                    ? pathname.startsWith("/employees") 
+                    : pathname === item.href;
                   const hasBadge =
                     item.badgeKey === "myTasks" && myTasksCount > 0;
+
+                  if (isEmployeesItem && currentUser?.role === "ADMIN") {
+                    return (
+                      <div key={item.name} className="space-y-0.5">
+                        <button
+                          onClick={() => setEmployeesDropdownOpen(!employeesDropdownOpen)}
+                          className={cn(
+                            "flex items-center rounded-lg transition-all w-full text-left relative cursor-pointer",
+                            "mb-0.5",
+                            isActive ? "font-medium" : "font-normal hover:bg-white/5"
+                          )}
+                          style={{
+                            padding: "7px 10px",
+                            gap: "9px",
+                            fontSize: "0.8125rem",
+                            color: isActive ? "#818CF8" : "#9CA3AF",
+                            background: isActive && !employeesDropdownOpen
+                              ? "rgba(99, 102, 241, 0.12)"
+                              : undefined,
+                          }}
+                        >
+                          <item.icon
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              minWidth: "16px",
+                              color: isActive ? "#818CF8" : "#6B7280",
+                              flexShrink: 0,
+                            }}
+                          />
+                          {!collapsed && (
+                            <span className="truncate flex-1">{item.name}</span>
+                          )}
+                          {!collapsed && (
+                            <ChevronDown
+                              className={cn(
+                                "w-3.5 h-3.5 transition-transform duration-205 text-text-tertiary",
+                                employeesDropdownOpen && "rotate-180"
+                              )}
+                            />
+                          )}
+                        </button>
+
+                        {employeesDropdownOpen && !collapsed && (
+                          <div className="pl-6 pr-2 py-1 space-y-1 bg-black/10 rounded-lg border border-border/20 mx-1 mt-0.5 transition-all">
+                            <Link
+                              href="/employees"
+                              className={cn(
+                                "block py-1 px-2 rounded-md transition-colors text-[12px]",
+                                pathname === "/employees" && !currentDepartmentParam
+                                  ? "text-[#818CF8] bg-white/5 font-medium"
+                                  : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                              )}
+                            >
+                              All Employees
+                            </Link>
+                            
+                            {departments.map((dept) => {
+                              const isDeptActive = pathname === "/employees" && currentDepartmentParam === dept.name;
+                              return (
+                                <Link
+                                  key={dept.id}
+                                  href={`/employees?department=${encodeURIComponent(dept.name)}`}
+                                  className={cn(
+                                    "block py-1 px-2 rounded-md transition-colors text-[12px] truncate",
+                                    isDeptActive
+                                      ? "text-[#818CF8] bg-white/5 font-medium"
+                                      : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                                  )}
+                                  title={dept.name}
+                                >
+                                  {dept.name}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
 
                   return (
                     <Link

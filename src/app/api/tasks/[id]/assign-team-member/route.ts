@@ -34,10 +34,16 @@ export async function POST(
 
     const previousAssigneeId = task.assigneeId;
 
+    const newAssignee = await prisma.user.findUnique({
+      where: { id: body.assigneeId },
+      select: { department: true }
+    });
+
     const updatedTask = await prisma.task.update({
       where: { id: taskId },
       data: {
         assigneeId: body.assigneeId,
+        department: newAssignee?.department || task.department,
       },
       include: {
         assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },

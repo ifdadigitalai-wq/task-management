@@ -55,6 +55,7 @@ export function TopNav() {
     if (cleanPath === "/notifications") return "Notifications Center";
     if (cleanPath === "/profile")       return "My Profile & Settings";
     if (cleanPath === "/delegatedBy")   return "Tasks Delegated By Me";
+    if (cleanPath === "/my-delegations")return "My Delegated Tasks";
     if (cleanPath === "/departments")   return "Departments Directory";
     if (cleanPath === "/onboarding")    return "Onboarding Templates";
     if (cleanPath === "/audit-log")     return "Security Audit Logs";
@@ -98,14 +99,14 @@ export function TopNav() {
     }
     fetchNotifications(true);
 
-    // Poll notifications and tasks every 30 seconds
+    // Poll notifications and tasks every 3 seconds
     const interval = setInterval(() => {
       fetchNotifications(false);
       fetchTasks();
-    }, 30000);
+    }, 3000);
 
     const handleOpenAssignModal = () => {
-      if (currentUser?.role === "ADMIN") {
+      if (currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE") {
         setShowAssignModal(true);
       }
     };
@@ -351,8 +352,8 @@ export function TopNav() {
 
       {/* Right Action Items */}
       <div className="flex items-center gap-2.5 shrink-0">
-        {/* Create Task (Admin Only) */}
-        {currentUser?.role === "ADMIN" && (
+        {/* Create Task */}
+        {(currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE") && (
           <button
             onClick={() => setShowAssignModal(true)}
             className="flex items-center gap-2 font-semibold rounded-lg transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 hover:scale-[1.02] active:scale-95"

@@ -26,9 +26,34 @@ export async function GET(req: Request) {
       parentTaskId: null,
     };
 
-    // 1. Enforce Employee Scope (employees can only see tasks assigned to them)
+    // 1. Enforce Employee Scope
     if (session.role === "EMPLOYEE") {
-      where.assigneeId = session.id;
+      if (assigneeIdParam && assigneeIdParam !== "ALL" && assigneeIdParam !== session.id) {
+        // Fetch current user department
+        const currentUser = await prisma.user.findUnique({
+          where: { id: session.id },
+          select: { department: true }
+        });
+        // Fetch target user department
+        const targetUser = await prisma.user.findUnique({
+          where: { id: assigneeIdParam },
+          select: { department: true }
+        });
+        if (currentUser?.department && currentUser.department === targetUser?.department) {
+          where.assigneeId = assigneeIdParam;
+        } else {
+          return NextResponse.json<ApiResponse<null>>(
+            { success: false, error: "Forbidden. You can only view tasks of colleagues in your department." },
+            { status: 403 }
+          );
+        }
+      } else {
+        where.OR = [
+          { assigneeId: session.id },
+          { creatorId: session.id },
+          { AND: [{ delegationToId: session.id }, { delegationPending: true }, { delegationStatus: "PENDING" }] }
+        ];
+      }
     } else {
       // Admin filter by assigneeId
       if (assigneeIdParam && assigneeIdParam !== "ALL") {
@@ -156,9 +181,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (session.role !== "ADMIN") {
+    if (session.role !== "ADMIN" && session.role !== "EMPLOYEE") {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: "Forbidden. Only admins can create tasks or subtasks." },
+        { success: false, error: "Forbidden. Only admins and employees can create tasks." },
         { status: 403 }
       );
     }
@@ -169,6 +194,40 @@ export async function POST(req: Request) {
         { success: false, error: "Task title is required." },
         { status: 400 }
       );
+    }
+
+    let taskDepartment = body.department || "General";
+    if (session.role === "EMPLOYEE") {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: { department: true }
+      });
+      if (!currentUser || !currentUser.department) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Employee must belong to a department to assign tasks." },
+          { status: 400 }
+        );
+      }
+      taskDepartment = currentUser.department;
+
+      if (!body.assigneeId) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "You must assign the task to a colleague." },
+          { status: 400 }
+        );
+      }
+      
+      const assigneeUser = await prisma.user.findUnique({
+        where: { id: body.assigneeId },
+        select: { department: true }
+      });
+      
+      if (!assigneeUser || assigneeUser.department !== currentUser.department) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "You can only assign tasks to colleagues in your department." },
+          { status: 403 }
+        );
+      }
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -188,7 +247,7 @@ export async function POST(req: Request) {
           tags: Array.isArray(body.tags) ? body.tags : [],
           checklistItems: body.checklistItems ?? undefined, // Store as JSON
           recurrence: body.recurrence ?? undefined,     // Store as JSON
-          department: body.department || "General",
+          department: taskDepartment,
           frequency: body.frequency || "ONE_TIME",
           customFrequency: body.customFrequency || null,
           attachments: body.attachments && Array.isArray(body.attachments)
@@ -269,6 +328,20 @@ export async function POST(req: Request) {
             },
           });
         }
+
+        // Recalculate parent task progress
+        const siblingSubtasks = await tx.task.findMany({
+          where: { parentTaskId: task.parentTaskId },
+          select: { id: true, status: true }
+        });
+        const doneCount = siblingSubtasks.filter(s => s.status === "DONE").length;
+        const totalCount = siblingSubtasks.length;
+        const parentProgress = Math.round((doneCount / totalCount) * 100);
+
+        await tx.task.update({
+          where: { id: task.parentTaskId },
+          data: { progress: parentProgress }
+        });
       }
 
       return task;

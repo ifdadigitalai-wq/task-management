@@ -68,19 +68,34 @@ export async function GET(
 
     // Verify access
     if (session.role === "EMPLOYEE" && task.assigneeId !== session.id && task.creatorId !== session.id) {
-      return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: "Forbidden. You do not have permission to view this task." },
-        { status: 403 }
-      );
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: { department: true }
+      });
+      const assignee = await prisma.user.findUnique({
+        where: { id: task.assigneeId || "" },
+        select: { department: true }
+      });
+      const creator = await prisma.user.findUnique({
+        where: { id: task.creatorId || "" },
+        select: { department: true }
+      });
+      const isColleague = currentUser?.department && (currentUser.department === assignee?.department || currentUser.department === creator?.department);
+      if (!isColleague) {
+        return NextResponse.json<ApiResponse<null>>(
+          { success: false, error: "Forbidden. You do not have permission to view this task." },
+          { status: 403 }
+        );
+      }
     }
 
     // Filter updates and subtasks for employees
     if (task && session.role === "EMPLOYEE") {
       task.updates = task.updates.filter(
-        (up: any) => up.user.role === "ADMIN" || up.userId === session.id
+        (up: any) => up.user.role === "ADMIN" || up.userId === session.id || up.userId === task.assigneeId || up.userId === task.creatorId
       );
       task.subTasks = task.subTasks.filter(
-        (sub: any) => sub.assigneeId === session.id
+        (sub: any) => sub.assigneeId === session.id || sub.assigneeId === task.assigneeId
       );
     }
 
@@ -145,7 +160,18 @@ export async function PATCH(
     if (body.dueDate !== undefined) updateData.dueDate = body.dueDate ? new Date(body.dueDate) : null;
     if (body.estimatedMinutes !== undefined) updateData.estimatedMinutes = body.estimatedMinutes ? parseInt(body.estimatedMinutes) : null;
     if (body.actualMinutes !== undefined) updateData.actualMinutes = body.actualMinutes ? parseInt(body.actualMinutes) : null;
-    if (body.assigneeId !== undefined) updateData.assigneeId = body.assigneeId;
+    if (body.assigneeId !== undefined) {
+      updateData.assigneeId = body.assigneeId;
+      if (body.assigneeId) {
+        const newAssignee = await prisma.user.findUnique({
+          where: { id: body.assigneeId },
+          select: { department: true }
+        });
+        if (newAssignee?.department) {
+          updateData.department = newAssignee.department;
+        }
+      }
+    }
     if (body.tags !== undefined) updateData.tags = body.tags;
     if (body.checklistItems !== undefined) updateData.checklistItems = body.checklistItems;
     if (body.recurrence !== undefined) updateData.recurrence = body.recurrence;
@@ -193,6 +219,23 @@ export async function PATCH(
           creator: { select: { id: true, name: true } },
         },
       });
+
+      // Recalculate parent task progress if status changed on a subtask
+      if (body.status !== undefined && body.status !== existingTask.status && existingTask.parentTaskId) {
+        const siblingSubtasks = await tx.task.findMany({
+          where: { parentTaskId: existingTask.parentTaskId },
+          select: { id: true, status: true }
+        });
+        const updatedSiblings = siblingSubtasks.map(s => s.id === id ? { ...s, status: body.status } : s);
+        const doneCount = updatedSiblings.filter(s => s.status === "DONE").length;
+        const totalCount = updatedSiblings.length;
+        const parentProgress = Math.round((doneCount / totalCount) * 100);
+        
+        await tx.task.update({
+          where: { id: existingTask.parentTaskId },
+          data: { progress: parentProgress }
+        });
+      }
 
       // Helper: determine the correct notification link based on recipient role
       const getTaskLink = async (recipientId: string, taskId: string) => {
@@ -342,6 +385,21 @@ export async function DELETE(
       const task = await tx.task.delete({
         where: { id },
       });
+
+      if (task.parentTaskId) {
+        const siblingSubtasks = await tx.task.findMany({
+          where: { parentTaskId: task.parentTaskId },
+          select: { id: true, status: true }
+        });
+        const totalCount = siblingSubtasks.length;
+        const doneCount = siblingSubtasks.filter(s => s.status === "DONE").length;
+        const parentProgress = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+        await tx.task.update({
+          where: { id: task.parentTaskId },
+          data: { progress: parentProgress }
+        });
+      }
 
       await tx.activity.create({
         data: {

@@ -187,9 +187,16 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         const payload = await res.json();
         const data = payload.success ? payload.data : payload;
         const tasksList = Array.isArray(data) ? data : [];
+
+        const selectedTask = get().selectedTask;
+        const updatedSelectedTask = selectedTask
+          ? tasksList.find((t) => t.id === selectedTask.id) || null
+          : null;
+
         set({
           tasks: tasksList,
           filteredTasks: filterTasks(tasksList, get().filters),
+          selectedTask: updatedSelectedTask ? { ...selectedTask, ...updatedSelectedTask } : selectedTask,
         });
       }
     } catch (err) {
@@ -201,7 +208,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   fetchCurrentUser: async () => {
     try {
-      const res = await fetch("/api/auth/me");
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
       if (res.ok) {
         const payload = await res.json();
         const data = payload.success ? payload.data : payload;

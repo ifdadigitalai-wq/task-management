@@ -11,6 +11,7 @@ export default function TaskTemplatesPage() {
   const toast = useToast();
 
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Add/Edit Template Modal State
@@ -19,6 +20,12 @@ export default function TaskTemplatesPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [defaultPriority, setDefaultPriority] = useState<Priority>("MEDIUM");
+  const [department, setDepartment] = useState("General");
+  const [frequency, setFrequency] = useState("ONE_TIME");
+  const [customFrequency, setCustomFrequency] = useState("");
+  const [recurrenceRule, setRecurrenceRule] = useState("NONE");
+  const [remindWhatsApp, setRemindWhatsApp] = useState(false);
+  const [remindEmail, setRemindEmail] = useState(false);
 
   // Checklist builder
   const [checklist, setChecklist] = useState<string[]>([]);
@@ -30,6 +37,12 @@ export default function TaskTemplatesPage() {
     setDefaultPriority("MEDIUM");
     setChecklist([]);
     setNewChecklistItem("");
+    setDepartment("General");
+    setFrequency("ONE_TIME");
+    setCustomFrequency("");
+    setRecurrenceRule("NONE");
+    setRemindWhatsApp(false);
+    setRemindEmail(false);
   };
 
   const handleStartEdit = (t: TaskTemplate) => {
@@ -39,6 +52,12 @@ export default function TaskTemplatesPage() {
     setDefaultPriority(t.defaultPriority);
     setChecklist(Array.isArray(t.checklistItems) ? (t.checklistItems as string[]) : []);
     setNewChecklistItem("");
+    setDepartment(t.department || "General");
+    setFrequency(t.frequency || "ONE_TIME");
+    setCustomFrequency(t.customFrequency || "");
+    setRecurrenceRule(t.recurrence?.rule || "NONE");
+    setRemindWhatsApp(Array.isArray(t.remindVia) ? t.remindVia.includes("whatsapp") : false);
+    setRemindEmail(Array.isArray(t.remindVia) ? t.remindVia.includes("email") : false);
   };
 
   const fetchTemplates = async () => {
@@ -58,6 +77,12 @@ export default function TaskTemplatesPage() {
 
   useEffect(() => {
     fetchTemplates();
+    fetch("/api/departments")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) setDepartments(payload.data || []);
+      })
+      .catch(console.error);
   }, []);
 
   const handleAddChecklistItem = () => {
@@ -87,6 +112,14 @@ export default function TaskTemplatesPage() {
           description: description.trim() || null,
           defaultPriority,
           checklistItems: checklist,
+          department,
+          frequency,
+          customFrequency: frequency === "CUSTOM" ? customFrequency.trim() : null,
+          recurrence: { rule: recurrenceRule },
+          remindVia: [
+            remindWhatsApp && "whatsapp",
+            remindEmail && "email",
+          ].filter(Boolean),
         }),
       });
 
@@ -95,11 +128,7 @@ export default function TaskTemplatesPage() {
         toast.success("Template created successfully.");
         setTemplates([...templates, payload.data]);
         setIsOpen(false);
-        // reset
-        setName("");
-        setDescription("");
-        setDefaultPriority("MEDIUM");
-        setChecklist([]);
+        resetForm();
       } else {
         toast.error(payload.error || "Failed to create template.");
       }
@@ -125,6 +154,14 @@ export default function TaskTemplatesPage() {
           description: description.trim() || null,
           defaultPriority,
           checklistItems: checklist,
+          department,
+          frequency,
+          customFrequency: frequency === "CUSTOM" ? customFrequency.trim() : null,
+          recurrence: { rule: recurrenceRule },
+          remindVia: [
+            remindWhatsApp && "whatsapp",
+            remindEmail && "email",
+          ].filter(Boolean),
         }),
       });
 
@@ -250,6 +287,33 @@ export default function TaskTemplatesPage() {
                   )}
                 </div>
 
+                <div className="flex flex-col gap-1.5 py-1 text-[10px] font-semibold text-slate-500 dark:text-slate-450 border-t border-slate-100 dark:border-slate-850 pt-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Dept:</span>
+                    <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-600 dark:text-slate-350">{t.department || "General"}</span>
+                  </div>
+                  {t.recurrence?.rule && t.recurrence.rule !== "NONE" && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Recurrence:</span>
+                      <span className="text-slate-600 dark:text-slate-350">{t.recurrence.rule.toLowerCase()}</span>
+                    </div>
+                  )}
+                  {t.frequency && t.frequency !== "ONE_TIME" && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Frequency:</span>
+                      <span className="text-slate-600 dark:text-slate-350">
+                        {t.frequency === "CUSTOM" && t.customFrequency ? t.customFrequency : t.frequency.toLowerCase()}
+                      </span>
+                    </div>
+                  )}
+                  {t.remindVia && Array.isArray(t.remindVia) && t.remindVia.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Remind:</span>
+                      <span className="text-slate-600 dark:text-slate-350">{t.remindVia.join(", ")}</span>
+                    </div>
+                  )}
+                </div>
+
                 {t.checklistItems && Array.isArray(t.checklistItems) && t.checklistItems.length > 0 && (
                   <div className="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-850">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -281,7 +345,7 @@ export default function TaskTemplatesPage() {
             onClick={() => { setIsOpen(false); setEditingTemplate(null); resetForm(); }}
             className="fixed inset-0 bg-black/35 backdrop-blur-xs z-50 transition-opacity"
           />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-lg bg-surface border border-border rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-lg max-h-[85vh] overflow-y-auto bg-surface border border-border rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 mb-5 border-b border-border">
               <span className="text-sm font-extrabold text-text-primary">
                 {editingTemplate ? "Edit Task Blueprint" : "Create Task Blueprint"}
@@ -336,6 +400,103 @@ export default function TaskTemplatesPage() {
                   <option value="HIGH">High</option>
                   <option value="CRITICAL">Critical</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5">
+                  Department
+                </label>
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="w-full bg-surface-raised text-text-primary border border-border-strong rounded-xl text-xs font-semibold focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none cursor-pointer"
+                >
+                  <option value="General">General</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.name}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5">
+                    Recurrence
+                  </label>
+                  <select
+                    value={recurrenceRule}
+                    onChange={(e) => setRecurrenceRule(e.target.value)}
+                    className="w-full bg-surface-raised text-text-primary border border-border-strong rounded-xl text-xs font-semibold focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none cursor-pointer"
+                  >
+                    <option value="NONE">No Recurrence</option>
+                    <option value="DAILY">Daily</option>
+                    <option value="WEEKLY">Weekly</option>
+                    <option value="MONTHLY">Monthly</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5">
+                    Task Frequency
+                  </label>
+                  <select
+                    value={frequency}
+                    onChange={(e) => setFrequency(e.target.value)}
+                    className="w-full bg-surface-raised text-text-primary border border-border-strong rounded-xl text-xs font-semibold focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none cursor-pointer"
+                  >
+                    <option value="ONE_TIME">One Time</option>
+                    <option value="DAILY">Daily</option>
+                    <option value="WEEKLY">Weekly</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="QUARTERLY">Quarterly</option>
+                    <option value="YEARLY">Yearly</option>
+                    <option value="CUSTOM">Custom Frequency</option>
+                  </select>
+                </div>
+              </div>
+
+              {frequency === "CUSTOM" && (
+                <div>
+                  <label className="block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5">
+                    Custom Frequency Rule *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Every 2 weeks on Tuesday"
+                    value={customFrequency}
+                    onChange={(e) => setCustomFrequency(e.target.value)}
+                    className="w-full bg-surface-raised text-text-primary border border-border-strong rounded-xl text-xs font-semibold focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5">
+                  Remind Employee Via
+                </label>
+                <div className="flex items-center gap-6 py-1">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-text-secondary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={remindWhatsApp}
+                      onChange={(e) => setRemindWhatsApp(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    WhatsApp Message
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-text-secondary font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={remindEmail}
+                      onChange={(e) => setRemindEmail(e.target.checked)}
+                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                    />
+                    Email Notification
+                  </label>
+                </div>
               </div>
 
               {/* Checklist rows builder */}

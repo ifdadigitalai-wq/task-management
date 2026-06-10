@@ -100,20 +100,35 @@ export default function TaskCard({ task }: TaskCardProps) {
         <h3 className="text-[12.5px] font-semibold text-text-primary leading-tight flex-1 line-clamp-2 pr-2">
           {task.title}
         </h3>
-        <span
-          className={cn(
-            "text-[9px] font-medium py-0.5 px-1.5 rounded-full shrink-0 uppercase tracking-[0.02em]",
-            STATUS_CLASSES[task.status] || STATUS_CLASSES.TODO
-          )}
-        >
-          {STATUS_TEXT[task.status]}
-        </span>
+        {task.delegationPending && task.delegationStatus === "PENDING" ? (
+          <span className="text-[9px] font-bold py-0.5 px-1.5 rounded-full shrink-0 uppercase tracking-[0.02em] bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
+            Pending Delegation
+          </span>
+        ) : (
+          <span
+            className={cn(
+              "text-[9px] font-medium py-0.5 px-1.5 rounded-full shrink-0 uppercase tracking-[0.02em]",
+              STATUS_CLASSES[task.status] || STATUS_CLASSES.TODO
+            )}
+          >
+            {STATUS_TEXT[task.status]}
+          </span>
+        )}
       </div>
 
       {/* Second Row: Meta Info */}
       <div className="flex items-center gap-1.5 flex-wrap text-text-secondary leading-none">
-        {/* Assignee Avatar + Name */}
-        {task.assignee ? (
+        {task.creatorId && task.assigneeId && task.creatorId !== task.assigneeId ? (
+          <div className="flex items-center gap-1 min-w-0" title={`Delegated: ${task.creator?.name || "System"} assigned to ${task.assignee?.name}`}>
+            <span className="text-[9.5px] font-semibold text-text-secondary truncate max-w-[65px]">
+              {task.creator?.name ? task.creator.name.split(" ")[0] : "System"}
+            </span>
+            <span className="text-[9.5px] text-text-tertiary">→</span>
+            <span className="text-[9.5px] font-semibold text-text-secondary truncate max-w-[65px]">
+              {task.assignee?.name.split(" ")[0]}
+            </span>
+          </div>
+        ) : task.assignee ? (
           <div className="flex items-center gap-1 min-w-0" title={`Assigned to ${task.assignee.name}`}>
             <div className="w-[18px] h-[18px] rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-brand-light text-brand-text text-[8px] font-medium border border-border">
               {task.assignee.avatarUrl ? (

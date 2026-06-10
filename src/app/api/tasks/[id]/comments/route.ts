@@ -46,6 +46,35 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Content is required" }, { status: 400 });
     }
 
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      select: { title: true, assigneeId: true, creatorId: true },
+    });
+
+    if (!task) {
+      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+    }
+
+    // Verify access
+    if (session.role === "EMPLOYEE" && task.assigneeId !== session.id && task.creatorId !== session.id) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: { department: true }
+      });
+      const assignee = await prisma.user.findUnique({
+        where: { id: task.assigneeId || "" },
+        select: { department: true }
+      });
+      const creator = await prisma.user.findUnique({
+        where: { id: task.creatorId || "" },
+        select: { department: true }
+      });
+      const isColleague = currentUser?.department && (currentUser.department === assignee?.department || currentUser.department === creator?.department);
+      if (!isColleague) {
+        return NextResponse.json({ success: false, error: "Forbidden. You do not have permission to comment on this task." }, { status: 403 });
+      }
+    }
+
     const comment = await prisma.taskComment.create({
       data: {
         taskId,
@@ -58,11 +87,6 @@ export async function POST(
     });
 
     // Notify assignee and creator about comment if they are not the comment author
-    const task = await prisma.task.findUnique({
-      where: { id: taskId },
-      select: { title: true, assigneeId: true, creatorId: true },
-    });
-
     if (task) {
       const notifyUserIds = new Set<string>();
       if (task.assigneeId && task.assigneeId !== session.id) notifyUserIds.add(task.assigneeId);

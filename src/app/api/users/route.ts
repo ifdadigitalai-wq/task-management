@@ -6,17 +6,39 @@ import { ApiResponse } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: "Unauthorized. Admin access required." },
-        { status: 403 }
+        { success: false, error: "Unauthorized." },
+        { status: 401 }
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const departmentParam = searchParams.get("department");
+
+    const where: any = {};
+
+    if (session.role === "EMPLOYEE") {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: { department: true }
+      });
+      if (!currentUser || !currentUser.department) {
+        where.id = session.id;
+      } else {
+        where.department = currentUser.department;
+      }
+    } else {
+      if (departmentParam && departmentParam !== "ALL") {
+        where.department = departmentParam;
+      }
+    }
+
     const users = await prisma.user.findMany({
+      where,
       select: {
         id: true,
         name: true,

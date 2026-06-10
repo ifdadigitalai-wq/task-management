@@ -56,6 +56,11 @@ export async function POST(req: Request) {
           defaultPriority: (body.defaultPriority as Priority) ?? "MEDIUM",
           checklistItems: body.checklistItems ?? [],
           createdById: session.id,
+          department: body.department ?? "General",
+          frequency: body.frequency ?? "ONE_TIME",
+          customFrequency: body.customFrequency ?? null,
+          recurrence: body.recurrence ?? undefined,
+          remindVia: body.remindVia ?? undefined,
         },
       });
 
