@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import { Plus, Search, Users, RefreshCw, AlertTriangle, Upload, X } from "lucide-react";
+import { Plus, Search, Users, RefreshCw, AlertTriangle, Upload, X, Download } from "lucide-react";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import AddEmployeeModal from "@/components/employees/AddEmployeeModal";
 import EditEmployeeModal from "@/components/employees/EditEmployeeModal";
@@ -274,6 +274,34 @@ function ImportEmployeesModal({
   const [importing, setImporting] = useState(false);
   const toast = useToast();
 
+  const handleDownloadTemplate = () => {
+    const headers = ["name", "email", "role", "department", "team", "phone", "job title"];
+    const exampleRow = [
+      "John Doe",
+      "john.doe@example.com",
+      "EMPLOYEE",
+      "Engineering",
+      "Frontend",
+      "1234567890",
+      "Senior Engineer"
+    ];
+    const csvContent = [
+      headers.join(","),
+      exampleRow.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "employee_import_template.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("CSV import template downloaded.");
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
@@ -374,12 +402,25 @@ function ImportEmployeesModal({
             Select a CSV or Excel (.xlsx/.xls) file containing employee details. Column headers must include <strong>name</strong> and <strong>email</strong>.
           </p>
 
-          <input
-            type="file"
-            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-            onChange={handleFileChange}
-            className="w-full text-xs text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-border-strong file:text-xs file:font-semibold file:bg-bg file:text-text-primary file:cursor-pointer"
-          />
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <input
+                type="file"
+                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                onChange={handleFileChange}
+                className="w-full text-xs text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-border-strong file:text-xs file:font-semibold file:bg-bg file:text-text-primary file:cursor-pointer"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleDownloadTemplate}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-semibold border border-indigo-100 dark:border-indigo-900/50 active:scale-95 transition-all whitespace-nowrap"
+              title="Download CSV Template"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Template
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">

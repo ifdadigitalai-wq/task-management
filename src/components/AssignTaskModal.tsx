@@ -1,153 +1,19 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import {
-  X, User, Flag, Briefcase, Repeat2, Paperclip, Mic, StopCircle, Trash2, Play, Pause, Check, Clock, Plus, Bookmark, FileText
-} from "lucide-react";
+import { X, Paperclip, Mic } from "lucide-react";
 import { useTaskStore } from "@/store/useTaskStore";
 import { useToast } from "@/hooks/useToast";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
-import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Priority, TaskTemplate, User as UserType } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { cn } from "@/lib/utils";
 import { uploadFiles } from "@/lib/uploadthing-client";
-
-// ── Voice Recording Modal ──────────────────────────────────────────────────────
-function VoiceRecordingModal({ onSave, onClose }: { onSave: (blob: Blob, name: string) => void; onClose: () => void }) {
-  const [state, setState] = useState<"idle" | "recording" | "paused" | "done">("idle");
-  const [seconds, setSeconds] = useState(0);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const mediaRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const blobRef = useRef<Blob | null>(null);
-  
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const display = `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`;
-
-  const startTimer = () => { timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000); };
-  const stopTimer  = () => { if (timerRef.current) clearInterval(timerRef.current); };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
-      chunksRef.current = [];
-      mr.ondataavailable = (e) => chunksRef.current.push(e.data);
-      mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        blobRef.current = blob;
-        setAudioUrl(URL.createObjectURL(blob));
-        setState("done");
-      };
-      mr.start();
-      mediaRef.current = mr;
-      setState("recording");
-      startTimer();
-    } catch (err) {
-      console.error("Microphone access denied:", err);
-    }
-  };
-
-  const pauseRecording  = () => { mediaRef.current?.pause();  stopTimer();  setState("paused"); };
-  const resumeRecording = () => { mediaRef.current?.resume(); startTimer(); setState("recording"); };
-  const stopRecording   = () => { mediaRef.current?.stop(); mediaRef.current?.stream.getTracks().forEach((t) => t.stop()); stopTimer(); };
-  const discard         = () => { setAudioUrl(null); blobRef.current = null; setSeconds(0); setState("idle"); };
-
-  useEffect(() => () => stopTimer(), []);
-
-  return (
-    <>
-      {/* Overlay — z-modal-backdrop = 70 */}
-      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center" style={{ zIndex: "var(--z-modal-backdrop)" }} />
-      
-      {/* Modal Container — z-modal = 80 */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[360px] bg-surface border border-border rounded-xl shadow-lg p-6 animate-in zoom-in-95 duration-150" style={{ zIndex: "var(--z-modal)" }}>
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[13px] font-medium text-text-primary">Voice Recording</span>
-          <button onClick={onClose} className="p-1 hover:bg-bg rounded-md text-text-tertiary">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        
-        <div className="text-center mb-6">
-          <div className={`text-3xl font-medium font-mono tracking-tight ${state === "recording" ? "text-priority-critical-text animate-pulse" : "text-text-primary"}`}>
-            {display}
-          </div>
-          <div className="mt-2 text-[11px] font-medium text-text-tertiary">
-            {state === "idle" && "Ready to record"}
-            {state === "recording" && "● Recording..."}
-            {state === "paused" && "Paused"}
-            {state === "done" && "Recording saved"}
-          </div>
-        </div>
-
-        {/* Waves Animation */}
-        {(state === "recording" || state === "paused") && (
-          <div className="flex justify-center items-center gap-1 mb-6 h-8">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div
-                key={i}
-                className={`w-0.5 rounded-full ${state === "recording" ? "bg-priority-critical-text" : "bg-border-strong"}`}
-                style={{
-                  height: `${6 + Math.abs(Math.sin(i * 0.5) * 16) + Math.cos(i * 0.8) * 8}px`,
-                  animation: state === "recording" ? `wave-anim ${1 + (i % 3) * 0.2}s ease-in-out infinite` : "none"
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {state === "done" && audioUrl && (
-          <div className="mb-6">
-            <audio controls src={audioUrl} className="w-full rounded bg-bg" />
-          </div>
-        )}
-
-        <div className="flex justify-center gap-3">
-          {state === "idle" && (
-            <Button onClick={startRecording} variant="danger" size="sm" icon={<Mic className="h-3.5 w-3.5" />}>
-              Start Recording
-            </Button>
-          )}
-          {state === "recording" && (
-            <>
-              <Button onClick={pauseRecording} variant="secondary" size="sm" icon={<Pause className="h-3.5 w-3.5" />}>
-                Pause
-              </Button>
-              <Button onClick={stopRecording} variant="danger" size="sm" icon={<StopCircle className="h-3.5 w-3.5" />}>
-                Stop
-              </Button>
-            </>
-          )}
-          {state === "paused" && (
-            <>
-              <Button onClick={resumeRecording} variant="secondary" size="sm" icon={<Play className="h-3.5 w-3.5" />}>
-                Resume
-              </Button>
-              <Button onClick={stopRecording} variant="danger" size="sm" icon={<StopCircle className="h-3.5 w-3.5" />}>
-                Stop
-              </Button>
-            </>
-          )}
-          {state === "done" && (
-            <>
-              <Button onClick={discard} variant="danger" size="sm" icon={<Trash2 className="h-3.5 w-3.5" />}>
-                Discard
-              </Button>
-              <Button onClick={() => { if (blobRef.current) { onSave(blobRef.current, `recording-${Date.now()}.webm`); onClose(); } }}
-                variant="primary" size="sm" icon={<Check className="h-3.5 w-3.5" />}>
-                Save Note
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
+import { VoiceRecordingModal } from "@/components/VoiceRecordingModal";
+import { TaskChecklistBuilder } from "@/components/tasks/TaskChecklistBuilder";
+import { TaskTagsBuilder } from "@/components/tasks/TaskTagsBuilder";
+import { AutoReminderSettings } from "@/components/tasks/AutoReminderSettings";
 
 export function AssignTaskModal({ onClose }: { onClose: () => void }) {
   const { addTask, currentUser, fetchCurrentUser } = useTaskStore();
@@ -163,11 +29,9 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
   const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [assigneeId, setAssigneeId] = useState<string>("");
-  const [tagsInput, setTagsInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [recurrenceRule, setRecurrenceRule] = useState<string>("NONE");
   const [checklist, setChecklist] = useState<{ text: string; completed: boolean }[]>([]);
-  const [newChecklistItem, setNewChecklistItem] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [voiceRecordings, setVoiceRecordings] = useState<{ name: string; blob: Blob }[]>([]);
   const [remindWhatsApp, setRemindWhatsApp] = useState(false);
@@ -184,7 +48,6 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
   const [reminderRecurring, setReminderRecurring] = useState(false);
   const [reminderEmail, setReminderEmail] = useState(false);
   const [reminderInApp, setReminderInApp] = useState(true);
-  const [showReminders, setShowReminders] = useState(false);
   
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -254,28 +117,6 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
         );
       }
     }
-  };
-
-  const handleAddTag = () => {
-    if (tagsInput.trim() && !tags.includes(tagsInput.trim())) {
-      setTags([...tags, tagsInput.trim()]);
-      setTagsInput("");
-    }
-  };
-
-  const handleRemoveTag = (t: string) => {
-    setTags(tags.filter((tag) => tag !== t));
-  };
-
-  const handleAddChecklistItem = () => {
-    if (newChecklistItem.trim()) {
-      setChecklist([...checklist, { text: newChecklistItem.trim(), completed: false }]);
-      setNewChecklistItem("");
-    }
-  };
-
-  const handleRemoveChecklistItem = (index: number) => {
-    setChecklist(checklist.filter((_, i) => i !== index));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -375,10 +216,10 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      {/* Backdrop ── z-modal-backdrop = 70 */}
+      {/* Backdrop */}
       <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] flex items-center justify-center" style={{ zIndex: "var(--z-modal-backdrop)" }} />
       
-      {/* Modal Container ── z-modal = 80 */}
+      {/* Modal Container */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[520px] max-h-[85vh] overflow-y-auto bg-surface rounded-xl shadow-lg flex flex-col animate-in zoom-in-95 duration-150" style={{ zIndex: "var(--z-modal)" }}>
         
         {/* Header */}
@@ -398,22 +239,6 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
 
         {/* Body Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
-          {/* Template Selection */}
-          <FormField label="Use Task Template">
-            <select
-              value={selectedTemplateId}
-              onChange={handleTemplateChange}
-              className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none"
-            >
-              <option value="">No template selected (Create custom)</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.defaultPriority})
-                </option>
-              ))}
-            </select>
-          </FormField>
-
           {/* Department */}
           {(currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE") && (
             <FormField label="Department *" required>
@@ -422,6 +247,7 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => {
                   const newDept = e.target.value;
                   setDepartment(newDept);
+                  setSelectedTemplateId(""); // Reset template when department changes
                   const selectedEmp = employees.find((emp) => emp.id === assigneeId);
                   if (selectedEmp && selectedEmp.department !== newDept) {
                     setAssigneeId("");
@@ -441,6 +267,25 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
               </select>
             </FormField>
           )}
+
+          {/* Template Selection */}
+          <FormField label="Use Task Template">
+            <select
+              value={selectedTemplateId}
+              onChange={handleTemplateChange}
+              disabled={!department}
+              className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none disabled:opacity-50"
+            >
+              <option value="">No template selected (Create custom)</option>
+              {templates
+                .filter((t) => t.department === department)
+                .map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.defaultPriority})
+                  </option>
+                ))}
+            </select>
+          </FormField>
 
           {/* Title */}
           <FormField label="Task Title *" required>
@@ -561,70 +406,19 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
             )}
           </div>
 
-          {/* Collapsible Auto Reminder Settings */}
-          <div className="border border-border rounded-xl overflow-hidden bg-bg/5">
-            <button
-              type="button"
-              onClick={() => setShowReminders(!showReminders)}
-              className="w-full flex items-center justify-between p-3.5 text-[12px] font-medium text-text-primary hover:bg-bg/40 transition-colors select-none"
-            >
-              <span>Auto Reminder Settings</span>
-              <span className="text-text-tertiary">{showReminders ? "▲" : "▼"}</span>
-            </button>
-            {showReminders && (
-              <div className="p-4 border-t border-border bg-surface space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
-                <div className="flex flex-wrap gap-x-6 gap-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
-                    <input
-                      type="checkbox"
-                      checked={reminderBeforeDue}
-                      onChange={(e) => setReminderBeforeDue(e.target.checked)}
-                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                    />
-                    Before Due Date
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
-                    <input
-                      type="checkbox"
-                      checked={reminderOnDue}
-                      onChange={(e) => setReminderOnDue(e.target.checked)}
-                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                    />
-                    On Due Date
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
-                    <input
-                      type="checkbox"
-                      checked={reminderRecurring}
-                      onChange={(e) => setReminderRecurring(e.target.checked)}
-                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                    />
-                    Recurring
-                  </label>
-                </div>
-                <div className="flex gap-x-6 pt-2 border-t border-border-strong/5">
-                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
-                    <input
-                      type="checkbox"
-                      checked={reminderEmail}
-                      onChange={(e) => setReminderEmail(e.target.checked)}
-                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                    />
-                    Email Reminders
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
-                    <input
-                      type="checkbox"
-                      checked={reminderInApp}
-                      onChange={(e) => setReminderInApp(e.target.checked)}
-                      className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
-                    />
-                    In-App Notifications
-                  </label>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Modular Auto Reminder Settings */}
+          <AutoReminderSettings
+            reminderBeforeDue={reminderBeforeDue}
+            setReminderBeforeDue={setReminderBeforeDue}
+            reminderOnDue={reminderOnDue}
+            setReminderOnDue={setReminderOnDue}
+            reminderRecurring={reminderRecurring}
+            setReminderRecurring={setReminderRecurring}
+            reminderEmail={reminderEmail}
+            setReminderEmail={setReminderEmail}
+            reminderInApp={reminderInApp}
+            setReminderInApp={setReminderInApp}
+          />
 
           {/* Reminders / Notifications via WhatsApp/Email */}
           <FormField label="Remind Employee Via">
@@ -650,71 +444,11 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
             </div>
           </FormField>
 
-          {/* Tags Input */}
-          <FormField label="Tags (Comma-separated)">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="E.g., bug, billing"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "," || e.key === "Enter") { e.preventDefault(); handleAddTag(); } }}
-                className="block w-full h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10"
-              />
-              <button
-                type="button"
-                onClick={handleAddTag}
-                className="h-[34px] px-3 bg-bg hover:bg-surface-raised border border-border-strong rounded text-[12px] font-medium text-text-secondary transition-colors"
-              >
-                Add
-              </button>
-            </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {tags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-brand-light text-brand-text text-[11px] font-medium border border-brand/10">
-                    {tag}
-                    <button type="button" onClick={() => handleRemoveTag(tag)} className="hover:opacity-75 focus-visible:outline-none">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </FormField>
+          {/* Modular Tags Builder */}
+          <TaskTagsBuilder tags={tags} setTags={setTags} />
 
-          {/* Checklist subtask list */}
-          <FormField label="Checklist Items">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Add checklist sub-task..."
-                value={newChecklistItem}
-                onChange={(e) => setNewChecklistItem(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddChecklistItem(); } }}
-                className="block w-full h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10"
-              />
-              <button
-                type="button"
-                onClick={handleAddChecklistItem}
-                className="h-[34px] w-[34px] bg-bg hover:bg-surface-raised border border-border-strong rounded flex items-center justify-center text-text-secondary transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            {checklist.length > 0 && (
-              <div className="space-y-1.5 mt-2 max-h-32 overflow-y-auto">
-                {checklist.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 rounded bg-bg border border-border">
-                    <span className="text-[12px] text-text-primary font-medium">{item.text}</span>
-                    <button type="button" onClick={() => handleRemoveChecklistItem(i)} className="text-text-tertiary hover:text-text-primary focus-visible:outline-none">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </FormField>
+          {/* Modular Checklist Builder */}
+          <TaskChecklistBuilder checklist={checklist} setChecklist={setChecklist} />
 
           {/* File attachments & voice note button */}
           <div className="flex items-center gap-2 border-t border-border pt-4 mt-2">
@@ -796,9 +530,12 @@ export function AssignTaskModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {showVoiceModal && <VoiceRecordingModal onSave={handleVoiceSave} onClose={() => setShowVoiceModal(false)} />}
+      {showVoiceModal && (
+        <VoiceRecordingModal
+          onSave={handleVoiceSave}
+          onClose={() => setShowVoiceModal(false)}
+        />
+      )}
     </>
   );
 }
-
-export default AssignTaskModal;

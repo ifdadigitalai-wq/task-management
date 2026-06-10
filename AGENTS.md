@@ -18,7 +18,7 @@ This document provides a concise, high-level manual of the Task Management syste
 - **Frontend**: React 19, Lucide React (Icons), Tailwind CSS (Vanilla PostCSS config)
 - **State Management**: Zustand (`src/store/useTaskStore.ts`)
 - **Database**: Prisma Client with Neon Serverless PostgreSQL (`prisma/schema.prisma`)
-- **Data Exchange**: XLSX Excel sheets import parsing
+- **Data Exchange**: CSV/XLSX import parsing with frontend-generated CSV template download to prevent format mismatching.
 
 ---
 
@@ -65,6 +65,10 @@ This document provides a concise, high-level manual of the Task Management syste
 
 ### 7. Notification Visual Categories
 - The notification bell (`NotificationBell.tsx`) styles messages dynamically: assignments, delegations, and transfers display in blue; overdue actions display in red; comments and replies display in purple; and completed tasks display in green.
+
+### 8. Employee Import & Template Download
+- Admins can import multiple employee accounts at once using CSV or Excel files (`ImportEmployeesModal` inside `/employees`).
+- Beside the file upload button, a "Template" button allows downloading a pre-formatted CSV template with standard headers (`name,email,role,department,team,phone,job title`) and a sample row to prevent format clashing.
 
 ---
 

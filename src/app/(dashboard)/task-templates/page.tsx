@@ -5,6 +5,8 @@ import { useTaskStore } from "@/store/useTaskStore";
 import { FileText, Plus, Trash2, X, AlertTriangle, Layers, ListTodo, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { TaskTemplate, Priority } from "@/types";
+import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 export default function TaskTemplatesPage() {
   const { currentUser } = useTaskStore();
@@ -13,6 +15,15 @@ export default function TaskTemplatesPage() {
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // New States for Filtering & Bulk Assignment
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState("ALL");
+  const [selectedTemplateForDetails, setSelectedTemplateForDetails] = useState<TaskTemplate | null>(null);
+  const [showAssignBulkModal, setShowAssignBulkModal] = useState(false);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [dueDate, setDueDate] = useState<string>("");
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
+  const [assigningBulk, setAssigningBulk] = useState(false);
 
   // Add/Edit Template Modal State
   const [isOpen, setIsOpen] = useState(false);
@@ -81,6 +92,13 @@ export default function TaskTemplatesPage() {
       .then((res) => res.json())
       .then((payload) => {
         if (payload.success) setDepartments(payload.data || []);
+      })
+      .catch(console.error);
+
+    fetch("/api/users")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) setEmployees(payload.data || []);
       })
       .catch(console.error);
   }, []);
@@ -196,6 +214,58 @@ export default function TaskTemplatesPage() {
     }
   };
 
+  const toggleEmployeeSelection = (empId: string) => {
+    if (selectedEmployeeIds.includes(empId)) {
+      setSelectedEmployeeIds(selectedEmployeeIds.filter((id) => id !== empId));
+    } else {
+      setSelectedEmployeeIds([...selectedEmployeeIds, empId]);
+    }
+  };
+
+  const handleSelectAll = (deptEmployees: any[]) => {
+    const allIds = deptEmployees.map(e => e.id);
+    const areAllSelected = deptEmployees.every(e => selectedEmployeeIds.includes(e.id));
+    if (areAllSelected) {
+      setSelectedEmployeeIds(selectedEmployeeIds.filter(id => !allIds.includes(id)));
+    } else {
+      setSelectedEmployeeIds([...new Set([...selectedEmployeeIds, ...allIds])]);
+    }
+  };
+
+  const handleBulkAssign = async () => {
+    if (selectedEmployeeIds.length === 0) {
+      toast.error("Please select at least one employee.");
+      return;
+    }
+    setAssigningBulk(true);
+    try {
+      const res = await fetch("/api/tasks/bulk-assign-from-template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateId: selectedTemplateForDetails?.id,
+          employeeIds: selectedEmployeeIds,
+          dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+        }),
+      });
+      const payload = await res.json();
+      if (payload.success) {
+        toast.success(`Task blueprint successfully assigned to ${selectedEmployeeIds.length} employees!`);
+        setShowAssignBulkModal(false);
+        setSelectedTemplateForDetails(null);
+        setSelectedEmployeeIds([]);
+        setDueDate("");
+      } else {
+        toast.error(payload.error || "Failed to assign tasks.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong.");
+    } finally {
+      setAssigningBulk(false);
+    }
+  };
+
   const isAdmin = currentUser?.role === "ADMIN";
 
   const getPriorityColor = (p: Priority) => {
@@ -221,124 +291,152 @@ export default function TaskTemplatesPage() {
           </p>
         </div>
 
-        {isAdmin && (
-          <button
-            onClick={() => { resetForm(); setIsOpen(true); }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
+        <div className="flex items-center gap-3">
+          <select
+            value={selectedDeptFilter}
+            onChange={(e) => setSelectedDeptFilter(e.target.value)}
+            className="h-9 px-3 border border-slate-200 dark:border-slate-855 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs font-semibold focus:outline-none cursor-pointer text-text-primary"
           >
-            <Plus className="w-4 h-4" />
-            New Template
-          </button>
-        )}
+            <option value="ALL">All Departments</option>
+            <option value="General">General</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.name}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
+
+          {isAdmin && (
+            <button
+              onClick={() => { resetForm(); setIsOpen(true); }}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              New Template
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Templates List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {loading ? (
-          <div className="col-span-full text-center py-20 text-slate-400 text-xs">
-            <div className="w-6 h-6 border-2 border-indigo-50 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2" />
-            Loading blueprints...
-          </div>
-        ) : templates.length === 0 ? (
-          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl text-center">
-            <div className="text-4xl mb-3">📋</div>
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-350">No Templates Defined</p>
-            <p className="text-[11px] text-slate-450 dark:text-slate-500 mt-1 max-w-[280px]">
-              Blueprints help team leaders assign standard processes quickly.
-            </p>
-          </div>
-        ) : (
-          templates.map((t) => (
-            <div key={t.id} className="p-5 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl flex flex-col justify-between shadow-xs relative hover:shadow-md transition-shadow">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${getPriorityColor(t.defaultPriority)}`}>
-                    {t.defaultPriority}
-                  </span>
+      {(() => {
+        const filteredTemplates = templates.filter(t => 
+          selectedDeptFilter === "ALL" || t.department === selectedDeptFilter
+        );
 
-                  {isAdmin && (
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => handleStartEdit(t)}
-                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors cursor-pointer"
-                        title="Edit template"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTemplate(t.id)}
-                        className="p-1 hover:bg-rose-50 dark:hover:bg-rose-955/20 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
-                        title="Delete template"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">
-                    {t.name}
-                  </h4>
-                  {t.description && (
-                    <p className="text-[11px] text-slate-450 dark:text-slate-400 mt-1 line-clamp-2">
-                      {t.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-1.5 py-1 text-[10px] font-semibold text-slate-500 dark:text-slate-450 border-t border-slate-100 dark:border-slate-850 pt-2">
-                  <div className="flex items-center gap-1">
-                    <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Dept:</span>
-                    <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-600 dark:text-slate-350">{t.department || "General"}</span>
-                  </div>
-                  {t.recurrence?.rule && t.recurrence.rule !== "NONE" && (
-                    <div className="flex items-center gap-1">
-                      <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Recurrence:</span>
-                      <span className="text-slate-600 dark:text-slate-350">{t.recurrence.rule.toLowerCase()}</span>
-                    </div>
-                  )}
-                  {t.frequency && t.frequency !== "ONE_TIME" && (
-                    <div className="flex items-center gap-1">
-                      <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Frequency:</span>
-                      <span className="text-slate-600 dark:text-slate-350">
-                        {t.frequency === "CUSTOM" && t.customFrequency ? t.customFrequency : t.frequency.toLowerCase()}
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {loading ? (
+              <div className="col-span-full text-center py-20 text-slate-400 text-xs">
+                <div className="w-6 h-6 border-2 border-indigo-50 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2" />
+                Loading blueprints...
+              </div>
+            ) : filteredTemplates.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl text-center">
+                <div className="text-4xl mb-3">📋</div>
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-350">No Templates Found</p>
+                <p className="text-[11px] text-slate-450 dark:text-slate-500 mt-1 max-w-[280px]">
+                  Blueprints help team leaders assign standard processes quickly.
+                </p>
+              </div>
+            ) : (
+              filteredTemplates.map((t) => (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTemplateForDetails(t)}
+                  className="p-5 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl flex flex-col justify-between shadow-xs relative hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${getPriorityColor(t.defaultPriority)}`}>
+                        {t.defaultPriority}
                       </span>
-                    </div>
-                  )}
-                  {t.remindVia && Array.isArray(t.remindVia) && t.remindVia.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Remind:</span>
-                      <span className="text-slate-600 dark:text-slate-350">{t.remindVia.join(", ")}</span>
-                    </div>
-                  )}
-                </div>
 
-                {t.checklistItems && Array.isArray(t.checklistItems) && t.checklistItems.length > 0 && (
-                  <div className="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-850">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                      <ListTodo className="w-3 h-3" />
-                      Blueprints Checklist ({t.checklistItems.length})
-                    </p>
-                    <div className="space-y-1 text-[11px] text-slate-600 dark:text-slate-400 font-semibold max-h-24 overflow-y-auto pr-1">
-                      {t.checklistItems.map((item: any, idx: number) => (
-                        <div key={idx} className="flex items-center gap-1.5">
-                          <span className="w-1 h-1 rounded-full bg-slate-350 dark:bg-slate-600 flex-shrink-0" />
-                          <span className="truncate">{item}</span>
+                      {isAdmin && (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleStartEdit(t); }}
+                            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors cursor-pointer"
+                            title="Edit template"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}
+                            className="p-1 hover:bg-rose-50 dark:hover:bg-rose-955/20 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                            title="Delete template"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
 
-              <div className="text-[10px] text-slate-400 mt-4 pt-2.5 border-t border-slate-150 dark:border-slate-850 font-medium">
-                Created {new Date(t.createdAt).toLocaleDateString()}
-              </div>
-            </div>
-          ))
-        )}
-      </div>   {/* Add/Edit Blueprint Modal */}
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">
+                        {t.name}
+                      </h4>
+                      {t.description && (
+                        <p className="text-[11px] text-slate-450 dark:text-slate-400 mt-1 line-clamp-2">
+                          {t.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 py-1 text-[10px] font-semibold text-slate-500 dark:text-slate-455 border-t border-slate-100 dark:border-slate-850 pt-2">
+                      <div className="flex items-center gap-1">
+                        <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Dept:</span>
+                        <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-600 dark:text-slate-350">{t.department || "General"}</span>
+                      </div>
+                      {t.recurrence?.rule && t.recurrence.rule !== "NONE" && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Recurrence:</span>
+                          <span className="text-slate-600 dark:text-slate-350">{t.recurrence.rule.toLowerCase()}</span>
+                        </div>
+                      )}
+                      {t.frequency && t.frequency !== "ONE_TIME" && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Frequency:</span>
+                          <span className="text-slate-600 dark:text-slate-350">
+                            {t.frequency === "CUSTOM" && t.customFrequency ? t.customFrequency : t.frequency.toLowerCase()}
+                          </span>
+                        </div>
+                      )}
+                      {t.remindVia && Array.isArray(t.remindVia) && t.remindVia.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider">Remind:</span>
+                          <span className="text-slate-600 dark:text-slate-350">{t.remindVia.join(", ")}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {t.checklistItems && Array.isArray(t.checklistItems) && t.checklistItems.length > 0 && (
+                      <div className="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-855">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                          <ListTodo className="w-3 h-3" />
+                          Blueprints Checklist ({t.checklistItems.length})
+                        </p>
+                        <div className="space-y-1 text-[11px] text-slate-600 dark:text-slate-400 font-semibold max-h-24 overflow-y-auto pr-1">
+                          {t.checklistItems.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center gap-1.5">
+                              <span className="w-1 h-1 rounded-full bg-slate-350 dark:bg-slate-600 flex-shrink-0" />
+                              <span className="truncate">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-[10px] text-slate-400 mt-4 pt-2.5 border-t border-slate-150 dark:border-slate-850 font-medium">
+                    Created {new Date(t.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        );
+      })()}
       {(isOpen || !!editingTemplate) && (
         <>
           <div
@@ -547,6 +645,243 @@ export default function TaskTemplatesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </>
+      )}
+
+      {/* Template Details Modal */}
+      {selectedTemplateForDetails && !showAssignBulkModal && (
+        <>
+          <div
+            onClick={() => setSelectedTemplateForDetails(null)}
+            className="fixed inset-0 bg-black/35 backdrop-blur-xs z-50 transition-opacity"
+          />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-lg bg-surface border border-border rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 mb-5 border-b border-border">
+              <span className="text-sm font-extrabold text-text-primary">
+                Blueprint Specifications
+              </span>
+              <button
+                onClick={() => setSelectedTemplateForDetails(null)}
+                className="p-1 hover:bg-bg rounded-xl text-text-tertiary hover:text-text-primary transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              <div>
+                <h3 className="text-sm font-bold text-text-primary">{selectedTemplateForDetails.name}</h3>
+                {selectedTemplateForDetails.description ? (
+                  <p className="text-xs text-text-secondary mt-1 whitespace-pre-wrap">{selectedTemplateForDetails.description}</p>
+                ) : (
+                  <p className="text-xs text-text-tertiary mt-1 italic">No description provided</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
+                <div>
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Priority</span>
+                  <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${getPriorityColor(selectedTemplateForDetails.defaultPriority)}`}>
+                    {selectedTemplateForDetails.defaultPriority}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Department</span>
+                  <span className="inline-block mt-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350 px-2 py-0.5 rounded text-xs font-semibold">
+                    {selectedTemplateForDetails.department || "General"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
+                <div>
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Frequency</span>
+                  <span className="inline-block mt-1 text-xs text-text-secondary font-semibold">
+                    {selectedTemplateForDetails.frequency === "CUSTOM" && selectedTemplateForDetails.customFrequency
+                      ? selectedTemplateForDetails.customFrequency
+                      : (selectedTemplateForDetails.frequency || "ONE_TIME").toLowerCase()}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">Recurrence Rule</span>
+                  <span className="inline-block mt-1 text-xs text-text-secondary font-semibold">
+                    {(selectedTemplateForDetails.recurrence?.rule || "NONE").toLowerCase()}
+                  </span>
+                </div>
+              </div>
+
+              {selectedTemplateForDetails.checklistItems && Array.isArray(selectedTemplateForDetails.checklistItems) && selectedTemplateForDetails.checklistItems.length > 0 && (
+                <div className="pt-3 border-t border-border space-y-2">
+                  <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">
+                    Checklist Items ({selectedTemplateForDetails.checklistItems.length})
+                  </span>
+                  <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                    {selectedTemplateForDetails.checklistItems.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-bg border border-border rounded-xl">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                        <span className="text-xs text-text-secondary truncate">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-5 border-t border-border mt-5">
+              <button
+                onClick={() => setSelectedTemplateForDetails(null)}
+                className="px-5 py-2.5 border border-border-strong hover:bg-bg text-text-secondary hover:text-text-primary font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Close Blueprint
+              </button>
+              {(currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE") && (
+                <button
+                  onClick={() => {
+                    setSelectedEmployeeIds([]);
+                    setDueDate("");
+                    setShowAssignBulkModal(true);
+                  }}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  Assign the task now
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Bulk Assign Modal */}
+      {selectedTemplateForDetails && showAssignBulkModal && (
+        <>
+          <div
+            onClick={() => setShowAssignBulkModal(false)}
+            className="fixed inset-0 bg-black/35 backdrop-blur-xs z-50 transition-opacity"
+          />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-md bg-surface border border-border rounded-3xl shadow-2xl p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+            <div className="flex items-start justify-between pb-3 mb-4 border-b border-border shrink-0">
+              <div>
+                <span className="text-sm font-extrabold text-text-primary block">
+                  Bulk Assignment Blueprint
+                </span>
+                <span className="text-[11px] text-text-tertiary font-semibold block mt-0.5">
+                  Template: {selectedTemplateForDetails.name}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowAssignBulkModal(false)}
+                className="p-1 hover:bg-bg rounded-xl text-text-tertiary hover:text-text-primary transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Form & List */}
+            <div className="space-y-4 overflow-y-auto flex-1 pr-1 pb-4">
+              {/* Due Date picker */}
+              <div>
+                <label className="block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5">
+                  Task Due Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full bg-surface-raised text-text-primary border border-border-strong rounded-xl text-xs font-semibold focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none p-2"
+                />
+              </div>
+
+              {/* Employees List */}
+              <div className="space-y-2">
+                {(() => {
+                  const deptEmployees = employees.filter((e) =>
+                    e.isActive &&
+                    (selectedTemplateForDetails.department === "General" ||
+                      e.department === selectedTemplateForDetails.department)
+                  );
+
+                  if (deptEmployees.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-xs text-rose-500 font-semibold bg-rose-50 dark:bg-rose-955/20 p-3 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                        No active employees found in the "{selectedTemplateForDetails.department || "General"}" department to assign this blueprint to.
+                      </div>
+                    );
+                  }
+
+                  const allSelected = deptEmployees.every((e) => selectedEmployeeIds.includes(e.id));
+
+                  return (
+                    <>
+                      <div className="flex items-center justify-between py-1 px-1 border-b border-border">
+                        <label className="flex items-center gap-2 text-xs font-bold text-text-secondary uppercase select-none cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={() => handleSelectAll(deptEmployees)}
+                            className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                          />
+                          Select All ({deptEmployees.length})
+                        </label>
+                        <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wide">
+                          {selectedEmployeeIds.length} Checked
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                        {deptEmployees.map((emp) => {
+                          const isChecked = selectedEmployeeIds.includes(emp.id);
+                          return (
+                            <label
+                              key={emp.id}
+                              className={cn(
+                                "flex items-center gap-3 p-2 border border-border rounded-xl cursor-pointer hover:bg-bg/40 transition-colors select-none",
+                                isChecked ? "bg-bg/60 border-brand/20" : ""
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleEmployeeSelection(emp.id)}
+                                className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+                              />
+                              <UserAvatar src={emp.avatarUrl} name={emp.name} size="sm" />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-xs font-bold text-text-primary block truncate">
+                                  {emp.name}
+                                </span>
+                                <span className="text-[10px] text-text-tertiary block truncate">
+                                  {emp.jobTitle || "Staff"} &bull; {emp.department || "General"}
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-border shrink-0 bg-bg/15">
+              <button
+                type="button"
+                onClick={() => setShowAssignBulkModal(false)}
+                className="px-5 py-2.5 border border-border-strong hover:bg-bg text-text-secondary hover:text-text-primary font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Back to Specs
+              </button>
+              <button
+                type="button"
+                disabled={assigningBulk || selectedEmployeeIds.length === 0}
+                onClick={handleBulkAssign}
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                {assigningBulk ? "Assigning..." : `Assign tasks (${selectedEmployeeIds.length})`}
+              </button>
+            </div>
           </div>
         </>
       )}
