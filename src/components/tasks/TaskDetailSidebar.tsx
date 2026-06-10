@@ -188,15 +188,17 @@ export function TaskDetailSidebar({
 
       {/* 4. Action Controls Footer in Sidebar */}
       <div className="space-y-2 pt-6 border-t border-border mt-auto">
-        {currentUser?.role === "ADMIN" ? (
+        {currentUser?.role === "ADMIN" && (
           <button
             onClick={handleDeleteTask}
-            className="w-full py-2 border border-[#FECACA] bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none"
+            className="w-full py-2 border border-[#FECACA] bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] text-xs font-semibold rounded transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none mb-3"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Delete Task
           </button>
-        ) : (
+        )}
+
+        {(currentUser?.role !== "ADMIN" || task.delegationPending) && (
           <div className="space-y-3">
             {/* CASE 1: Incoming pending delegation to current user (Employee Y) */}
             {task.delegationPending && task.delegationStatus === "PENDING" && task.delegationToId === currentUser?.id ? (

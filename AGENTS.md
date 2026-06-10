@@ -42,6 +42,8 @@ This document provides a concise, high-level manual of the Task Management syste
 
 ### 1. Task Delegation & Boundaries
 - Employees can delegate active tasks *only* to colleagues inside the **same department**.
+- Admins bypass the same-department restriction when delegating tasks.
+- Manual reassignment or delegation of a task (e.g. by an Admin) automatically resets any active pending or declined delegation states.
 - Toggling delegation status immediately triggers toast updates and dashboard status badge syncs.
 
 ### 2. Task Progress Auto-Calculation

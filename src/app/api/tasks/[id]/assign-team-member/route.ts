@@ -44,9 +44,47 @@ export async function POST(
       data: {
         assigneeId: body.assigneeId,
         department: newAssignee?.department || task.department,
+        delegationPending: false,
+        delegationStatus: null,
+        delegationToId: null,
+        delegationFromId: null,
       },
       include: {
-        assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
+        assignee: {
+          select: { id: true, name: true, email: true, avatarUrl: true, department: true, jobTitle: true },
+        },
+        creator: {
+          select: { id: true, name: true, email: true, avatarUrl: true },
+        },
+        subTasks: {
+          include: {
+            assignee: { select: { id: true, name: true, avatarUrl: true } }
+          }
+        },
+        updates: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: {
+              select: { id: true, name: true, avatarUrl: true, role: true },
+            },
+            comments: {
+              orderBy: { createdAt: "asc" },
+              include: {
+                user: {
+                  select: { id: true, name: true, avatarUrl: true, role: true },
+                },
+              },
+            },
+          },
+        },
+        attachments: true,
+        comments: {
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true } },
+          },
+          orderBy: { createdAt: "asc" },
+        },
+        reminderSettings: true,
       },
     });
 

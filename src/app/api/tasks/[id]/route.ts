@@ -171,6 +171,10 @@ export async function PATCH(
           updateData.department = newAssignee.department;
         }
       }
+      updateData.delegationPending = false;
+      updateData.delegationStatus = null;
+      updateData.delegationToId = null;
+      updateData.delegationFromId = null;
     }
     if (body.tags !== undefined) updateData.tags = body.tags;
     if (body.checklistItems !== undefined) updateData.checklistItems = body.checklistItems;

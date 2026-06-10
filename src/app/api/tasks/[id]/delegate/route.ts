@@ -62,12 +62,12 @@ export async function POST(
         );
       }
 
-      // Verify they are in the same department
+      // Verify they are in the same department (bypassed for ADMIN role)
       const currentUser = await prisma.user.findUnique({
         where: { id: currentUserId }
       });
 
-      if (!currentUser || currentUser.department !== colleague.department) {
+      if (session.role !== "ADMIN" && (!currentUser || currentUser.department !== colleague.department)) {
         return NextResponse.json<ApiResponse<null>>(
           { success: false, error: "You can only delegate tasks to colleagues in the same department." },
           { status: 403 }
