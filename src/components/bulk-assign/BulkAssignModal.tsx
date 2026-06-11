@@ -8,6 +8,7 @@ import { Check, X, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { TaskTemplate, Priority } from "@/types";
+import { uploadFiles } from "@/lib/uploadthing-client";
 
 // Step Components
 import { DeptModeStep } from "./DeptModeStep";
@@ -15,6 +16,7 @@ import { TemplateChecklistStep } from "./TemplateChecklistStep";
 import { TitlesStep } from "./TitlesStep";
 import { DescriptionsStep } from "./DescriptionsStep";
 import { TaskDetailsStep } from "./TaskDetailsStep";
+import { AttachmentsStep } from "./AttachmentsStep";
 import { ReviewStep } from "./ReviewStep";
 
 interface BulkAssignModalProps {
@@ -29,6 +31,8 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
     titles,
     descriptions,
     details,
+    files,
+    voiceRecordings,
     setTasks,
     reset,
   } = useBulkAssign();
@@ -53,7 +57,7 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
       .catch((err) => console.error("Failed to fetch templates:", err));
   }, []);
 
-  // Dynamic step definitions based on chosen mode
+  // Dynamic step definitions based on chosen mode (now 6 steps!)
   const getSteps = () => {
     if (mode === "template") {
       return [
@@ -61,6 +65,7 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
         { key: "templates", label: "Templates" },
         { key: "descriptions", label: "Descriptions" },
         { key: "details", label: "Details" },
+        { key: "attachments", label: "Attachments" },
         { key: "review", label: "Review" },
       ];
     }
@@ -70,6 +75,7 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
       { key: "titles", label: "Titles" },
       { key: "descriptions", label: "Descriptions" },
       { key: "details", label: "Details" },
+      { key: "attachments", label: "Attachments" },
       { key: "review", label: "Review" },
     ];
   };
@@ -153,16 +159,47 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
     setSubmitting(true);
 
     try {
-      // Filter out tasks without titles
+      // Upload attachments per task first
       const tasksPayload = [];
       for (let i = 0; i < titles.length; i++) {
         if (titles[i].trim()) {
+          const taskFiles = files[i] || [];
+          const taskVoices = voiceRecordings[i] || [];
+          const filesToUpload: File[] = [];
+
+          taskFiles.forEach((file) => filesToUpload.push(file));
+          taskVoices.forEach((v) => {
+            const file = new File([v.blob], v.name, { type: v.blob.type });
+            filesToUpload.push(file);
+          });
+
+          let uploadedAttachments: any[] = [];
+          if (filesToUpload.length > 0) {
+            toast.info(`Uploading attachments for Task T${i + 1}...`);
+            const uploadRes = await uploadFiles("taskAttachment", {
+              files: filesToUpload,
+            });
+            uploadedAttachments = uploadRes.map((res) => ({
+              url: res.url,
+              filename: res.name,
+            }));
+          }
+
           tasksPayload.push({
             title: titles[i].trim(),
             description: descriptions[i]?.trim() || null,
             priority: details[i]?.priority || "MEDIUM",
             assigneeId: details[i]?.assigneeId || null,
             dueDate: details[i]?.dueDate || null,
+            frequency: details[i]?.frequency || "ONE_TIME",
+            customFrequency: details[i]?.customFrequency || "",
+            recurrenceRule: details[i]?.recurrenceRule || "NONE",
+            reminderSettings: details[i]?.reminderSettings || null,
+            remindVia: [
+              details[i]?.remindWhatsApp && "whatsapp",
+              details[i]?.remindEmail && "email",
+            ].filter(Boolean),
+            attachments: uploadedAttachments,
           });
         }
       }
@@ -219,6 +256,8 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
         return <DescriptionsStep />;
       case "details":
         return <TaskDetailsStep />;
+      case "attachments":
+        return <AttachmentsStep />;
       case "review":
         return <ReviewStep />;
       default:
@@ -242,7 +281,7 @@ export function BulkAssignModal({ onClose }: BulkAssignModalProps) {
 
       {/* Main modal container */}
       <div
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[540px] max-h-[85vh] overflow-y-auto bg-surface rounded-xl shadow-lg flex flex-col animate-in zoom-in-95 duration-150 border border-border"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[650px] max-h-[85vh] overflow-y-auto bg-surface rounded-xl shadow-lg flex flex-col animate-in zoom-in-95 duration-150 border border-border"
         style={{ zIndex: "var(--z-modal)" }}
       >
         {/* Header */}

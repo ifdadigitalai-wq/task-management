@@ -3,6 +3,8 @@ import { getSession } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { hasPermission } from "@/lib/rbac";
 import { Priority, TaskStatus } from "@/types";
+import { sendWhatsAppTaskReminder } from "@/lib/whatsapp";
+import { sendEmailTaskReminder } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -26,8 +28,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Invalid mode. Must be 'template' or 'custom'." }, { status: 400 });
     }
 
-    const createdTasksCount = await prisma.$transaction(async (tx) => {
-      let count = 0;
+    const createdTasksResult = await prisma.$transaction(async (tx) => {
+      const createdTasksList = [];
 
       // In either mode, if the frontend sends the resolved and customized tasks array, use it!
       if (Array.isArray(tasks) && tasks.length > 0) {
@@ -48,9 +50,32 @@ export async function POST(req: Request) {
               creatorId: session.id,
               progress: 0,
               isSubtask: false,
+              frequency: taskObj.frequency || "ONE_TIME",
+              customFrequency: taskObj.customFrequency || null,
+              recurrence: taskObj.recurrenceRule && taskObj.recurrenceRule !== "NONE" ? { rule: taskObj.recurrenceRule } : undefined,
+              attachments: taskObj.attachments && taskObj.attachments.length > 0
+                ? {
+                    create: taskObj.attachments.map((att: any) => ({
+                      url: att.url,
+                      filename: att.filename || "attachment",
+                      uploadedBy: session.name,
+                    })),
+                  }
+                : undefined,
+              reminderSettings: taskObj.reminderSettings
+                ? {
+                    create: {
+                      beforeDueDate: taskObj.reminderSettings.beforeDueDate ?? true,
+                      onDueDate: taskObj.reminderSettings.onDueDate ?? true,
+                      recurring: taskObj.reminderSettings.recurring ?? false,
+                      emailNotification: taskObj.reminderSettings.emailNotification ?? false,
+                      inAppNotification: taskObj.reminderSettings.inAppNotification ?? true,
+                    },
+                  }
+                : undefined,
             },
             include: {
-              assignee: { select: { id: true, name: true, role: true } },
+              assignee: { select: { id: true, name: true, email: true, phone: true, role: true } },
             },
           });
 
@@ -77,7 +102,11 @@ export async function POST(req: Request) {
               },
             });
           }
-          count++;
+
+          createdTasksList.push({
+            task,
+            remindVia: taskObj.remindVia || [],
+          });
         }
       } else if (mode === "template") {
         // Fallback: Resolve template items on the database side if tasks array is not provided
@@ -104,6 +133,9 @@ export async function POST(req: Request) {
                   progress: 0,
                   isSubtask: false,
                 },
+                include: {
+                  assignee: { select: { id: true, name: true, email: true, phone: true, role: true } },
+                },
               });
 
               await tx.activity.create({
@@ -116,7 +148,11 @@ export async function POST(req: Request) {
                   meta: { title: task.title },
                 },
               });
-              count++;
+
+              createdTasksList.push({
+                task,
+                remindVia: [],
+              });
             }
           } else {
             // Fallback for single task templates (without items)
@@ -132,6 +168,9 @@ export async function POST(req: Request) {
                 progress: 0,
                 isSubtask: false,
               },
+              include: {
+                assignee: { select: { id: true, name: true, email: true, phone: true, role: true } },
+              },
             });
 
             await tx.activity.create({
@@ -144,7 +183,11 @@ export async function POST(req: Request) {
                 meta: { title: task.title },
               },
             });
-            count++;
+
+            createdTasksList.push({
+              task,
+              remindVia: [],
+            });
           }
         }
       } else {
@@ -157,14 +200,57 @@ export async function POST(req: Request) {
           action: "BULK_ASSIGN_TASKS",
           entityType: "TASK",
           performedBy: session.name,
-          details: { count, department, mode, templatesCount: selectedTemplates?.length || 0 },
+          details: { count: createdTasksList.length, department, mode, templatesCount: selectedTemplates?.length || 0 },
         },
       });
 
-      return count;
+      return createdTasksList;
     });
 
-    return NextResponse.json({ success: true, data: { count: createdTasksCount } });
+    // Send WhatsApp/Email reminders outside of database transaction
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    for (const item of createdTasksResult) {
+      const { task, remindVia } = item;
+      if (task.assigneeId && task.assignee && Array.isArray(remindVia) && remindVia.length > 0) {
+        const taskLink = task.assignee.role === "ADMIN"
+          ? `${appUrl}/all-tasks?taskId=${task.id}`
+          : `${appUrl}/my-tasks?taskId=${task.id}`;
+
+        if (remindVia.includes("whatsapp") && task.assignee.phone) {
+          try {
+            await sendWhatsAppTaskReminder({
+              employeePhone: task.assignee.phone,
+              employeeName: task.assignee.name,
+              taskTitle: task.title,
+              taskDescription: task.description,
+              taskPriority: task.priority,
+              taskDueDate: task.dueDate,
+              taskLink,
+            });
+          } catch (err) {
+            console.error("WhatsApp reminder sending failed:", err);
+          }
+        }
+
+        if (remindVia.includes("email") && task.assignee.email) {
+          try {
+            await sendEmailTaskReminder({
+              employeeEmail: task.assignee.email,
+              employeeName: task.assignee.name,
+              taskTitle: task.title,
+              taskDescription: task.description,
+              taskPriority: task.priority,
+              taskDueDate: task.dueDate,
+              taskLink,
+            });
+          } catch (err) {
+            console.error("Email reminder sending failed:", err);
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, data: { count: createdTasksResult.length } });
   } catch (error: any) {
     console.error("[POST BULK ASSIGN ERROR]", error);
     return NextResponse.json({ success: false, error: error.message || "Internal Server Error" }, { status: 500 });

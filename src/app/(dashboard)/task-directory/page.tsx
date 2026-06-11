@@ -326,7 +326,7 @@ export default function TaskDirectoryPage() {
               onChange={(e) => setSelectedTag(e.target.value)}
               className="appearance-none px-3.5 py-1.5 pr-8 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer"
             >
-              <option value="ALL">All Tag Categories</option>
+              <option value="ALL">Department</option>
               {allTags.map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}

@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
-import { FileText, Plus, Trash2, X, AlertTriangle, Layers, ListTodo, Pencil } from "lucide-react";
+import { FileText, Plus, Trash2, X, AlertTriangle, Layers, ListTodo, Pencil, Upload, Download } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { TaskTemplate, Priority } from "@/types";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import * as XLSX from "xlsx";
 
 export default function TaskTemplatesPage() {
   const { currentUser } = useTaskStore();
@@ -15,6 +16,7 @@ export default function TaskTemplatesPage() {
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImport, setShowImport] = useState(false);
 
   // New States for Filtering & Bulk Assignment
   const [selectedDeptFilter, setSelectedDeptFilter] = useState("ALL");
@@ -307,13 +309,23 @@ export default function TaskTemplatesPage() {
           </select>
 
           {isAdmin && (
-            <button
-              onClick={() => { resetForm(); setIsOpen(true); }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              New Template
-            </button>
+            <>
+              <button
+                onClick={() => setShowImport(true)}
+                className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-bg dark:hover:bg-slate-800 rounded-xl text-xs font-bold active:scale-95 transition-all cursor-pointer"
+              >
+                <Upload className="w-4 h-4" />
+                Import Templates
+              </button>
+
+              <button
+                onClick={() => { resetForm(); setIsOpen(true); }}
+                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                New Template
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -885,6 +897,188 @@ export default function TaskTemplatesPage() {
           </div>
         </>
       )}
+      {showImport && (
+        <ImportTemplatesModal
+          onClose={() => setShowImport(false)}
+          onImported={fetchTemplates}
+        />
+      )}
     </div>
+  );
+}
+
+function ImportTemplatesModal({
+  onClose,
+  onImported,
+}: {
+  onClose: () => void;
+  onImported: () => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const toast = useToast();
+
+  const handleDownloadTemplate = () => {
+    const headers = [
+      "name",
+      "description",
+      "defaultPriority",
+      "department",
+      "frequency",
+      "customFrequency",
+      "recurrence",
+      "remindVia",
+      "checklistItems"
+    ];
+    const exampleRow = [
+      "Weekly Server Maintenance",
+      "Perform routine database optimization and security scans",
+      "MEDIUM",
+      "Engineering",
+      "WEEKLY",
+      "",
+      "WEEKLY",
+      "whatsapp,email",
+      "Check disk usage|Run apt-get update|Verify backup integrity|Restart services"
+    ];
+    const csvContent = [
+      headers.join(","),
+      exampleRow.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "task_template_import_template.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("CSV import template downloaded.");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setImporting(true);
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: "binary" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json<any>(ws);
+
+        const parsed = data.map((row: any) => {
+          const getVal = (keys: string[]) => {
+            const key = Object.keys(row).find(k => keys.includes(k.toLowerCase().trim()));
+            return key ? row[key] : null;
+          };
+
+          return {
+            name: getVal(["name", "template name", "title", "blueprint name"]),
+            description: getVal(["description", "desc", "details"]),
+            defaultPriority: getVal(["defaultpriority", "priority", "default priority"]) || "MEDIUM",
+            department: getVal(["department", "dept"]) || "General",
+            frequency: getVal(["frequency", "task frequency"]) || "ONE_TIME",
+            customFrequency: getVal(["customfrequency", "custom frequency"]),
+            recurrence: getVal(["recurrence", "recurrence rule", "recurrenceRule"]) || "NONE",
+            remindVia: getVal(["remindvia", "remind via", "remind"]),
+            checklistItems: getVal(["checklistitems", "checklist items", "checklist", "subtasks"]),
+          };
+        }).filter(t => t.name && String(t.name).trim());
+
+        if (parsed.length === 0) {
+          toast.error("No valid templates found. Make sure to have a 'name' column.");
+          setImporting(false);
+          return;
+        }
+
+        const res = await fetch("/api/task-templates/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ templates: parsed }),
+        });
+
+        const payload = await res.json();
+        if (payload.success) {
+          toast.success(`Successfully imported ${payload.data.importedCount} task templates!`);
+          onImported();
+          onClose();
+        } else {
+          toast.error(payload.error || "Failed to import templates.");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Error parsing file.");
+      } finally {
+        setImporting(false);
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  return (
+    <>
+      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[3px] z-50" />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-55 w-full max-w-[420px] bg-surface border border-border rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-border">
+          <h3 className="text-sm font-extrabold text-text-primary">Import Task Blueprints</h3>
+          <button onClick={onClose} className="p-1 hover:bg-bg rounded-xl text-text-tertiary hover:text-text-primary transition-colors cursor-pointer">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4 mb-6">
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Select a CSV or Excel (.xlsx/.xls) file containing task blueprints. Column headers must include <strong>name</strong>. Multiple sub-tasks should be pipe-separated (e.g. <code>Item 1|Item 2</code>).
+          </p>
+
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <input
+                type="file"
+                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                onChange={handleFileChange}
+                className="w-full text-xs text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-border-strong file:text-xs file:font-semibold file:bg-bg file:text-text-primary file:cursor-pointer"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleDownloadTemplate}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold border border-indigo-100 dark:border-indigo-900/50 active:scale-95 transition-all whitespace-nowrap cursor-pointer"
+              title="Download CSV Template"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Template
+            </button>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-border">
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 border border-border-strong hover:bg-bg text-text-secondary hover:text-text-primary font-bold text-xs rounded-xl transition-all cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpload}
+            disabled={importing || !file}
+            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+          >
+            {importing ? "Importing..." : "Upload & Import"}
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

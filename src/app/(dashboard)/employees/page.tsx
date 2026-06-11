@@ -275,15 +275,15 @@ function ImportEmployeesModal({
   const toast = useToast();
 
   const handleDownloadTemplate = () => {
-    const headers = ["name", "email", "role", "department", "team", "phone", "job title"];
+    const headers = ["name", "email", "role", "department","phone", "job title","password"];
     const exampleRow = [
       "John Doe",
       "john.doe@example.com",
       "EMPLOYEE",
       "Engineering",
-      "Frontend",
       "1234567890",
-      "Senior Engineer"
+      "Senior Engineer",
+      "ifda@2026"
     ];
     const csvContent = [
       headers.join(","),

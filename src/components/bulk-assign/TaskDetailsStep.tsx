@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useBulkAssign, TaskDetail } from "./useBulkAssign";
+import { useBulkAssign } from "./useBulkAssign";
 import { User as UserType, Priority } from "@/types";
-import { Check, CheckCircle2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AutoReminderSettings } from "@/components/tasks/AutoReminderSettings";
+import { FormField } from "@/components/ui/FormField";
 
 export function TaskDetailsStep() {
   const {
@@ -36,11 +38,22 @@ export function TaskDetailsStep() {
     (emp) => emp.isActive && emp.department === dept
   );
 
-  const activeTaskTitle = titles[activeTaskIndex] || `Task ${activeTaskIndex + 1}`;
   const activeTaskDetails = details[activeTaskIndex] || {
     priority: "MEDIUM",
     assigneeId: "",
     dueDate: null,
+    frequency: "ONE_TIME",
+    customFrequency: "",
+    recurrenceRule: "NONE",
+    reminderSettings: {
+      beforeDueDate: true,
+      onDueDate: true,
+      recurring: false,
+      emailNotification: false,
+      inAppNotification: true,
+    },
+    remindWhatsApp: false,
+    remindEmail: false,
   };
 
   // Helper to check if a task has an assignee assigned (meaning it is filled)
@@ -53,7 +66,7 @@ export function TaskDetailsStep() {
       {/* Dropdown at top */}
       <div className="space-y-1.5">
         <label className="text-[11px] font-bold uppercase tracking-[0.06em] text-text-tertiary block">
-          Editing Task
+          Editing Task Details
         </label>
         <select
           value={activeTaskIndex}
@@ -69,7 +82,7 @@ export function TaskDetailsStep() {
       </div>
 
       {/* Editing Card */}
-      <div className="p-5 bg-surface-raised border border-border-strong rounded-2xl space-y-4">
+      <div className="p-5 bg-surface-raised border border-border-strong rounded-2xl space-y-4 max-h-[350px] overflow-y-auto pr-1">
         {/* Priority buttons */}
         <div className="space-y-1.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-text-tertiary block">
@@ -135,6 +148,119 @@ export function TaskDetailsStep() {
             className="w-full bg-surface text-text-primary border border-border-strong rounded-xl text-xs font-semibold focus:border-brand focus:ring-2 p-2"
           />
         </div>
+
+        {/* Recurrence and Frequency Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          {/* Recurrence */}
+          <FormField label="Recurrence">
+            <select
+              value={activeTaskDetails.recurrenceRule || "NONE"}
+              onChange={(e) => setDetailField(activeTaskIndex, "recurrenceRule", e.target.value)}
+              className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 text-xs font-semibold"
+            >
+              <option value="NONE">No Recurrence</option>
+              <option value="DAILY">Daily</option>
+              <option value="WEEKLY">Weekly</option>
+              <option value="MONTHLY">Monthly</option>
+            </select>
+          </FormField>
+
+          {/* Frequency */}
+          <FormField label="Task Frequency">
+            <select
+              value={activeTaskDetails.frequency || "ONE_TIME"}
+              onChange={(e) => setDetailField(activeTaskIndex, "frequency", e.target.value)}
+              className="block w-full h-[34px] cursor-pointer focus:border-brand focus:ring-2 focus:ring-brand/10 text-xs font-semibold"
+            >
+              <option value="ONE_TIME">One Time</option>
+              <option value="DAILY">Daily</option>
+              <option value="WEEKLY">Weekly</option>
+              <option value="MONTHLY">Monthly</option>
+              <option value="QUARTERLY">Quarterly</option>
+              <option value="YEARLY">Yearly</option>
+              <option value="CUSTOM">Custom Frequency</option>
+            </select>
+          </FormField>
+        </div>
+
+        {/* Custom Frequency Input */}
+        {activeTaskDetails.frequency === "CUSTOM" && (
+          <FormField label="Custom Frequency Rule" required>
+            <input
+              type="text"
+              placeholder="e.g. Every 2 weeks on Tuesday"
+              value={activeTaskDetails.customFrequency || ""}
+              onChange={(e) => setDetailField(activeTaskIndex, "customFrequency", e.target.value)}
+              required
+              className="block w-full h-[34px] focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none text-xs font-semibold"
+            />
+          </FormField>
+        )}
+
+        {/* Auto Reminder Settings Component */}
+        <div className="pt-1">
+          <AutoReminderSettings
+            reminderBeforeDue={activeTaskDetails.reminderSettings.beforeDueDate}
+            setReminderBeforeDue={(val) =>
+              setDetailField(activeTaskIndex, "reminderSettings", {
+                ...activeTaskDetails.reminderSettings,
+                beforeDueDate: val,
+              })
+            }
+            reminderOnDue={activeTaskDetails.reminderSettings.onDueDate}
+            setReminderOnDue={(val) =>
+              setDetailField(activeTaskIndex, "reminderSettings", {
+                ...activeTaskDetails.reminderSettings,
+                onDueDate: val,
+              })
+            }
+            reminderRecurring={activeTaskDetails.reminderSettings.recurring}
+            setReminderRecurring={(val) =>
+              setDetailField(activeTaskIndex, "reminderSettings", {
+                ...activeTaskDetails.reminderSettings,
+                recurring: val,
+              })
+            }
+            reminderEmail={activeTaskDetails.reminderSettings.emailNotification}
+            setReminderEmail={(val) =>
+              setDetailField(activeTaskIndex, "reminderSettings", {
+                ...activeTaskDetails.reminderSettings,
+                emailNotification: val,
+              })
+            }
+            reminderInApp={activeTaskDetails.reminderSettings.inAppNotification}
+            setReminderInApp={(val) =>
+              setDetailField(activeTaskIndex, "reminderSettings", {
+                ...activeTaskDetails.reminderSettings,
+                inAppNotification: val,
+              })
+            }
+          />
+        </div>
+
+        {/* Remind Employee Via checkboxes */}
+        <FormField label="Remind Employee Via">
+          <div className="flex items-center gap-6 py-1">
+            <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+              <input
+                type="checkbox"
+                checked={activeTaskDetails.remindWhatsApp}
+                onChange={(e) => setDetailField(activeTaskIndex, "remindWhatsApp", e.target.checked)}
+                className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+              />
+              WhatsApp Message
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer text-[12px] text-text-primary font-medium select-none">
+              <input
+                type="checkbox"
+                checked={activeTaskDetails.remindEmail}
+                onChange={(e) => setDetailField(activeTaskIndex, "remindEmail", e.target.checked)}
+                className="rounded text-brand focus:ring-brand/30 h-3.5 w-3.5 cursor-pointer"
+              />
+              Email Notification
+            </label>
+          </div>
+        </FormField>
       </div>
 
       {/* Pill tabs shortcuts */}
