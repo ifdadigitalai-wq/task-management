@@ -36,6 +36,9 @@ This document provides a concise, high-level manual of the Task Management syste
 ### `Activity`
 - **Properties**: Log transaction for mutation records (`userId`, `action` like `CREATE_TASK`, `STOP_TASK_TIMER`, `entityType`, `meta` JSON payload).
 
+### `TaskTemplate` & `TaskTemplateItem`
+- **Properties**: `id`, `name`, `createdAt`, `departmentId` (optional), and relation to `TaskTemplateItem` (`title`, `description`, `priority` as a string). Used for storing reusable multi-task checklists.
+
 ---
 
 ## 🔄 Core Business Workflows
@@ -71,6 +74,12 @@ This document provides a concise, high-level manual of the Task Management syste
 ### 8. Employee Import & Template Download
 - Admins can import multiple employee accounts at once using CSV or Excel files (`ImportEmployeesModal` inside `/employees`).
 - Beside the file upload button, a "Template" button allows downloading a pre-formatted CSV template with standard headers (`name,email,role,department,team,phone,job title`) and a sample row to prevent format clashing.
+
+### 9. Bulk Task Assignment Workflow
+- Administrators and Managers can bulk-assign tasks via a multi-step modal (`BulkAssignModal.tsx`) triggered by the "Assign tasks" button in `TopNav.tsx`.
+- **Template Path**: Allows selecting multiple saved task templates under the chosen department, automatically creating a `Task` for each `TaskTemplateItem` (or legacy single template) in a single transaction (`POST /api/tasks/bulk-assign`).
+- **Custom Path**: Allows entering custom task titles (Step 2), descriptions (Step 3), priorities, assignees, and due dates (Step 4) via an interactive detail card.
+- **Template Save**: Allows saving custom task sets as a reusable `TaskTemplate` blueprint (`POST /api/templates/save`).
 
 ---
 

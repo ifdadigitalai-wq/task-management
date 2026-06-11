@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useTaskStore } from "@/store/useTaskStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { AssignTaskModal } from "@/components/AssignTaskModal";
+import { BulkAssignModal } from "@/components/bulk-assign/BulkAssignModal";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -16,6 +17,7 @@ import { Notification } from "@/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/hooks/useToast";
+import { hasPermission } from "@/lib/rbac";
 
 export function TopNav() {
   const pathname = usePathname();
@@ -25,6 +27,7 @@ export function TopNav() {
   const { toggleSidebar } = useThemeStore();
 
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showBulkAssignModal, setShowBulkAssignModal] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -352,27 +355,29 @@ export function TopNav() {
 
       {/* Right Action Items */}
       <div className="flex items-center gap-2.5 shrink-0">
-        {/* Create Task */}
-        {(currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE") && (
+        {/* Create Tasks (Bulk) */}
+        {currentUser && hasPermission(currentUser.role as any, "bulk_assign") && (
           <button
-            onClick={() => setShowAssignModal(true)}
+            onClick={() => setShowBulkAssignModal(true)}
             className="flex items-center gap-2 font-semibold rounded-lg transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 hover:scale-[1.02] active:scale-95"
             style={{
-              background: "#4F46E5",
+              background: "#10B981",
               color: "#FFFFFF",
               border: "none",
               padding: "8px 16px",
               fontSize: "0.875rem",
               fontWeight: 600,
               borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)",
+              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
               minHeight: "36px",
             }}
           >
             <Plus className="w-4 h-4" />
-            Assign task
+            Assign tasks
           </button>
         )}
+
+
 
         {/* Notifications */}
         <NotificationBell
@@ -452,6 +457,11 @@ export function TopNav() {
       {/* Assign Task Modal */}
       {showAssignModal && (
         <AssignTaskModal onClose={() => setShowAssignModal(false)} />
+      )}
+
+      {/* Bulk Assign Tasks Modal */}
+      {showBulkAssignModal && (
+        <BulkAssignModal onClose={() => setShowBulkAssignModal(false)} />
       )}
     </div>
   );

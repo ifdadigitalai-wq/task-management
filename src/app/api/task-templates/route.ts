@@ -15,6 +15,7 @@ export async function GET() {
 
     const templates = await prisma.taskTemplate.findMany({
       orderBy: { createdAt: "desc" },
+      include: { items: true },
     });
 
     return NextResponse.json<ApiResponse<any[]>>({

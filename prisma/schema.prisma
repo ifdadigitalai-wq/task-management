@@ -242,23 +242,36 @@ model TaskTimer {
 }
 
 model TaskTemplate {
-  id              String    @id @default(cuid())
+  id              String             @id @default(cuid())
   name            String
   description     String?
-  defaultPriority Priority  @default(MEDIUM)
-  checklistItems  Json?     // Array of checklist items: string[]
+  defaultPriority Priority           @default(MEDIUM)
+  checklistItems  Json?              // Array of checklist items: string[]
   createdById     String?
-  createdBy       User?     @relation(fields: [createdById], references: [id])
+  createdBy       User?              @relation(fields: [createdById], references: [id])
   tasks           Task[]
-  createdAt       DateTime  @default(now())
+  createdAt       DateTime           @default(now())
 
   // New fields
-  department      String    @default("General")
-  frequency       Frequency @default(ONE_TIME)
+  department      String             @default("General")
+  frequency       Frequency          @default(ONE_TIME)
   customFrequency String?
-  recurrence      Json?     // Recurrence rule
-  remindVia       Json?     // remind employee via e.g. ["whatsapp", "email"]
+  recurrence      Json?              // Recurrence rule
+  remindVia       Json?              // remind employee via e.g. ["whatsapp", "email"]
+
+  departmentId    String?
+  items           TaskTemplateItem[]
 }
+
+model TaskTemplateItem {
+  id          String       @id @default(cuid())
+  templateId  String
+  template    TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  priority    String
+}
+
 
 model Notification {
   id        String   @id @default(cuid())

@@ -166,6 +166,14 @@ export interface TaskTimer {
   durationMinutes: number;
 }
 
+export interface TaskTemplateItem {
+  id: string;
+  templateId: string;
+  title: string;
+  description?: string | null;
+  priority: string;
+}
+
 export interface TaskTemplate {
   id: string;
   name: string;
@@ -182,6 +190,9 @@ export interface TaskTemplate {
   customFrequency?: string | null;
   recurrence?: any;     // JSON representation
   remindVia?: any;      // JSON representation of string[]
+
+  departmentId?: string | null;
+  items?: TaskTemplateItem[];
 }
 
 export interface Notification {
