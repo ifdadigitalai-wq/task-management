@@ -94,9 +94,11 @@ export async function GET(
       task.updates = task.updates.filter(
         (up: any) => up.user.role === "ADMIN" || up.userId === session.id || up.userId === task.assigneeId || up.userId === task.creatorId
       );
-      task.subTasks = task.subTasks.filter(
-        (sub: any) => sub.assigneeId === session.id || sub.assigneeId === task.assigneeId
-      );
+      if (task.assigneeId !== session.id && task.creatorId !== session.id) {
+        task.subTasks = task.subTasks.filter(
+          (sub: any) => sub.assigneeId === session.id || sub.assigneeId === task.assigneeId
+        );
+      }
     }
 
     return NextResponse.json<ApiResponse<any>>({
@@ -135,8 +137,25 @@ export async function PATCH(
       );
     }
 
-    // Employees can only edit tasks assigned to them or created by them
-    if (session.role === "EMPLOYEE" && existingTask.assigneeId !== session.id && existingTask.creatorId !== session.id) {
+    // Employees can only edit tasks assigned to them or created by them, or if it is a subtask of a task assigned to/created by them
+    let isAllowed = false;
+    if (session.role !== "EMPLOYEE") {
+      isAllowed = true;
+    } else {
+      if (existingTask.assigneeId === session.id || existingTask.creatorId === session.id) {
+        isAllowed = true;
+      } else if (existingTask.parentTaskId) {
+        const parentTask = await prisma.task.findUnique({
+          where: { id: existingTask.parentTaskId },
+          select: { assigneeId: true, creatorId: true }
+        });
+        if (parentTask && (parentTask.assigneeId === session.id || parentTask.creatorId === session.id)) {
+          isAllowed = true;
+        }
+      }
+    }
+
+    if (!isAllowed) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: "Forbidden. You cannot edit this task." },
         { status: 403 }
@@ -183,6 +202,7 @@ export async function PATCH(
     if (body.frequency !== undefined) updateData.frequency = body.frequency;
     if (body.customFrequency !== undefined) updateData.customFrequency = body.customFrequency;
     if (body.progress !== undefined) updateData.progress = body.progress;
+    if (body.remark !== undefined) updateData.remark = body.remark;
     if (body.attachments !== undefined) {
       updateData.attachments = {
         deleteMany: {},

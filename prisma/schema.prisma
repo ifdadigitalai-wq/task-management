@@ -124,6 +124,7 @@ model Task {
   customFrequency  String?
   progress         Int            @default(0)
   isSubtask        Boolean        @default(false)
+  remark           String?
 
   // Delegation fields
   delegationPending   Boolean      @default(false)

@@ -33,6 +33,10 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Parent task not found" }, { status: 404 });
     }
 
+    if (session.role === "EMPLOYEE" && parentTask.assigneeId !== session.id && parentTask.creatorId !== session.id) {
+      return NextResponse.json({ success: false, error: "Forbidden. You cannot add subtasks to this task." }, { status: 403 });
+    }
+
     const subtask = await prisma.task.create({
       data: {
         title: body.title,

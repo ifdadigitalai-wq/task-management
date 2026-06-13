@@ -81,6 +81,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
     handleDeleteTask,
     handleUpdateStatus,
     handleToggleSubtaskStatus,
+    handleSaveSubtaskRemark,
     currentUser,
   } = useTaskDetail(onClose);
 
@@ -254,6 +255,7 @@ export function TaskDetailPanel({ onClose }: { onClose: () => void }) {
                     handleChecklistToggle={handleChecklistToggle}
                     subtasks={subtasks}
                     handleToggleSubtaskStatus={handleToggleSubtaskStatus}
+                    handleSaveSubtaskRemark={handleSaveSubtaskRemark}
                   />
                 )}
               </div>

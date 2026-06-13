@@ -117,6 +117,15 @@ export async function updateStatus(taskId: string, status: TaskStatus) {
   return res.json();
 }
 
+export async function patchTaskRemark(taskId: string, remark: string) {
+  const res = await fetch(`/api/tasks/${taskId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remark }),
+  });
+  return res.json();
+}
+
 export async function uploadAttachments(taskId: string, attachments: any[]) {
   const res = await fetch(`/api/tasks/${taskId}/attachments`, {
     method: "POST",

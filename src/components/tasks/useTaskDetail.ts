@@ -486,6 +486,22 @@ export function useTaskDetail(onClose: () => void) {
     }
   };
 
+  const handleSaveSubtaskRemark = async (subtaskId: string, remark: string) => {
+    try {
+      const payload = await api.patchTaskRemark(subtaskId, remark);
+      if (payload.success) {
+        const updatedSubtasks = subtasks.map((s) => (s.id === subtaskId ? payload.data : s));
+        setSubtasks(updatedSubtasks);
+        toast.success("Subtask remark updated successfully!");
+      } else {
+        toast.error(payload.error || "Failed to update remark.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update subtask remark.");
+    }
+  };
+
   return {
     task,
     setTask,
@@ -560,6 +576,7 @@ export function useTaskDetail(onClose: () => void) {
     handleDeleteTask,
     handleUpdateStatus,
     handleToggleSubtaskStatus,
+    handleSaveSubtaskRemark,
     currentUser,
   };
 }

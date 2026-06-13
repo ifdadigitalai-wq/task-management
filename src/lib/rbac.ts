@@ -31,7 +31,8 @@ const ROLE_PERMISSIONS: Record<UserRole, PermissionAction[]> = {
     "create_task"
   ],
   EMPLOYEE: [
-    "create_task"
+    "create_task",
+    "create_subtask"
   ]
 };
 

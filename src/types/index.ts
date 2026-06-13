@@ -63,6 +63,7 @@ export interface Task {
   customFrequency?: string | null;
   progress: number;
   isSubtask: boolean;
+  remark?: string | null;
   delegationPending: boolean;
   delegationStatus?: string | null;
   delegationToId?: string | null;

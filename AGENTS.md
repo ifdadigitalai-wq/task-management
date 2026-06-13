@@ -30,7 +30,7 @@ This document provides a concise, high-level manual of the Task Management syste
 - **Relations**: Task Creator, Task Assignee, Delegated From, Delegated To.
 
 ### `Task`
-- **Properties**: `id`, `title`, `description`, `status` (`TODO`, `IN_PROGRESS`, `IN_REVIEW`, `DONE`, `CANCELLED`), `priority` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), `progress` (0-100), `isSubtask`, `parentTaskId`.
+- **Properties**: `id`, `title`, `description`, `status` (`TODO`, `IN_PROGRESS`, `IN_REVIEW`, `DONE`, `CANCELLED`), `priority` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), `progress` (0-100), `isSubtask`, `parentTaskId`, `remark`.
 - **Progress Calculation**: Computed automatically if subtasks or checklist items exist. Disabled manual sliding capability in this scenario.
 
 ### `Activity`
@@ -80,6 +80,11 @@ This document provides a concise, high-level manual of the Task Management syste
 - **Template Path**: Allows selecting multiple saved task templates under the chosen department, automatically creating a `Task` for each `TaskTemplateItem` (or legacy single template) in a single transaction (`POST /api/tasks/bulk-assign`).
 - **Custom Path**: Allows entering custom task titles (Step 2), descriptions (Step 3), priorities, assignees, and due dates (Step 4) via an interactive detail card.
 - **Template Save**: Allows saving custom task sets as a reusable `TaskTemplate` blueprint (`POST /api/templates/save`).
+
+### 10. Subtask Operations & Remarks
+- **Permissions**: Employees can add, toggle status, and update remarks on subtasks for tasks they are assigned to or created.
+- **Remarks Field**: Subtasks have an inline editable `remark` text field. Updates to remarks are synchronized to the `remark` database column of the subtask's task row via a `PATCH /api/tasks/[subtaskId]` request.
+- **Visibility**: If an employee is the assignee or creator of the parent task, they can view all of its subtasks. Otherwise, employees only see subtasks that are assigned to them or assigned to the parent task assignee.
 
 ---
 
