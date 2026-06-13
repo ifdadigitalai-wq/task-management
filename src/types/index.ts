@@ -241,6 +241,15 @@ export interface Activity {
   task?: Task | null;
 }
 
+export interface Message {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  createdAt: string | Date;
+  read: boolean;
+}
+
 export interface FilterState {
   status: TaskStatus | "ALL";
   priority: Priority | "ALL";

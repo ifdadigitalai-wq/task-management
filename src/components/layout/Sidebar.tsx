@@ -15,7 +15,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  MessageSquare
 } from "lucide-react";
 import React, { useEffect } from "react";
 import { useTaskStore } from "@/store/useTaskStore";
@@ -32,6 +33,7 @@ const NAV_SECTIONS = [
       { name: "All Tasks",       href: "/all-tasks",    icon: Layers },
       { name: "Employees",       href: "/employees",    icon: User },
       { name: "Delegated Tasks", href: "/delegatedBy",  icon: Send },
+      { name: "Chat",            href: "/chat",         icon: MessageSquare },
     ],
   },
   {
@@ -108,7 +110,8 @@ export function Sidebar() {
           { name: "Dashboard",       href: "/dashboard",    icon: LayoutGrid },
           { name: "My Tasks",        href: "/my-tasks",     icon: ListTodo, badgeKey: "myTasks" },
           { name: "My Team",         href: "/my-team",      icon: User },
-          { name: "My Delegations",  href: "/my-delegations", icon: Send }
+          { name: "My Delegations",  href: "/my-delegations", icon: Send },
+          { name: "Chat",            href: "/chat",         icon: MessageSquare }
         ],
       };
     }

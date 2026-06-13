@@ -92,6 +92,8 @@ model User {
   calendarEvents    CalendarEvent[]
   receivedDelegations Task[]       @relation("DelegatedTo")
   sentDelegations     Task[]       @relation("DelegatedFrom")
+  sentMessages        Message[]    @relation("SentMessages")
+  receivedMessages    Message[]    @relation("ReceivedMessages")
 }
 
 model Task {
@@ -320,5 +322,19 @@ model Activity {
   createdAt  DateTime @default(now())
   taskId     String?
   task       Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String
+  createdAt  DateTime @default(now())
+  read       Boolean  @default(false)
+
+  @@index([senderId])
+  @@index([receiverId])
 }
 

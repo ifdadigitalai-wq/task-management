@@ -86,6 +86,11 @@ This document provides a concise, high-level manual of the Task Management syste
 - **Remarks Field**: Subtasks have an inline editable `remark` text field. Updates to remarks are synchronized to the `remark` database column of the subtask's task row via a `PATCH /api/tasks/[subtaskId]` request.
 - **Visibility**: If an employee is the assignee or creator of the parent task, they can view all of its subtasks. Otherwise, employees only see subtasks that are assigned to them or assigned to the parent task assignee.
 
+### 11. Company Chat Direct Messaging
+- **Permissions**: Both administrators and employees can access the `/chat` route, search all active users, and message each other directly.
+- **Message Model**: Managed in `Message` database model with fields (`senderId`, `receiverId`, `content`, `read`).
+- **Real-Time & Read Status**: Direct messaging uses polling (every 3 seconds). Loading the chat history panel automatically patches all unread messages from the target user to `read: true`.
+
 ---
 
 ## 🧪 Development & Verification
